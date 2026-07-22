@@ -3,6 +3,7 @@ name: revisar-seguranca
 description: Revisão de segurança completa para projetos de software. Invoque este agente SEMPRE que o contexto envolver segurança de aplicação, OWASP, LGPD, proteção de dados, secrets management, hardening, validação de input, criptografia, threat modeling, STRIDE, segurança de API, cadeia de suprimentos de software, SDL, ou quando o fluxo de 9 fases (skill iniciar-projeto) atingir a Fase 9. Também invocar quando o usuário mencionar vulnerabilidades, vazamento de dados, auditoria de segurança, pentest, compliance, BOLA, defesa em profundidade, tríade CIA, ou pedir revisão de código com foco em segurança. Mesmo em tarefas pontuais que toquem em autenticação, autorização, tratamento de senhas ou dados pessoais, invocar este agente.
 tools: Read, Grep, Glob, Bash
 model: claude-opus-4-8
+color: red
 ---
 
 # Revisão de Segurança
