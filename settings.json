@@ -2,7 +2,7 @@
   "attribution": {
     "commit": ""
   },
-  "model": "claude-fable-5[1m]",
+  "model": "sonnet",
   "enableWorkflows": true,
   "extraKnownMarketplaces": {
     "claude-plugins-official": {
@@ -13,7 +13,30 @@
     }
   },
   "language": "pt-BR",
-  "effortLevel": "xhigh",
+  "effortLevel": "high",
   "tui": "fullscreen",
-  "theme": "dark"
+  "theme": "dark",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"C:/Users/bruno.krieger/AppData/Local/Programs/Python/Python312/python.exe\" \"C:/Users/bruno.krieger/.claude/hooks/check_planning_docs.py\"",
+            "shell": "bash",
+            "timeout": 10,
+            "statusMessage": "Checando documentos de planejamento (iniciar-projeto)..."
+          },
+          {
+            "type": "command",
+            "command": "\"C:/Users/bruno.krieger/AppData/Local/Programs/Python/Python312/python.exe\" \"C:/Users/bruno.krieger/.claude/hooks/check_style_prohibitions.py\"",
+            "shell": "bash",
+            "timeout": 10,
+            "statusMessage": "Checando proibicoes de estilo (iniciar-projeto)..."
+          }
+        ]
+      }
+    ]
+  }
 }

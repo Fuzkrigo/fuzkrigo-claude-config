@@ -83,6 +83,8 @@ Se o usuário pedir para pular uma fase ou começar implementação sem as anter
 
 Só prosseguir se o usuário justificar conscientemente o bypass.
 
+> Esta checagem também é reforçada por um hook `PreToolUse` (`~/.claude/hooks/check_planning_docs.py`), que pergunta automaticamente antes de qualquer escrita de código de produção sem `PLANEJAMENTO.md`/`CHECKLIST.md` na raiz — garante que a pergunta nunca seja esquecida, mesmo que eu não perceba o contexto. O texto acima continua valendo como orientação de julgamento para a resposta.
+
 ---
 
 ## 4. Documentos de Projeto (na raiz)
@@ -163,6 +165,8 @@ Explicar a legenda no topo do arquivo. Consultar o CHECKLIST.md **no início de 
 ## 7. Proibições de Estilo (INEGOCIÁVEL)
 
 Estas regras valem para **todo** artefato do projeto — código, documentação, commits, PRs, releases, issues, comentários:
+
+> Um hook `PreToolUse` (`~/.claude/hooks/check_style_prohibitions.py`) bloqueia automaticamente emoji decorativo e os trailers/frases típicas de commit que atribuem a autoria do trabalho a uma ferramenta de IA (a lista exata de padrões está no código-fonte do hook). Por design, o hook não bloqueia o nome do assistente isolado — banir isso quebraria documentação legítima sobre a própria configuração, este repositório incluído. Julgamento sobre menções indiretas que o hook não cobre continua comigo.
 
 1. **Zero emojis** em qualquer arquivo, documentação, mensagem de commit, PR ou release. Emojis dão cara de conteúdo gerado por IA; o objetivo é o oposto — linguagem humana e sóbria.
    - **Única exceção**: os pontos de cor das labels no GitHub Projects, que são identificação visual funcional do board (ver `references/github-projects.md`).
