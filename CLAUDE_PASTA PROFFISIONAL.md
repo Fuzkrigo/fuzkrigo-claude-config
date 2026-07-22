@@ -60,7 +60,7 @@ Se eu não especificar arquitetura, **apresente as duas com prós/contras antes 
 
 ## 6. Segurança — Dados Fiscais
 
-> Revisão completa de segurança → skill `revisar-seguranca`.
+> Revisão completa de segurança → agente `revisar-seguranca` (invocar via ferramenta Agent).
 
 Projetos lidam com **dados fiscais/operacionais** (impostos, faturamento, cruzamentos financeiros). Tratar com rigor de dado sensível: não expor em logs de rede, não incluir em debug, não colar em prompts de IA.
 

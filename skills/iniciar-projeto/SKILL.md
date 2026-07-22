@@ -55,8 +55,8 @@ Estas são as **9 Fases da Metodologia** — o processo que se repete em todo pr
 - Momento de avaliar design patterns: consultar `@.claude/PATTERNS.md` (se disponível) e sugerir um pattern apenas quando resolver dor concreta identificada — nunca na primeira versão, nunca por estética
 
 ### FASE 9 — Revisão de Segurança
-- Carregar a skill `revisar-seguranca` e executar checklist OWASP Top 10
-- Checklist LGPD quando o projeto lida com dados pessoais
+- Invocar o agente `revisar-seguranca` (ferramenta Agent) para executar a auditoria completa — o próprio agente decide, por triagem, quais módulos carregar (OWASP é quase sempre um deles; LGPD quando o projeto lida com dados pessoais)
+- Tratar os itens ❌ do relatório antes de finalizar a fase; itens ⚠️ ficam registrados no CHECKLIST.md
 
 ---
 

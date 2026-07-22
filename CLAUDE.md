@@ -69,12 +69,12 @@ Ao iniciar projeto novo ou refatoração grande, carregar a skill `/iniciar-proj
 
 **QUANDO CARREGAR CADA SKILL OU ARQUIVO DE REFERÊNCIA:**
 
-| Arquivo/Skill               | Quando carregar                                                                       |
-| --------------------------- | ------------------------------------------------------------------------------------- |
-| Skill - `/iniciar-projeto`  | Início de projeto novo ou refatoração grande                                          |
-| Skill - `revisar-seguranca` | Fase 9 (revisão de segurança) ou ao tocar em features sensíveis                       |
-| `@.claude/PATTERNS.md`      | Discussões de arquitetura ou refatoração de módulos                                   |
-| `@.claude/CODIGO.md`        | Sessões de implementação, debugging ou quando precisar de referência de stack/padrões |
+| Arquivo/Skill/Agente          | Quando usar                                                                            |
+| ------------------------------ | --------------------------------------------------------------------------------------- |
+| Skill - `/iniciar-projeto`     | Início de projeto novo ou refatoração grande                                            |
+| Agente - `revisar-seguranca`   | Fase 9 (revisão de segurança) ou ao tocar em features sensíveis — invocar via tool Agent |
+| `@.claude/PATTERNS.md`         | Discussões de arquitetura ou refatoração de módulos                                     |
+| `@.claude/CODIGO.md`           | Sessões de implementação, debugging ou quando precisar de referência de stack/padrões   |
 
 ---
 
@@ -104,7 +104,7 @@ Camadas de teste, estratégia de mocks e detalhamento operacional: `@.claude/COD
 
 Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da sessão.
 
-**O QUE DESATIVA:** Chamada da Skill `iniciar-projeto` (fluxo de 9 fases, briefing investigativo, 3 documentos formais, Plan Mode, revisão arquitetural profunda), TDD, Chamada da Skill `revisar-seguranca` (checklists OWASP/LGPD), regra de bloqueio por fases.
+**O QUE DESATIVA:** Chamada da Skill `iniciar-projeto` (fluxo de 9 fases, briefing investigativo, 3 documentos formais, Plan Mode, revisão arquitetural profunda), TDD, Invocação do agente `revisar-seguranca` (checklists OWASP/LGPD), regra de bloqueio por fases.
 
 **O QUE MANTÉM (INEGOCIÁVEL):**
 
@@ -146,7 +146,7 @@ Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da ses
 - **SNIPPETS CIRÚRGICOS**, não arquivos inteiros.
 - **80% COBERTURA GERAL, 95% EM LÓGICA DE NEGÓCIO.**
 - **FUNÇÃO ≤ 50 LINHAS; ARQUIVOS ≤ 500 LINHAS.**
-- **SEGURANÇA É TRANSVERSAL:** use a skill `revisar-seguranca` na fase de revisão; alertas de segurança crítica valem sempre, mesmo com a skill inativa.
+- **SEGURANÇA É TRANSVERSAL:** invoque o agente `revisar-seguranca` na fase de revisão; alertas de segurança crítica valem sempre, mesmo sem o agente ter sido chamado.
 - **TODA ENTRADA EXTERNA É SUSPEITA. BACKEND VALIDA SEMPRE.**
 - **CÓDIGO DE IA É SUSPEITO POR PADRÃO**: leia, entenda, teste, audite.
 - **STACK ABERTA**: sugira alternativas quando fizer sentido técnico.
