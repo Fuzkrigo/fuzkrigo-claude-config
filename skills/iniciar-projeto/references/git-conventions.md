@@ -1,0 +1,125 @@
+# Convenções Git — Commits, Branches, PRs e Fluxo
+
+Padrão único para todos os projetos. Toda escrita em português BR. Sem emojis. Sem menção a IA, Claude, coautoria ou `Co-authored-by` em qualquer commit, PR ou descrição.
+
+**Execução manual pelo usuário.** Commits, branches e PRs são digitados pelo próprio usuário no Git Bash — é treino deliberado. O papel aqui é: avisar a hora certa e entregar o **bloco de comandos completo**, do início ao fim, nunca executar.
+
+## Índice
+- [Commits semânticos](#commits-semânticos)
+- [Branches](#branches)
+- [Pull Requests](#pull-requests)
+- [Fluxo completo de comandos](#fluxo-completo-de-comandos)
+- [Fechamento de issue via commit](#fechamento-de-issue-via-commit)
+
+## Commits semânticos
+
+Conventional Commits: `<tipo>(<escopo>): <descrição>`
+
+- **tipo**: um dos abaixo
+- **escopo**: área afetada, opcional mas recomendado (ex.: `parser`, `ui`, `auth`)
+- **descrição**: imperativo, minúscula, sem ponto final, em português
+
+Tipos:
+
+| Tipo       | Uso                                                     |
+| ---------- | ------------------------------------------------------- |
+| `feat`     | nova funcionalidade                                     |
+| `fix`      | correção de bug                                         |
+| `docs`     | documentação apenas                                     |
+| `refactor` | refatoração sem mudar comportamento                     |
+| `test`     | adição ou ajuste de testes                              |
+| `chore`    | manutenção, dependências, config                        |
+| `style`    | formatação, sem efeito em lógica                        |
+| `perf`     | melhoria de performance                                 |
+| `build`    | sistema de build ou empacotamento (ex.: PyInstaller)    |
+| `ci`       | pipeline de integração contínua                         |
+
+**Exemplos:**
+
+Input: adicionar parser de eventos R-4010 do REINF
+Output: `feat(parser): adicionar leitura de eventos R-4010`
+
+Input: corrigir encoding UTF-8 na exportação no Windows
+Output: `fix(export): corrigir encoding utf-8 no windows`
+
+Input: extrair cálculo de estorno para módulo próprio
+Output: `refactor(icms): extrair calculo de estorno para modulo dedicado`
+
+Corpo do commit (opcional), para contexto extra — nunca mencionar IA:
+
+```
+fix(export): corrigir encoding utf-8 no windows
+
+O arquivo era gravado em cp1252, quebrando acentos.
+Descoberto durante #23.
+```
+
+Breaking change: adicionar `!` após o tipo/escopo e uma seção `BREAKING CHANGE:` no corpo.
+
+## Branches
+
+Nome amarrado ao tipo do commit e ao número da issue:
+
+`<tipo>/<numero-issue>-<descricao-curta-kebab>`
+
+**Exemplos:**
+- `feat/42-parser-reinf`
+- `fix/57-encoding-windows`
+- `refactor/61-estorno-icms`
+
+`main` é a branch estável. Sem trabalho direto na `main`.
+
+## Pull Requests
+
+- Título segue o mesmo padrão do commit: `<tipo>(<escopo>): <descrição>`
+- Corpo usa o `PULL_REQUEST_TEMPLATE.md` (pronto em `assets/.github/` da skill, copiado para o projeto no setup): o que muda, por que, como testar
+- Referenciar a issue com keyword de fechamento (`Closes #42`) para fechar automaticamente no merge
+- Sem emojis, sem menção a IA
+
+## Fluxo completo de comandos
+
+Entregar sempre o ciclo inteiro, do início ao fim, para o usuário digitar. Modelo (issue #42, tipo feat, escopo parser):
+
+```bash
+# 1. Partir da main atualizada
+git checkout main
+git pull origin main
+
+# 2. Criar e entrar na branch da etapa
+git checkout -b feat/42-parser-reinf
+
+# 3. Trabalhar e commitar (repetir por commit atomico)
+git add caminho/do/arquivo.py
+git commit -m "feat(parser): adicionar leitura de eventos R-4010"
+
+# 4. Enviar a branch para o remoto
+git push -u origin feat/42-parser-reinf
+
+# 5. Abrir o PR (via gh, ou pela interface web)
+gh pr create \
+  --base main \
+  --title "feat(parser): adicionar leitura de eventos R-4010" \
+  --body "Implementa o parser de R-4010. Closes #42"
+
+# 6. Apos aprovacao, fazer merge (merge normal preserva os commits semanticos)
+gh pr merge --merge --delete-branch
+
+# 7. Voltar para main e atualizar
+git checkout main
+git pull origin main
+
+# 8. Apagar a branch local (se o merge nao removeu)
+git branch -d feat/42-parser-reinf
+```
+
+Se o usuário preferir abrir o PR e fazer o merge pela interface web, os passos 5-6 viram cliques; os passos 7-8 continuam no terminal. Sempre oferecer as duas rotas.
+
+## Fechamento de issue via commit
+
+Para fechar a issue da etapa automaticamente ao integrar na `main`, usar uma keyword de fechamento na mensagem do commit final ou no corpo do PR:
+
+`Closes #42` (ou `Fixes #42`, `Resolves #42`)
+
+Ao dar merge na `main`, o GitHub fecha a issue #42 sozinho. Nada é executado no lugar do usuário — ele faz o push/merge, o GitHub reage à keyword.
+
+Para vincular sem fechar (referência apenas), usar só `#42` sem keyword.

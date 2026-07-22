@@ -1,0 +1,19 @@
+{
+  "attribution": {
+    "commit": ""
+  },
+  "model": "claude-fable-5[1m]",
+  "enableWorkflows": true,
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/anthropics/claude-plugins-official.git"
+      }
+    }
+  },
+  "language": "pt-BR",
+  "effortLevel": "xhigh",
+  "tui": "fullscreen",
+  "theme": "dark"
+}
