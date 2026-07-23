@@ -1,6 +1,6 @@
 ---
 name: iniciar-projeto
-description: Fluxo obrigatório de desenvolvimento em 9 fases, planejamento de projeto, geração de PLANEJAMENTO.md, CHECKLIST.md e ARCHITECTURE.md, e integração com GitHub Projects e Linear (padrão "Fuzkrigo Projects"). Use esta skill SEMPRE que o usuário mencionar projeto novo, iniciar desenvolvimento, planejar funcionalidade, criar roadmap, briefing de projeto, ou qualquer pedido que envolva começar a construir algo do zero. Também ativar quando o usuário pedir para gerar documentos de planejamento, checklist, diagramas de arquitetura, configurar labels/board/issues no GitHub ou no Linear, definir padrão de commits ou releases, ou mencionar fases de desenvolvimento. Se o usuário tentar implementar código sem ter passado pelo fluxo de fases, BLOQUEIE e carregue esta skill.
+description: Fluxo obrigatório de desenvolvimento em 9 fases, planejamento de projeto, geração de ROADMAP.md, CHECKLIST.md e ARCHITECTURE.md, e integração com GitHub Projects e Linear (padrão "Fuzkrigo Projects"). Use esta skill SEMPRE que o usuário mencionar projeto novo, iniciar desenvolvimento, planejar funcionalidade, criar roadmap, briefing de projeto, ou qualquer pedido que envolva começar a construir algo do zero. Também ativar quando o usuário pedir para gerar documentos de planejamento, checklist, diagramas de arquitetura, configurar labels/board/issues no GitHub ou no Linear, definir padrão de commits ou releases, ou mencionar fases de desenvolvimento. Se o usuário tentar implementar código sem ter passado pelo fluxo de fases, BLOQUEIE e carregue esta skill.
 ---
 
 # Fluxo de Desenvolvimento e Planejamento
@@ -15,25 +15,23 @@ Estas são as **9 Fases da Metodologia** — o processo que se repete em todo pr
 - Receber a ideia inicial
 - Fazer perguntas investigativas: escopo, público-alvo, requisitos funcionais e não funcionais
 - Validar viabilidade técnica
-- Ao final: gerar PLANEJAMENTO.md, CHECKLIST.md e ARCHITECTURE.md (seção 4)
+- Ao final: gerar ROADMAP.md e CHECKLIST.md diretamente (seção 4) — ficam com o Claude principal, editados com alta frequência ao longo do projeto (mesmo raciocínio de custo que mantém commits do dia a dia com o Claude principal em vez do `project-manager`)
+- Invocar o agente `project-documentation` (ferramenta Agent) para gerar a versão inicial de `ARCHITECTURE.md`, a partir do ROADMAP.md recém-criado — muda com menos frequência que ROADMAP/CHECKLIST, por isso fica com o agente
 - **NÃO escrever código de produção nesta fase**
 
-### FASE 2 — Documento 1: Resumo Executivo e Roadmap
-- Resumo executivo do projeto
-- Lista sequencial de todas as etapas de desenvolvimento
-- Justificativa de escolha de arquitetura, linguagens e ferramentas
-- Cronograma estimado
-- Ao final, com roadmap e milestones já definidos: invocar o agente `gestor-projetos` (ferramenta Agent) para provisionar GitHub e espelhar no Linear (seção 5). As etapas só ficam concretas aqui, por isso o board nasce nesta fase, não na Fase 1.
+### FASE 2 — Resumo Executivo
+- Ao final, com roadmap e milestones já definidos: invocar o agente `project-documentation` (ferramenta Agent) para gerar `RESUMO-EXECUTIVO.md`
+- Também invocar o agente `project-manager` (ferramenta Agent) para provisionar GitHub e espelhar no Linear (seção 5). As etapas só ficam concretas aqui, por isso o board nasce nesta fase, não na Fase 1
 
-### FASE 3 — Documento 2: Documentação Técnica e Manual
-- Design System (quando aplicável)
-- Lógica detalhada e fluxogramas (usar Mermaid — ver `references/architecture-md.md`)
-- Seções obrigatórias: Segurança, Logs e Monitoramento, Tratamento de Erros (seguir os padrões de `@.claude/CODIGO.md`, seções 1 e 4, se disponível)
-- Manual de uso preliminar
+### FASE 3 — Documentação Técnica e Manual do Usuário
+- Invocar o agente `project-documentation` (ferramenta Agent) para gerar `DOCUMENTACAO-TECNICA.md` e `MANUAL.md`
+- Design System (quando aplicável) entra na Documentação Técnica
 
-### FASE 4 — Documento 3: Apresentação e Venda
-- Apresentação corporativa para supervisores (problema → solução → impacto)
-- Apresentação comercial quando aplicável com quantificação de valor e precificação
+### FASE 4 — Apresentação e Venda
+- Invocar o agente `project-documentation` (ferramenta Agent) para gerar `APRESENTACAO.md`
+- Contexto corporativo: problema → solução → impacto, para equipe/gestão
+- Contexto pessoal/externo: mesma estrutura, mais elaborada, com precificação — cliente oficial
+- Formato final (`.pptx` x HTML) ainda em aberto — decisão adiada
 
 ### FASE 5 — Plan Mode
 - Entrar em Plan Mode antes de qualquer implementação
@@ -53,6 +51,8 @@ Estas são as **9 Fases da Metodologia** — o processo que se repete em todo pr
 ### FASE 8 — Refatoração Contínua
 - Após cada feature: avaliar extração, simplificação, remoção de duplicação
 - Invocar o agente `code-reviewer` (ferramenta Agent) para auditoria formal de SOLID/Clean Code/limites de tamanho antes de fechar a fase
+- Com a estrutura final estável (depois das correções do `code-reviewer`), invocar o agente `docstrings-manager` (ferramenta Agent) para documentar funções/classes/módulos públicos
+- Se a fase introduziu mudança estrutural (novo módulo, integração externa, decisão de arquitetura, modelo de dados), invocar o agente `project-documentation` (ferramenta Agent) para atualizar `ARCHITECTURE.md` — critério completo em `references/architecture-md.md`
 - Momento de avaliar design patterns: consultar `@.claude/PATTERNS.md` (se disponível) e sugerir um pattern apenas quando resolver dor concreta identificada — nunca na primeira versão, nunca por estética
 
 ### FASE 9 — Revisão de Segurança
@@ -84,20 +84,28 @@ Se o usuário pedir para pular uma fase ou começar implementação sem as anter
 
 Só prosseguir se o usuário justificar conscientemente o bypass.
 
-> Esta checagem também é reforçada por um hook `PreToolUse` (`~/.claude/hooks/check_planning_docs.py`), que pergunta automaticamente antes de qualquer escrita de código de produção sem `PLANEJAMENTO.md`/`CHECKLIST.md` na raiz — garante que a pergunta nunca seja esquecida, mesmo que eu não perceba o contexto. O texto acima continua valendo como orientação de julgamento para a resposta.
+> Esta checagem também é reforçada por um hook `PreToolUse` (`~/.claude/hooks/check_planning_docs.py`), que pergunta automaticamente antes de qualquer escrita de código de produção sem `ROADMAP.md`/`CHECKLIST.md` na raiz — garante que a pergunta nunca seja esquecida, mesmo que eu não perceba o contexto. O texto acima continua valendo como orientação de julgamento para a resposta.
 
 ---
 
 ## 4. Documentos de Projeto (na raiz)
 
-Todo projeto novo gera **três** arquivos na raiz, uma única vez, logo ao final da Fase 1:
+Todo projeto novo gera **dois** arquivos na raiz, uma única vez, logo ao final da Fase 1 — mantidos pelo Claude principal por serem editados com alta frequência:
 
-1. **`PLANEJAMENTO.md`** — plano vivo (estratégia macro: o que e por quê)
+1. **`ROADMAP.md`** — plano vivo (estratégia macro: o que e por quê)
 2. **`CHECKLIST.md`** — fases da metodologia + itens acionáveis, com checkboxes
-3. **`ARCHITECTURE.md`** — diagramas Mermaid da arquitetura (estrutura, fluxo, dados)
 
-Estrutura detalhada de PLANEJAMENTO.md e CHECKLIST.md: ver seção 6.
-Estrutura e templates de ARCHITECTURE.md: ver `references/architecture-md.md`.
+Estrutura detalhada de ROADMAP.md e CHECKLIST.md: ver seção 6.
+
+Outros **cinco** documentos são gerados e mantidos pelo agente `project-documentation` (ferramenta Agent) — baixa frequência de edição, por isso não ficam com o Claude principal:
+
+3. **`ARCHITECTURE.md`** — diagramas Mermaid da arquitetura (estrutura, fluxo, dados). Vivo e oficial: gerado na Fase 1, atualizado quando a estrutura muda (Fase 8). Estrutura e templates: ver `references/architecture-md.md`
+4. **`RESUMO-EXECUTIVO.md`** — resumo executivo e retrospecto por fase (Fase 2)
+5. **`DOCUMENTACAO-TECNICA.md`** — decisões técnicas, API, configuração (Fase 3)
+6. **`MANUAL.md`** — manual do usuário final (Fase 3)
+7. **`APRESENTACAO.md`** — apresentação corporativa ou comercial, conforme o contexto (Fase 4)
+
+Detalhes de geração de cada um: `~/.claude/agents/project-documentation.md`.
 
 **Dispensados** em: Modo Tarefa (`#tarefa`), correções pequenas de bug, ajustes estéticos/config.
 
@@ -105,12 +113,12 @@ Estrutura e templates de ARCHITECTURE.md: ver `references/architecture-md.md`.
 
 ## 5. Integração GitHub e Linear (padrão "Fuzkrigo Projects")
 
-Provisionamento de GitHub (board, labels, views, issues, milestones) e o espelho no Linear são feitos pelo agente `gestor-projetos` (ferramenta Agent) — invocar ao final da Fase 2, com roadmap e milestones já definidos. O agente decide sozinho a ordem (GitHub primeiro, Linear só completa lacunas) e o guardrail de duplicidade — não preciso orquestrar isso manualmente.
+Provisionamento de GitHub (board, labels, views, issues, milestones) e o espelho no Linear são feitos pelo agente `project-manager` (ferramenta Agent) — invocar ao final da Fase 2, com roadmap e milestones já definidos. O agente decide sozinho a ordem (GitHub primeiro, Linear só completa lacunas) e o guardrail de duplicidade — não preciso orquestrar isso manualmente.
 
 Quando uma milestone termina, o mesmo agente monta o CHANGELOG.md, o texto do release e o bloco de comandos Git — mas a execução da parte Git (commit, tag, release, fechamento de milestone) segue a política de `references/git-conventions.md`: pergunto se você executa ou se eu executo.
 
 - Commits semânticos, branches, PRs, releases e a política de execução: `references/git-conventions.md`
-- Detalhes de provisionamento GitHub/Linear e do ritual de release: `~/.claude/agents/gestor-projetos.md`
+- Detalhes de provisionamento GitHub/Linear e do ritual de release: `~/.claude/agents/project-manager.md`
 
 Os padrões do "Fuzkrigo Projects" são **sugestões adaptáveis**, não regras rígidas — ajustar ao contexto de cada projeto quando necessário.
 
@@ -118,14 +126,14 @@ Os padrões do "Fuzkrigo Projects" são **sugestões adaptáveis**, não regras 
 
 ## 6. Estrutura dos Documentos de Planejamento
 
-### 6.1. PLANEJAMENTO.md (plano vivo)
+### 6.1. ROADMAP.md (plano vivo)
 
 Conteúdo obrigatório:
 1. **Identidade do projeto** — nome, data de início, responsável, status atual
 2. **Resumo do problema** — o que resolve, 2-3 parágrafos
 3. **Decisões arquiteturais** — stack, padrões aplicados, justificativa
 4. **Skills e configurações ativas** — quais skills e qual CLAUDE.md do projeto se aplicam; quais estão desativados
-5. **Roadmap de desenvolvimento** — milestones e fases ordenadas com descrição curta
+5. **Roadmap de desenvolvimento** — milestones e fases ordenadas com descrição curta, cronograma estimado
 6. **Riscos e pontos de atenção**
 7. **Histórico de mudanças do plano** — cada atualização com data e motivo
 
@@ -156,7 +164,7 @@ Explicar a legenda no topo do arquivo. Consultar o CHECKLIST.md **no início de 
 
 1. Os três arquivos ficam na **raiz** do projeto.
 2. Gerados **uma única vez** — atualizações são edições, nunca recriação.
-3. Bloquear implementação (Fase 7) se PLANEJAMENTO.md e CHECKLIST.md não existirem.
+3. Bloquear implementação (Fase 7) se ROADMAP.md e CHECKLIST.md não existirem.
 4. **Nunca deletados** durante o projeto.
 5. Ao final, arquivar em `_backups/projeto-concluido-YYYY-MM-DD/`.
 

@@ -104,7 +104,7 @@ Sugerir apenas quando o contexto do projeto claramente pedir.
 1. Nunca aplicar pattern sem dor concreta identificada
 2. Nunca aplicar na primeira versão — aguardar segunda ou terceira iteração
 3. Sempre preferir solução mais simples (dicionário > classe abstrata, parâmetro > herança)
-4. Documentar no PLANEJAMENTO.md quando um pattern foi aplicado e qual dor resolveu
+4. Documentar no ROADMAP.md quando um pattern foi aplicado e qual dor resolveu
 5. Se aplicar o pattern aumentar linhas sem reduzir complexidade real → recuar
 
 ---

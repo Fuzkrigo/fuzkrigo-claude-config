@@ -65,7 +65,7 @@ Detalhamento (SOLID, Clean Code, teste de complexidade, tratamento de erros): `@
 
 ## 4. Início Obrigatório de Todo Projeto
 
-Ao iniciar projeto novo ou refatoração grande, carregar a skill `/iniciar-projeto`, que conduz o briefing, o fluxo de 9 fases e a geração dos documentos. Concluído o planejamento, `PLANEJAMENTO.md` e `CHECKLIST.md` passam a ser a referência da sessão — não recarregar a skill a cada sessão; consultar os documentos direto.
+Ao iniciar projeto novo ou refatoração grande, carregar a skill `/iniciar-projeto`, que conduz o briefing, o fluxo de 9 fases e a geração dos documentos. Concluído o planejamento, `ROADMAP.md` e `CHECKLIST.md` passam a ser a referência da sessão — não recarregar a skill a cada sessão; consultar os documentos direto.
 
 **QUANDO CARREGAR CADA SKILL OU ARQUIVO DE REFERÊNCIA:**
 
@@ -74,7 +74,9 @@ Ao iniciar projeto novo ou refatoração grande, carregar a skill `/iniciar-proj
 | Skill - `/iniciar-projeto`     | Início de projeto novo ou refatoração grande                                            |
 | Agente - `security-reviewer`   | Fase 9 (revisão de segurança) ou ao tocar em features sensíveis — invocar via tool Agent |
 | Agente - `code-reviewer`       | Fase 8 (refatoração contínua) ou pedido de review de código — invocar via tool Agent     |
-| Agente - `gestor-projetos`     | Fase 2 (provisionar GitHub/Linear) ou ritual de release — invocar via tool Agent         |
+| Agente - `project-manager`     | Fase 2 (provisionar GitHub/Linear) ou ritual de release — invocar via tool Agent         |
+| Agente - `project-documentation` | Fase 1/2/3/4/8 (Arquitetura, Resumo Executivo, Documentação Técnica, Manual, Apresentação) — invocar via tool Agent |
+| Agente - `docstrings-manager`  | Fase 8 (documentar código após o code-reviewer), ou pedido pontual de docstring/comentário — invocar via tool Agent |
 | `@.claude/PATTERNS.md`         | Discussões de arquitetura ou refatoração de módulos                                     |
 | `@.claude/CODIGO.md`           | Sessões de implementação, debugging ou quando precisar de referência de stack/padrões   |
 
@@ -106,6 +108,8 @@ Camadas de teste, estratégia de mocks e detalhamento operacional: `@.claude/COD
 
 Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da sessão.
 
+**Marcador para o hook de bloqueio:** ao ativar, criar o arquivo `<temp>/claude-modo-tarefa/<session_id>.flag` (session id extraído do caminho do diretório scratchpad informado no prompt do sistema — é o penúltimo segmento do caminho). Isso é necessário porque o hook `check_planning_docs.py` (que reforça a Regra de Bloqueio da skill `iniciar-projeto`) roda como processo isolado sem acesso à conversa — sem esse marcador, ele não tem como saber que a regra foi desativada nesta sessão e continuaria perguntando a cada edição de código.
+
 **O QUE DESATIVA:** Chamada da Skill `iniciar-projeto` (fluxo de 9 fases, briefing investigativo, 3 documentos formais, Plan Mode, revisão arquitetural profunda), TDD, Invocação do agente `security-reviewer` (checklists OWASP/LGPD), regra de bloqueio por fases.
 
 **O QUE MANTÉM (INEGOCIÁVEL):**
@@ -119,7 +123,7 @@ Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da ses
 
 **TOM EM MODO TAREFA:** enxuto, direto, sem teoria. Código com uma linha de contexto. Explicação linha a linha só se pedido.
 
-**SAIR DO MODO TAREFA:** nova conversa, ou declarar "sair do modo tarefa" / "modo normal".
+**SAIR DO MODO TAREFA:** nova conversa (o marcador da sessão anterior fica órfão, sem efeito — cada sessão tem seu próprio session id), ou declarar "sair do modo tarefa" / "modo normal" (apagar o arquivo-marcador desta sessão).
 
 ---
 
