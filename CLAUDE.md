@@ -72,7 +72,7 @@ Ao iniciar projeto novo ou refatoração grande, carregar a skill `/iniciar-proj
 | Arquivo/Skill/Agente          | Quando usar                                                                            |
 | ------------------------------ | --------------------------------------------------------------------------------------- |
 | Skill - `/iniciar-projeto`     | Início de projeto novo ou refatoração grande                                            |
-| Agente - `revisar-seguranca`   | Fase 9 (revisão de segurança) ou ao tocar em features sensíveis — invocar via tool Agent |
+| Agente - `security-reviewer`   | Fase 9 (revisão de segurança) ou ao tocar em features sensíveis — invocar via tool Agent |
 | Agente - `code-reviewer`       | Fase 8 (refatoração contínua) ou pedido de review de código — invocar via tool Agent     |
 | Agente - `project-manager`     | Fase 2 (provisionar GitHub/Linear) ou ritual de release — invocar via tool Agent         |
 | Agente - `project-documentation` | Fase 1/2/3/4/8 (Arquitetura, Resumo Executivo, Documentação Técnica, Manual, Apresentação) — invocar via tool Agent |
@@ -110,7 +110,7 @@ Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da ses
 
 **Marcador para o hook de bloqueio:** ao ativar, criar o arquivo `<temp>/claude-modo-tarefa/<session_id>.flag` (session id extraído do caminho do diretório scratchpad informado no prompt do sistema — é o penúltimo segmento do caminho). Isso é necessário porque o hook `check_planning_docs.py` (que reforça a Regra de Bloqueio da skill `iniciar-projeto`) roda como processo isolado sem acesso à conversa — sem esse marcador, ele não tem como saber que a regra foi desativada nesta sessão e continuaria perguntando a cada edição de código.
 
-**O QUE DESATIVA:** Chamada da Skill `iniciar-projeto` (fluxo de 9 fases, briefing investigativo, 3 documentos formais, Plan Mode, revisão arquitetural profunda), TDD, Invocação do agente `revisar-seguranca` (checklists OWASP/LGPD), regra de bloqueio por fases.
+**O QUE DESATIVA:** Chamada da Skill `iniciar-projeto` (fluxo de 9 fases, briefing investigativo, 3 documentos formais, Plan Mode, revisão arquitetural profunda), TDD, Invocação do agente `security-reviewer` (checklists OWASP/LGPD), regra de bloqueio por fases.
 
 **O QUE MANTÉM (INEGOCIÁVEL):**
 
@@ -152,7 +152,7 @@ Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da ses
 - **SNIPPETS CIRÚRGICOS**, não arquivos inteiros.
 - **80% COBERTURA GERAL, 95% EM LÓGICA DE NEGÓCIO.**
 - **FUNÇÃO ≤ 50 LINHAS; ARQUIVOS ≤ 500 LINHAS.**
-- **SEGURANÇA É TRANSVERSAL:** invoque o agente `revisar-seguranca` na fase de revisão; alertas de segurança crítica valem sempre, mesmo sem o agente ter sido chamado.
+- **SEGURANÇA É TRANSVERSAL:** invoque o agente `security-reviewer` na fase de revisão; alertas de segurança crítica valem sempre, mesmo sem o agente ter sido chamado.
 - **TODA ENTRADA EXTERNA É SUSPEITA. BACKEND VALIDA SEMPRE.**
 - **CÓDIGO DE IA É SUSPEITO POR PADRÃO**: leia, entenda, teste, audite.
 - **STACK ABERTA**: sugira alternativas quando fizer sentido técnico.
