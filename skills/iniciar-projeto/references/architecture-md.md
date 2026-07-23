@@ -38,7 +38,7 @@ Visão de arquitetura do sistema. Atualizado em [data].
 [ER das entidades principais, quando há persistência]
 
 ## 5. Decisões de arquitetura
-[Lista curta: decisão, alternativa descartada, justificativa. Espelha o PLANEJAMENTO.md]
+[Lista curta: decisão, alternativa descartada, justificativa. Espelha o ROADMAP.md]
 ```
 
 ## Templates Mermaid
@@ -129,9 +129,9 @@ Para projetos maiores, seguir a lógica do modelo C4 usando `graph` do Mermaid: 
 
 ## Quando atualizar
 
-O `ARCHITECTURE.md` é vivo. Sugerir atualização quando:
+O `ARCHITECTURE.md` é vivo, mantido pelo agente `documentacao-projeto`. Invocá-lo quando:
 - Um novo módulo ou integração externa entra.
-- Uma decisão de arquitetura muda (refletir também no PLANEJAMENTO.md).
+- Uma decisão de arquitetura muda (refletir também no ROADMAP.md).
 - O modelo de dados ganha ou perde entidades.
 
 Cada atualização acompanha a mudança de código, não fica para depois.

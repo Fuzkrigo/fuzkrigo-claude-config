@@ -65,7 +65,7 @@ Detalhamento (SOLID, Clean Code, teste de complexidade, tratamento de erros): `@
 
 ## 4. Início Obrigatório de Todo Projeto
 
-Ao iniciar projeto novo ou refatoração grande, carregar a skill `/iniciar-projeto`, que conduz o briefing, o fluxo de 9 fases e a geração dos documentos. Concluído o planejamento, `PLANEJAMENTO.md` e `CHECKLIST.md` passam a ser a referência da sessão — não recarregar a skill a cada sessão; consultar os documentos direto.
+Ao iniciar projeto novo ou refatoração grande, carregar a skill `/iniciar-projeto`, que conduz o briefing, o fluxo de 9 fases e a geração dos documentos. Concluído o planejamento, `ROADMAP.md` e `CHECKLIST.md` passam a ser a referência da sessão — não recarregar a skill a cada sessão; consultar os documentos direto.
 
 **QUANDO CARREGAR CADA SKILL OU ARQUIVO DE REFERÊNCIA:**
 
@@ -75,6 +75,8 @@ Ao iniciar projeto novo ou refatoração grande, carregar a skill `/iniciar-proj
 | Agente - `revisar-seguranca`   | Fase 9 (revisão de segurança) ou ao tocar em features sensíveis — invocar via tool Agent |
 | Agente - `code-reviewer`       | Fase 8 (refatoração contínua) ou pedido de review de código — invocar via tool Agent     |
 | Agente - `gestor-projetos`     | Fase 2 (provisionar GitHub/Linear) ou ritual de release — invocar via tool Agent         |
+| Agente - `documentacao-projeto` | Fase 1/2/3/4/8 (Arquitetura, Resumo Executivo, Documentação Técnica, Manual, Apresentação) — invocar via tool Agent |
+| Agente - `docstrings`          | Fase 8 (documentar código após o code-reviewer), ou pedido pontual de docstring/comentário — invocar via tool Agent |
 | `@.claude/PATTERNS.md`         | Discussões de arquitetura ou refatoração de módulos                                     |
 | `@.claude/CODIGO.md`           | Sessões de implementação, debugging ou quando precisar de referência de stack/padrões   |
 
