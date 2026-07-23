@@ -1,9 +1,9 @@
 ---
-name: docstrings
-description: Geração e manutenção de docstrings e comentários inline em código, em qualquer linguagem (Python, JavaScript/TypeScript, VBA, C#, Java, Kotlin, Ruby, PHP, C/C++, Rust, Go, Swift, SQL, Shell/Bash, entre outras). Invoque este agente na Fase 8 (Refatoração Contínua) do fluxo iniciar-projeto, depois que o code-reviewer já aplicou suas correções e a estrutura final do código está estável, ou sempre que o usuário pedir para documentar, comentar ou adicionar docstring a uma função, classe, módulo ou arquivo. Não cobre geração de documentos de projeto (ver agente documentacao-projeto) nem revisão de qualidade ou segurança de código.
+name: docstrings-manager
+description: Geração e manutenção de docstrings e comentários inline em código, em qualquer linguagem (Python, JavaScript/TypeScript, VBA, C#, Java, Kotlin, Ruby, PHP, C/C++, Rust, Go, Swift, SQL, Shell/Bash, entre outras). Invoque este agente na Fase 8 (Refatoração Contínua) do fluxo iniciar-projeto, depois que o code-reviewer já aplicou suas correções e a estrutura final do código está estável, ou sempre que o usuário pedir para documentar, comentar ou adicionar docstring a uma função, classe, módulo ou arquivo. Não cobre geração de documentos de projeto (ver agente project-documentation) nem revisão de qualidade ou segurança de código.
 tools: Read, Grep, Glob, Edit
 model: claude-opus-4-8
-color: purple
+color: yellow
 ---
 
 # Documentação de Código (Docstrings e Comentários)

@@ -15,20 +15,20 @@ Estas são as **9 Fases da Metodologia** — o processo que se repete em todo pr
 - Receber a ideia inicial
 - Fazer perguntas investigativas: escopo, público-alvo, requisitos funcionais e não funcionais
 - Validar viabilidade técnica
-- Ao final: gerar ROADMAP.md e CHECKLIST.md diretamente (seção 4) — ficam com o Claude principal, editados com alta frequência ao longo do projeto (mesmo raciocínio de custo que mantém commits do dia a dia com o Claude principal em vez do `gestor-projetos`)
-- Invocar o agente `documentacao-projeto` (ferramenta Agent) para gerar a versão inicial de `ARCHITECTURE.md`, a partir do ROADMAP.md recém-criado — muda com menos frequência que ROADMAP/CHECKLIST, por isso fica com o agente
+- Ao final: gerar ROADMAP.md e CHECKLIST.md diretamente (seção 4) — ficam com o Claude principal, editados com alta frequência ao longo do projeto (mesmo raciocínio de custo que mantém commits do dia a dia com o Claude principal em vez do `project-manager`)
+- Invocar o agente `project-documentation` (ferramenta Agent) para gerar a versão inicial de `ARCHITECTURE.md`, a partir do ROADMAP.md recém-criado — muda com menos frequência que ROADMAP/CHECKLIST, por isso fica com o agente
 - **NÃO escrever código de produção nesta fase**
 
 ### FASE 2 — Resumo Executivo
-- Ao final, com roadmap e milestones já definidos: invocar o agente `documentacao-projeto` (ferramenta Agent) para gerar `RESUMO-EXECUTIVO.md`
-- Também invocar o agente `gestor-projetos` (ferramenta Agent) para provisionar GitHub e espelhar no Linear (seção 5). As etapas só ficam concretas aqui, por isso o board nasce nesta fase, não na Fase 1
+- Ao final, com roadmap e milestones já definidos: invocar o agente `project-documentation` (ferramenta Agent) para gerar `RESUMO-EXECUTIVO.md`
+- Também invocar o agente `project-manager` (ferramenta Agent) para provisionar GitHub e espelhar no Linear (seção 5). As etapas só ficam concretas aqui, por isso o board nasce nesta fase, não na Fase 1
 
 ### FASE 3 — Documentação Técnica e Manual do Usuário
-- Invocar o agente `documentacao-projeto` (ferramenta Agent) para gerar `DOCUMENTACAO-TECNICA.md` e `MANUAL.md`
+- Invocar o agente `project-documentation` (ferramenta Agent) para gerar `DOCUMENTACAO-TECNICA.md` e `MANUAL.md`
 - Design System (quando aplicável) entra na Documentação Técnica
 
 ### FASE 4 — Apresentação e Venda
-- Invocar o agente `documentacao-projeto` (ferramenta Agent) para gerar `APRESENTACAO.md`
+- Invocar o agente `project-documentation` (ferramenta Agent) para gerar `APRESENTACAO.md`
 - Contexto corporativo: problema → solução → impacto, para equipe/gestão
 - Contexto pessoal/externo: mesma estrutura, mais elaborada, com precificação — cliente oficial
 - Formato final (`.pptx` x HTML) ainda em aberto — decisão adiada
@@ -51,8 +51,8 @@ Estas são as **9 Fases da Metodologia** — o processo que se repete em todo pr
 ### FASE 8 — Refatoração Contínua
 - Após cada feature: avaliar extração, simplificação, remoção de duplicação
 - Invocar o agente `code-reviewer` (ferramenta Agent) para auditoria formal de SOLID/Clean Code/limites de tamanho antes de fechar a fase
-- Com a estrutura final estável (depois das correções do `code-reviewer`), invocar o agente `docstrings` (ferramenta Agent) para documentar funções/classes/módulos públicos
-- Se a fase introduziu mudança estrutural (novo módulo, integração externa, decisão de arquitetura, modelo de dados), invocar o agente `documentacao-projeto` (ferramenta Agent) para atualizar `ARCHITECTURE.md` — critério completo em `references/architecture-md.md`
+- Com a estrutura final estável (depois das correções do `code-reviewer`), invocar o agente `docstrings-manager` (ferramenta Agent) para documentar funções/classes/módulos públicos
+- Se a fase introduziu mudança estrutural (novo módulo, integração externa, decisão de arquitetura, modelo de dados), invocar o agente `project-documentation` (ferramenta Agent) para atualizar `ARCHITECTURE.md` — critério completo em `references/architecture-md.md`
 - Momento de avaliar design patterns: consultar `@.claude/PATTERNS.md` (se disponível) e sugerir um pattern apenas quando resolver dor concreta identificada — nunca na primeira versão, nunca por estética
 
 ### FASE 9 — Revisão de Segurança
@@ -97,7 +97,7 @@ Todo projeto novo gera **dois** arquivos na raiz, uma única vez, logo ao final 
 
 Estrutura detalhada de ROADMAP.md e CHECKLIST.md: ver seção 6.
 
-Outros **cinco** documentos são gerados e mantidos pelo agente `documentacao-projeto` (ferramenta Agent) — baixa frequência de edição, por isso não ficam com o Claude principal:
+Outros **cinco** documentos são gerados e mantidos pelo agente `project-documentation` (ferramenta Agent) — baixa frequência de edição, por isso não ficam com o Claude principal:
 
 3. **`ARCHITECTURE.md`** — diagramas Mermaid da arquitetura (estrutura, fluxo, dados). Vivo e oficial: gerado na Fase 1, atualizado quando a estrutura muda (Fase 8). Estrutura e templates: ver `references/architecture-md.md`
 4. **`RESUMO-EXECUTIVO.md`** — resumo executivo e retrospecto por fase (Fase 2)
@@ -105,7 +105,7 @@ Outros **cinco** documentos são gerados e mantidos pelo agente `documentacao-pr
 6. **`MANUAL.md`** — manual do usuário final (Fase 3)
 7. **`APRESENTACAO.md`** — apresentação corporativa ou comercial, conforme o contexto (Fase 4)
 
-Detalhes de geração de cada um: `~/.claude/agents/documentacao-projeto.md`.
+Detalhes de geração de cada um: `~/.claude/agents/project-documentation.md`.
 
 **Dispensados** em: Modo Tarefa (`#tarefa`), correções pequenas de bug, ajustes estéticos/config.
 
@@ -113,12 +113,12 @@ Detalhes de geração de cada um: `~/.claude/agents/documentacao-projeto.md`.
 
 ## 5. Integração GitHub e Linear (padrão "Fuzkrigo Projects")
 
-Provisionamento de GitHub (board, labels, views, issues, milestones) e o espelho no Linear são feitos pelo agente `gestor-projetos` (ferramenta Agent) — invocar ao final da Fase 2, com roadmap e milestones já definidos. O agente decide sozinho a ordem (GitHub primeiro, Linear só completa lacunas) e o guardrail de duplicidade — não preciso orquestrar isso manualmente.
+Provisionamento de GitHub (board, labels, views, issues, milestones) e o espelho no Linear são feitos pelo agente `project-manager` (ferramenta Agent) — invocar ao final da Fase 2, com roadmap e milestones já definidos. O agente decide sozinho a ordem (GitHub primeiro, Linear só completa lacunas) e o guardrail de duplicidade — não preciso orquestrar isso manualmente.
 
 Quando uma milestone termina, o mesmo agente monta o CHANGELOG.md, o texto do release e o bloco de comandos Git — mas a execução da parte Git (commit, tag, release, fechamento de milestone) segue a política de `references/git-conventions.md`: pergunto se você executa ou se eu executo.
 
 - Commits semânticos, branches, PRs, releases e a política de execução: `references/git-conventions.md`
-- Detalhes de provisionamento GitHub/Linear e do ritual de release: `~/.claude/agents/gestor-projetos.md`
+- Detalhes de provisionamento GitHub/Linear e do ritual de release: `~/.claude/agents/project-manager.md`
 
 Os padrões do "Fuzkrigo Projects" são **sugestões adaptáveis**, não regras rígidas — ajustar ao contexto de cada projeto quando necessário.
 

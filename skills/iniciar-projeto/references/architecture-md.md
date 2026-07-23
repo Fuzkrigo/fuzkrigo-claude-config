@@ -129,7 +129,7 @@ Para projetos maiores, seguir a lógica do modelo C4 usando `graph` do Mermaid: 
 
 ## Quando atualizar
 
-O `ARCHITECTURE.md` é vivo, mantido pelo agente `documentacao-projeto`. Invocá-lo quando:
+O `ARCHITECTURE.md` é vivo, mantido pelo agente `project-documentation`. Invocá-lo quando:
 - Um novo módulo ou integração externa entra.
 - Uma decisão de arquitetura muda (refletir também no ROADMAP.md).
 - O modelo de dados ganha ou perde entidades.

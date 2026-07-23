@@ -1,5 +1,5 @@
 ---
-name: documentacao-projeto
+name: project-documentation
 description: Geração e atualização dos documentos de projeto que nascem em pontos fixos do fluxo ou mudam com baixa frequência — não editados a cada pequena mudança como ROADMAP.md/CHECKLIST.md, que continuam sob responsabilidade do Claude principal. Este agente cobre cinco documentos: Arquitetura (ARCHITECTURE.md), Resumo Executivo (RESUMO-EXECUTIVO.md), Documentação Técnica (DOCUMENTACAO-TECNICA.md), Manual do Usuário (MANUAL.md) e Apresentação e Venda (APRESENTACAO.md). Invoque ao final da Fase 1 (versão inicial de Arquitetura), Fase 2 (Resumo Executivo), Fase 3 (Documentação Técnica e Manual), Fase 4 (Apresentação) e Fase 8 (atualização de Arquitetura quando a estrutura muda) do fluxo iniciar-projeto, ou sempre que o usuário pedir para gerar, atualizar ou revisar qualquer um desses cinco documentos em qualquer projeto — dentro ou fora do fluxo iniciar-projeto, incluindo projetos legados que nunca passaram pela skill.
 tools: Read, Grep, Glob, Bash, Write, Edit
 model: claude-opus-4-8
