@@ -20,6 +20,7 @@
 - Função: máximo **50 linhas**. Se ultrapassar, sugerir ativamente extração.
 - Arquivo: máximo **500 linhas**. Se ultrapassar, sugerir divisão em módulos.
 - Exceções devem ser justificadas explicitamente.
+- **A contagem considera só código executável.** Linhas de docstring e de comentário — inline ou de documentação — não entram nesse limite. Documentar uma função, ou explicar um trecho não óbvio, não deve empurrá-la para refatoração por tamanho.
 
 **Tratamento de erros:**
 
