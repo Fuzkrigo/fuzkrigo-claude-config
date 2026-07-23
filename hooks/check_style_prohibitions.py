@@ -31,7 +31,7 @@ EMOJI_RANGES = [
     (0x1F1E6, 0x1F1FF),
 ]
 # Excecao deliberada: estes sao marcadores de status funcionais usados pelo
-# proprio agente revisar-seguranca e por convencoes do usuario, nao emoji
+# proprio agente security-reviewer e por convencoes do usuario, nao emoji
 # decorativo. / Deliberate exception: functional status markers, not
 # decorative emoji.
 ALLOWED_EMOJI_CODEPOINTS = {0x2705, 0x26A0, 0x274C, 0xFE0F}

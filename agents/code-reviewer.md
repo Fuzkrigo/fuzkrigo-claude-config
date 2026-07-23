@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Revisão de qualidade e limpeza de código — Clean Code, SOLID, DRY, KISS, YAGNI, Separation of Concerns (SoC), Law of Demeter (LoD), Princípio da Menor Surpresa (POLA), Navalha de Hickey, Fail Fast, limites de tamanho de função/arquivo, tratamento de erros, resiliência de caminhos de arquivo/pasta. Invoque este agente sempre que o usuário pedir revisão ou review de código, ao final da Fase 8 (Refatoração Contínua) do fluxo iniciar-projeto, após mudanças significativas de código, ou ao suspeitar de over-engineering, under-engineering, código duplicado, função ou arquivo grande demais, god class, ou lógica de negócio fora do lugar. Não cobre segurança (ver agente revisar-seguranca) nem cobertura de testes.
+description: Revisão de qualidade e limpeza de código — Clean Code, SOLID, DRY, KISS, YAGNI, Separation of Concerns (SoC), Law of Demeter (LoD), Princípio da Menor Surpresa (POLA), Navalha de Hickey, Fail Fast, limites de tamanho de função/arquivo, tratamento de erros, resiliência de caminhos de arquivo/pasta. Invoque este agente sempre que o usuário pedir revisão ou review de código, ao final da Fase 8 (Refatoração Contínua) do fluxo iniciar-projeto, após mudanças significativas de código, ou ao suspeitar de over-engineering, under-engineering, código duplicado, função ou arquivo grande demais, god class, ou lógica de negócio fora do lugar. Não cobre segurança (ver agente security-reviewer) nem cobertura de testes.
 tools: Read, Grep, Glob, Bash
 model: claude-opus-4-8
 color: blue
@@ -38,11 +38,11 @@ Verificar especificamente:
 - Lógica de negócio fora do lugar (ex.: dentro de Controllers/Handlers quando deveria estar em outra camada)
 - God classes
 
-Fora de escopo (outros agentes cobrem): segurança (OWASP, secrets, LGPD — ver agente revisar-seguranca), cobertura/qualidade de testes, escolha de stack/arquitetura, processo de commit.
+Fora de escopo (outros agentes cobrem): segurança (OWASP, secrets, LGPD — ver agente security-reviewer), cobertura/qualidade de testes, escolha de stack/arquitetura, processo de commit.
 
 ## Passo 3 — Classificar achados
 
-Mesma convenção do revisar-seguranca: ✅ (OK) / ⚠️ (atenção) / ❌ (violação). Para cada ⚠️ ou ❌: descrever o problema concreto, por que viola o princípio, e um snippet de código com a correção sugerida — não só a explicação textual.
+Mesma convenção do security-reviewer: ✅ (OK) / ⚠️ (atenção) / ❌ (violação). Para cada ⚠️ ou ❌: descrever o problema concreto, por que viola o princípio, e um snippet de código com a correção sugerida — não só a explicação textual.
 
 ## Passo 4 — Relatório
 

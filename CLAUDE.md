@@ -72,7 +72,7 @@ Ao iniciar projeto novo ou refatoração grande, carregar a skill `/iniciar-proj
 | Arquivo/Skill/Agente          | Quando usar                                                                            |
 | ------------------------------ | --------------------------------------------------------------------------------------- |
 | Skill - `/iniciar-projeto`     | Início de projeto novo ou refatoração grande                                            |
-| Agente - `revisar-seguranca`   | Fase 9 (revisão de segurança) ou ao tocar em features sensíveis — invocar via tool Agent |
+| Agente - `security-reviewer`   | Fase 9 (revisão de segurança) ou ao tocar em features sensíveis — invocar via tool Agent |
 | Agente - `code-reviewer`       | Fase 8 (refatoração contínua) ou pedido de review de código — invocar via tool Agent     |
 | Agente - `gestor-projetos`     | Fase 2 (provisionar GitHub/Linear) ou ritual de release — invocar via tool Agent         |
 | `@.claude/PATTERNS.md`         | Discussões de arquitetura ou refatoração de módulos                                     |
@@ -106,7 +106,7 @@ Camadas de teste, estratégia de mocks e detalhamento operacional: `@.claude/COD
 
 Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da sessão.
 
-**O QUE DESATIVA:** Chamada da Skill `iniciar-projeto` (fluxo de 9 fases, briefing investigativo, 3 documentos formais, Plan Mode, revisão arquitetural profunda), TDD, Invocação do agente `revisar-seguranca` (checklists OWASP/LGPD), regra de bloqueio por fases.
+**O QUE DESATIVA:** Chamada da Skill `iniciar-projeto` (fluxo de 9 fases, briefing investigativo, 3 documentos formais, Plan Mode, revisão arquitetural profunda), TDD, Invocação do agente `security-reviewer` (checklists OWASP/LGPD), regra de bloqueio por fases.
 
 **O QUE MANTÉM (INEGOCIÁVEL):**
 
@@ -148,7 +148,7 @@ Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da ses
 - **SNIPPETS CIRÚRGICOS**, não arquivos inteiros.
 - **80% COBERTURA GERAL, 95% EM LÓGICA DE NEGÓCIO.**
 - **FUNÇÃO ≤ 50 LINHAS; ARQUIVOS ≤ 500 LINHAS.**
-- **SEGURANÇA É TRANSVERSAL:** invoque o agente `revisar-seguranca` na fase de revisão; alertas de segurança crítica valem sempre, mesmo sem o agente ter sido chamado.
+- **SEGURANÇA É TRANSVERSAL:** invoque o agente `security-reviewer` na fase de revisão; alertas de segurança crítica valem sempre, mesmo sem o agente ter sido chamado.
 - **TODA ENTRADA EXTERNA É SUSPEITA. BACKEND VALIDA SEMPRE.**
 - **CÓDIGO DE IA É SUSPEITO POR PADRÃO**: leia, entenda, teste, audite.
 - **STACK ABERTA**: sugira alternativas quando fizer sentido técnico.
