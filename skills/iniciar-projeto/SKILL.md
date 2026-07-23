@@ -1,6 +1,6 @@
 ---
 name: iniciar-projeto
-description: Fluxo obrigatório de desenvolvimento em 9 fases, planejamento de projeto, geração de PLANEJAMENTO.md, CHECKLIST.md e ARCHITECTURE.md, e integração com GitHub Projects (padrão "Fuzkrigo Projects"). Use esta skill SEMPRE que o usuário mencionar projeto novo, iniciar desenvolvimento, planejar funcionalidade, criar roadmap, briefing de projeto, ou qualquer pedido que envolva começar a construir algo do zero. Também ativar quando o usuário pedir para gerar documentos de planejamento, checklist, diagramas de arquitetura, configurar labels/board/issues no GitHub, definir padrão de commits ou releases, ou mencionar fases de desenvolvimento. Se o usuário tentar implementar código sem ter passado pelo fluxo de fases, BLOQUEIE e carregue esta skill.
+description: Fluxo obrigatório de desenvolvimento em 9 fases, planejamento de projeto, geração de PLANEJAMENTO.md, CHECKLIST.md e ARCHITECTURE.md, e integração com GitHub Projects e Linear (padrão "Fuzkrigo Projects"). Use esta skill SEMPRE que o usuário mencionar projeto novo, iniciar desenvolvimento, planejar funcionalidade, criar roadmap, briefing de projeto, ou qualquer pedido que envolva começar a construir algo do zero. Também ativar quando o usuário pedir para gerar documentos de planejamento, checklist, diagramas de arquitetura, configurar labels/board/issues no GitHub ou no Linear, definir padrão de commits ou releases, ou mencionar fases de desenvolvimento. Se o usuário tentar implementar código sem ter passado pelo fluxo de fases, BLOQUEIE e carregue esta skill.
 ---
 
 # Fluxo de Desenvolvimento e Planejamento
@@ -24,6 +24,7 @@ Estas são as **9 Fases da Metodologia** — o processo que se repete em todo pr
 - Justificativa de escolha de arquitetura, linguagens e ferramentas
 - Cronograma estimado
 - Ao final, com roadmap e milestones já definidos: se o projeto usa GitHub, provisionar board, labels, views e as issues de etapa via `gh` (seção 5). As etapas só ficam concretas aqui, por isso o board nasce nesta fase, não na Fase 1.
+- Na sequência, tentar espelhar a mesma estrutura no Linear (seção 5) — sempre, silenciosamente: se não houver conector Linear conectado à sessão ou nenhum team correspondente, pular sem perguntar e sem bloquear a fase.
 
 ### FASE 3 — Documento 2: Documentação Técnica e Manual
 - Design System (quando aplicável)
@@ -52,6 +53,7 @@ Estas são as **9 Fases da Metodologia** — o processo que se repete em todo pr
 
 ### FASE 8 — Refatoração Contínua
 - Após cada feature: avaliar extração, simplificação, remoção de duplicação
+- Invocar o agente `code-reviewer` (ferramenta Agent) para auditoria formal de SOLID/Clean Code/limites de tamanho antes de fechar a fase
 - Momento de avaliar design patterns: consultar `@.claude/PATTERNS.md` (se disponível) e sugerir um pattern apenas quando resolver dor concreta identificada — nunca na primeira versão, nunca por estética
 
 ### FASE 9 — Revisão de Segurança
@@ -102,7 +104,7 @@ Estrutura e templates de ARCHITECTURE.md: ver `references/architecture-md.md`.
 
 ---
 
-## 5. Integração GitHub (padrão "Fuzkrigo Projects")
+## 5. Integração GitHub e Linear (padrão "Fuzkrigo Projects")
 
 Quando o projeto usa GitHub (praticamente todos, pessoais e corporativos), ao final da Fase 2 eu **provisiono automaticamente via `gh`**: repositório, labels, board (Project), campos, views, milestones e as issues de cada etapa geradas a partir do CHECKLIST.md. Isso é setup de organização, não código.
 
@@ -111,6 +113,12 @@ O que permanece **exclusivamente manual do usuário** (eu só aviso a hora certa
 - Setup do board, labels, views, issues e automações: `references/github-projects.md`
 - Commits semânticos, branches, PRs e o fluxo completo de comandos Git: `references/git-conventions.md`
 - Milestones → releases, tags SemVer e changelog: `references/releases.md`
+
+**Logo em seguida, sempre tentar espelhar a mesma estrutura no Linear** via o conector MCP (`mcp__claude_ai_Linear__*`), silenciosamente: buscar as ferramentas com ToolSearch, checar se há um team correspondente e, se não houver conector ativo ou team, pular sem perguntar nem bloquear a fase.
+
+**Ordem obrigatória — GitHub primeiro, Linear só completa lacunas:** nunca provisionar os dois em paralelo do zero. Primeiro o GitHub existe e tem sua sincronização nativa com o Linear configurada pelo usuário (fora do meu controle); essa sincronização traz issues/labels automaticamente. Só depois eu crio no Linear o que a sincronização não cobre: Project, Milestones, campo nativo de Priority e labels ainda não usadas por nenhuma issue sincronizada. Criar uma issue nova diretamente no Linear que já existe no GitHub pode disparar a sincronização bidirecional e gerar uma **issue duplicada no GitHub** — se isso acontecer, checar o GitHub logo após cada criação e fechar a duplicata como tal, referenciando a original.
+
+Detalhes de labels, Project/Milestones, mapeamento de campos e o guardrail de duplicidade: `references/linear-projects.md`.
 
 Os padrões do "Fuzkrigo Projects" são **sugestões adaptáveis**, não regras rígidas — ajustar ao contexto de cada projeto quando necessário.
 
@@ -169,7 +177,7 @@ Estas regras valem para **todo** artefato do projeto — código, documentação
 > Um hook `PreToolUse` (`~/.claude/hooks/check_style_prohibitions.py`) bloqueia automaticamente emoji decorativo e os trailers/frases típicas de commit que atribuem a autoria do trabalho a uma ferramenta de IA (a lista exata de padrões está no código-fonte do hook). Por design, o hook não bloqueia o nome do assistente isolado — banir isso quebraria documentação legítima sobre a própria configuração, este repositório incluído. Julgamento sobre menções indiretas que o hook não cobre continua comigo.
 
 1. **Zero emojis** em qualquer arquivo, documentação, mensagem de commit, PR ou release. Emojis dão cara de conteúdo gerado por IA; o objetivo é o oposto — linguagem humana e sóbria.
-   - **Única exceção**: os pontos de cor das labels no GitHub Projects, que são identificação visual funcional do board (ver `references/github-projects.md`).
+   - **Única exceção**: os pontos de cor das labels no GitHub Projects e no Linear, que são identificação visual funcional do board (ver `references/github-projects.md` e `references/linear-projects.md`).
 2. **Nunca mencionar** IA, Claude, assistente, coautoria ou geração automática — em nenhum lugar: nem em commits (`Co-authored-by`), nem em documentação, nem em comentários de código, nem em releases. Todo o trabalho é apresentado como autoria própria do usuário.
 3. Escrever com voz humana e direta, evitando construções que soem automáticas ou genéricas.
 

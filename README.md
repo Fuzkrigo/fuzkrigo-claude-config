@@ -15,7 +15,8 @@ Backup e documentação da configuração pessoal do Claude Code (Fuzkrigo) — 
 │   ├── iniciar-projeto/             # Fluxo obrigatório de 9 fases para novos projetos/refatorações grandes
 │   └── pipeline-corporativo/        # Templates e procedimentos para projetos VBA+Python+PyInstaller (ambiente corporativo)
 ├── agents/                          # Subagentes globais (.claude/agents/*.md)
-│   └── revisar-seguranca/           # Auditoria de segurança isolada (OWASP, LGPD, secrets, threat modeling, SDL) — ver agents/revisar-seguranca.md
+│   ├── revisar-seguranca/           # Auditoria de segurança isolada (OWASP, LGPD, secrets, threat modeling, SDL) — ver agents/revisar-seguranca.md
+│   └── code-reviewer.md             # Revisão de qualidade de código (SOLID, DRY, KISS, YAGNI, SoC, LoD, POLA) — lê CLAUDE.md §3 e CODIGO.md §1/§7 ao vivo, não duplica conteúdo
 └── hooks/                           # Scripts Python invocados pelos hooks do settings.json
     ├── check_planning_docs.py       # PreToolUse (Write|Edit) — iniciar-projeto §3, Regra de Bloqueio
     └── check_style_prohibitions.py  # PreToolUse (Write|Edit) — iniciar-projeto §7, Proibições de Estilo
@@ -33,5 +34,6 @@ Hooks são comandos que o harness executa automaticamente em eventos do ciclo de
 - `CLAUDE_PASTA PROFFISIONAL.md`, `CODIGO.md` e `PATTERNS.md` são carregados por referência (`@arquivo.md`) a partir do `CLAUDE.md`, conforme o contexto da sessão.
 - As pastas em `skills/` correspondem a skills instaladas em `~/.claude/skills/` — aqui mantidas como texto para versionamento e documentação; a instalação real usa o pacote `.skill` (zip) gerado a partir desse conteúdo.
 - `agents/revisar-seguranca.md` corresponde ao agente instalado em `~/.claude/agents/revisar-seguranca.md` (global, todos os projetos). Era a skill `revisar-seguranca` até esta ter sido convertida em agente isolado — ver histórico do commit para a análise que motivou a troca.
+- `agents/code-reviewer.md` corresponde ao agente instalado em `~/.claude/agents/code-reviewer.md` (global). Diferente do `revisar-seguranca`, não tem pasta `references/` própria — lê `CLAUDE.md` e `CODIGO.md` diretamente em tempo de execução, porque esses arquivos continuam em uso proativo fora do agente (não fazia sentido duplicar conteúdo que eu já consulto durante implementação normal).
 - `hooks/*.py` correspondem aos scripts instalados em `~/.claude/hooks/`, referenciados pelo bloco `hooks` do `settings.json` global.
 - `settings.json` corresponde à configuração global do Claude Code.
