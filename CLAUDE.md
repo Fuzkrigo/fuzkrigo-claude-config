@@ -106,6 +106,8 @@ Camadas de teste, estratégia de mocks e detalhamento operacional: `@.claude/COD
 
 Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da sessão.
 
+**Marcador para o hook de bloqueio:** ao ativar, criar o arquivo `<temp>/claude-modo-tarefa/<session_id>.flag` (session id extraído do caminho do diretório scratchpad informado no prompt do sistema — é o penúltimo segmento do caminho). Isso é necessário porque o hook `check_planning_docs.py` (que reforça a Regra de Bloqueio da skill `iniciar-projeto`) roda como processo isolado sem acesso à conversa — sem esse marcador, ele não tem como saber que a regra foi desativada nesta sessão e continuaria perguntando a cada edição de código.
+
 **O QUE DESATIVA:** Chamada da Skill `iniciar-projeto` (fluxo de 9 fases, briefing investigativo, 3 documentos formais, Plan Mode, revisão arquitetural profunda), TDD, Invocação do agente `revisar-seguranca` (checklists OWASP/LGPD), regra de bloqueio por fases.
 
 **O QUE MANTÉM (INEGOCIÁVEL):**
@@ -119,7 +121,7 @@ Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da ses
 
 **TOM EM MODO TAREFA:** enxuto, direto, sem teoria. Código com uma linha de contexto. Explicação linha a linha só se pedido.
 
-**SAIR DO MODO TAREFA:** nova conversa, ou declarar "sair do modo tarefa" / "modo normal".
+**SAIR DO MODO TAREFA:** nova conversa (o marcador da sessão anterior fica órfão, sem efeito — cada sessão tem seu próprio session id), ou declarar "sair do modo tarefa" / "modo normal" (apagar o arquivo-marcador desta sessão).
 
 ---
 

@@ -5,10 +5,16 @@ Pergunta (nao bloqueia direto - hooks nao veem a conversa, entao nao sabem
 se estamos em #tarefa ou correcao pequena; quem decide e o usuario) quando
 codigo de producao esta sendo escrito sem PLANEJAMENTO.md/CHECKLIST.md na
 raiz do projeto.
+
+Excecao: se existir o arquivo-marcador de Modo Tarefa desta sessao (criado
+pelo Claude ao ativar #tarefa - CLAUDE.md secao 7), libera direto sem
+perguntar. O hook nao ve a conversa, entao esse marcador e o unico jeito
+dele saber que a Regra de Bloqueio foi desativada nesta sessao.
 """
 import json
 import os
 import sys
+import tempfile
 
 DOC_EXEMPT = {"PLANEJAMENTO.md", "CHECKLIST.md", "ARCHITECTURE.md"}
 
@@ -23,10 +29,21 @@ def allow():
     sys.exit(0)
 
 
+def modo_tarefa_ativo(session_id):
+    if not session_id:
+        return False
+    marker = os.path.join(tempfile.gettempdir(), "claude-modo-tarefa", f"{session_id}.flag")
+    return os.path.isfile(marker)
+
+
 def main():
     try:
         data = json.load(sys.stdin)
     except (json.JSONDecodeError, ValueError):
+        allow()
+        return
+
+    if modo_tarefa_ativo(data.get("session_id")):
         allow()
         return
 
