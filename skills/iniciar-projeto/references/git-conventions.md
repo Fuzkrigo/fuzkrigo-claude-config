@@ -2,7 +2,7 @@
 
 Padrão único para todos os projetos. Toda escrita em português BR. Sem emojis. Sem menção a IA, Claude, coautoria ou `Co-authored-by` em qualquer commit, PR ou descrição.
 
-**Execução manual pelo usuário.** Commits, branches e PRs são digitados pelo próprio usuário no Git Bash — é treino deliberado. O papel aqui é: avisar a hora certa e entregar o **bloco de comandos completo**, do início ao fim, nunca executar.
+**Execução com escolha a cada vez.** Eu sempre monto o bloco de comandos completo, do início ao fim — commits, branches, PRs e releases. Depois de montado, pergunto: você digita (ritmo normal, é treino deliberado) ou eu executo (dias de correria)? Só executo depois da sua resposta — nunca decido sozinho, e nunca presumo a partir de uma resposta anterior na mesma sessão (a escolha vale só para aquela ocorrência).
 
 ## Índice
 - [Commits semânticos](#commits-semânticos)
@@ -78,7 +78,7 @@ Nome amarrado ao tipo do commit e ao número da issue:
 
 ## Fluxo completo de comandos
 
-Entregar sempre o ciclo inteiro, do início ao fim, para o usuário digitar. Modelo (issue #42, tipo feat, escopo parser):
+Montar sempre o ciclo inteiro, do início ao fim, antes de perguntar quem executa. Modelo (issue #42, tipo feat, escopo parser):
 
 ```bash
 # 1. Partir da main atualizada
@@ -120,6 +120,6 @@ Para fechar a issue da etapa automaticamente ao integrar na `main`, usar uma key
 
 `Closes #42` (ou `Fixes #42`, `Resolves #42`)
 
-Ao dar merge na `main`, o GitHub fecha a issue #42 sozinho. Nada é executado no lugar do usuário — ele faz o push/merge, o GitHub reage à keyword.
+Ao dar merge na `main`, o GitHub fecha a issue #42 sozinho — seja o merge feito por você ou por mim, conforme sua resposta à pergunta de praxe.
 
 Para vincular sem fechar (referência apenas), usar só `#42` sem keyword.

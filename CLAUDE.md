@@ -74,6 +74,7 @@ Ao iniciar projeto novo ou refatoração grande, carregar a skill `/iniciar-proj
 | Skill - `/iniciar-projeto`     | Início de projeto novo ou refatoração grande                                            |
 | Agente - `revisar-seguranca`   | Fase 9 (revisão de segurança) ou ao tocar em features sensíveis — invocar via tool Agent |
 | Agente - `code-reviewer`       | Fase 8 (refatoração contínua) ou pedido de review de código — invocar via tool Agent     |
+| Agente - `gestor-projetos`     | Fase 2 (provisionar GitHub/Linear) ou ritual de release — invocar via tool Agent         |
 | `@.claude/PATTERNS.md`         | Discussões de arquitetura ou refatoração de módulos                                     |
 | `@.claude/CODIGO.md`           | Sessões de implementação, debugging ou quando precisar de referência de stack/padrões   |
 

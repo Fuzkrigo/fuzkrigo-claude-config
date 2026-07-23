@@ -23,8 +23,7 @@ Estas são as **9 Fases da Metodologia** — o processo que se repete em todo pr
 - Lista sequencial de todas as etapas de desenvolvimento
 - Justificativa de escolha de arquitetura, linguagens e ferramentas
 - Cronograma estimado
-- Ao final, com roadmap e milestones já definidos: se o projeto usa GitHub, provisionar board, labels, views e as issues de etapa via `gh` (seção 5). As etapas só ficam concretas aqui, por isso o board nasce nesta fase, não na Fase 1.
-- Na sequência, tentar espelhar a mesma estrutura no Linear (seção 5) — sempre, silenciosamente: se não houver conector Linear conectado à sessão ou nenhum team correspondente, pular sem perguntar e sem bloquear a fase.
+- Ao final, com roadmap e milestones já definidos: invocar o agente `gestor-projetos` (ferramenta Agent) para provisionar GitHub e espelhar no Linear (seção 5). As etapas só ficam concretas aqui, por isso o board nasce nesta fase, não na Fase 1.
 
 ### FASE 3 — Documento 2: Documentação Técnica e Manual
 - Design System (quando aplicável)
@@ -106,19 +105,12 @@ Estrutura e templates de ARCHITECTURE.md: ver `references/architecture-md.md`.
 
 ## 5. Integração GitHub e Linear (padrão "Fuzkrigo Projects")
 
-Quando o projeto usa GitHub (praticamente todos, pessoais e corporativos), ao final da Fase 2 eu **provisiono automaticamente via `gh`**: repositório, labels, board (Project), campos, views, milestones e as issues de cada etapa geradas a partir do CHECKLIST.md. Isso é setup de organização, não código.
+Provisionamento de GitHub (board, labels, views, issues, milestones) e o espelho no Linear são feitos pelo agente `gestor-projetos` (ferramenta Agent) — invocar ao final da Fase 2, com roadmap e milestones já definidos. O agente decide sozinho a ordem (GitHub primeiro, Linear só completa lacunas) e o guardrail de duplicidade — não preciso orquestrar isso manualmente.
 
-O que permanece **exclusivamente manual do usuário** (eu só aviso a hora certa e entrego o bloco de comandos completo, nunca executo): **commits, branches, Pull Requests e releases**.
+Quando uma milestone termina, o mesmo agente monta o CHANGELOG.md, o texto do release e o bloco de comandos Git — mas a execução da parte Git (commit, tag, release, fechamento de milestone) segue a política de `references/git-conventions.md`: pergunto se você executa ou se eu executo.
 
-- Setup do board, labels, views, issues e automações: `references/github-projects.md`
-- Commits semânticos, branches, PRs e o fluxo completo de comandos Git: `references/git-conventions.md`
-- Milestones → releases, tags SemVer e changelog: `references/releases.md`
-
-**Logo em seguida, sempre tentar espelhar a mesma estrutura no Linear** via o conector MCP (`mcp__claude_ai_Linear__*`), silenciosamente: buscar as ferramentas com ToolSearch, checar se há um team correspondente e, se não houver conector ativo ou team, pular sem perguntar nem bloquear a fase.
-
-**Ordem obrigatória — GitHub primeiro, Linear só completa lacunas:** nunca provisionar os dois em paralelo do zero. Primeiro o GitHub existe e tem sua sincronização nativa com o Linear configurada pelo usuário (fora do meu controle); essa sincronização traz issues/labels automaticamente. Só depois eu crio no Linear o que a sincronização não cobre: Project, Milestones, campo nativo de Priority e labels ainda não usadas por nenhuma issue sincronizada. Criar uma issue nova diretamente no Linear que já existe no GitHub pode disparar a sincronização bidirecional e gerar uma **issue duplicada no GitHub** — se isso acontecer, checar o GitHub logo após cada criação e fechar a duplicata como tal, referenciando a original.
-
-Detalhes de labels, Project/Milestones, mapeamento de campos e o guardrail de duplicidade: `references/linear-projects.md`.
+- Commits semânticos, branches, PRs, releases e a política de execução: `references/git-conventions.md`
+- Detalhes de provisionamento GitHub/Linear e do ritual de release: `~/.claude/agents/gestor-projetos.md`
 
 Os padrões do "Fuzkrigo Projects" são **sugestões adaptáveis**, não regras rígidas — ajustar ao contexto de cada projeto quando necessário.
 
