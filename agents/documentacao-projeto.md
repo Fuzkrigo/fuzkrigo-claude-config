@@ -34,8 +34,8 @@ Nunca invente conteúdo. Leia, na raiz do projeto:
 - Resumo executivo do projeto
 - Retrospecto por fase: o que foi desenvolvido e por quê — evolui conforme fases fecham
 - Justificativa de arquitetura/linguagens/ferramentas — referenciar o raciocínio já registrado em ROADMAP.md, não duplicar
+- Cronograma estimado (do ROADMAP.md) x executado (real, apurado por fase)
 - Documento vivo: refinado a cada fase concluída. Ao final do projeto, deve responder sozinho a qualquer pergunta plausível sobre o que foi construído e por quê — sem exigir que o leitor consulte outro documento
-- Cronograma estimado x realizado
 
 ### Documentação Técnica — `DOCUMENTACAO-TECNICA.md` (Fase 3)
 - Decisões técnicas e motivo de cada escolha de stack

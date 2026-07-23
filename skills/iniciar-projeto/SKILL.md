@@ -133,7 +133,7 @@ Conteúdo obrigatório:
 2. **Resumo do problema** — o que resolve, 2-3 parágrafos
 3. **Decisões arquiteturais** — stack, padrões aplicados, justificativa
 4. **Skills e configurações ativas** — quais skills e qual CLAUDE.md do projeto se aplicam; quais estão desativados
-5. **Roadmap de desenvolvimento** — milestones e fases ordenadas com descrição curta, cronograma estimado x executado
+5. **Roadmap de desenvolvimento** — milestones e fases ordenadas com descrição curta, cronograma estimado
 6. **Riscos e pontos de atenção**
 7. **Histórico de mudanças do plano** — cada atualização com data e motivo
 
