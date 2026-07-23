@@ -3,14 +3,14 @@
 
 Pergunta (nao bloqueia direto - hooks nao veem a conversa, entao nao sabem
 se estamos em #tarefa ou correcao pequena; quem decide e o usuario) quando
-codigo de producao esta sendo escrito sem PLANEJAMENTO.md/CHECKLIST.md na
+codigo de producao esta sendo escrito sem ROADMAP.md/CHECKLIST.md na
 raiz do projeto.
 """
 import json
 import os
 import sys
 
-DOC_EXEMPT = {"PLANEJAMENTO.md", "CHECKLIST.md", "ARCHITECTURE.md"}
+DOC_EXEMPT = {"ROADMAP.md", "CHECKLIST.md", "ARCHITECTURE.md"}
 
 CODE_EXTENSIONS = {
     "py", "js", "jsx", "ts", "tsx", "vba", "bas", "java", "go", "rs",
@@ -45,13 +45,13 @@ def main():
         allow()
         return
 
-    if os.path.isfile("PLANEJAMENTO.md") and os.path.isfile("CHECKLIST.md"):
+    if os.path.isfile("ROADMAP.md") and os.path.isfile("CHECKLIST.md"):
         allow()
         return
 
     reason = (
         "Antes de prosseguir com a escrita de codigo de producao, ainda "
-        "preciso da Fase 1-2 (PLANEJAMENTO.md e CHECKLIST.md na raiz do "
+        "preciso da Fase 1-2 (ROADMAP.md e CHECKLIST.md na raiz do "
         "projeto). Quer fazer isso agora, ou tem uma razao especifica para "
         "pular esta etapa (#tarefa, correcao pequena, ajuste estetico)?"
     )
