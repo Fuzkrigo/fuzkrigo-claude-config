@@ -1,7 +1,7 @@
 ---
 name: Feature ou Etapa
 about: Nova funcionalidade ou etapa de desenvolvimento
-title: "[Fase N] Etapa: "
+title: "[M<n>] Etapa E<n>: "
 labels: type:feature
 ---
 

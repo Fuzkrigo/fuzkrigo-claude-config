@@ -47,7 +47,7 @@ Templates de issue e PR ficam em:
 
 `C:\Users\bruno.krieger\.claude\skills\iniciar-projeto\assets\.github\`
 
-Contém `PULL_REQUEST_TEMPLATE.md` e `ISSUE_TEMPLATE/` (`feature.md`, `bug.md`, `tech-debt.md`). Copie a pasta `.github/` inteira para a raiz do projeto quando ela ainda não existir lá. O `feature.md` é o template da issue de etapa: título `[Fase N] Etapa: <nome>`, contexto curto, tarefas como checklist.
+Contém `PULL_REQUEST_TEMPLATE.md` e `ISSUE_TEMPLATE/` (`feature.md`, `bug.md`, `tech-debt.md`). Copie a pasta `.github/` inteira para a raiz do projeto quando ela ainda não existir lá. O `feature.md` é o template da issue de etapa: título no padrão `[M<n>] Etapa E<n>: ` (ver "Padrão de título das issues" no Passo 3), contexto curto, tarefas como checklist.
 
 **Fonte das etapas:**
 
@@ -123,10 +123,45 @@ Milestones são as entregas versionadas, sempre nomeadas em SemVer (`v0.1.0 - MV
 
 | Nível | GitHub |
 |---|---|
-| Milestone | Milestone + Release |
-| Fase | Prefixo no título da issue e/ou label de fase |
+| Milestone | Milestone + Release, e o `M<n>` do título da issue |
 | Etapa | **Issue** (uma por etapa), com checklist de tarefas |
 | Tarefa | Checkbox dentro da issue |
+
+### Padrão de título das issues (obrigatório)
+
+Formato único para todo projeto, **idêntico no GitHub e no Linear** — a sincronização copia o título, então divergir aqui quebra os dois lados de uma vez:
+
+```
+[M<n>] Etapa <E|F><n>: <nome curto>
+```
+
+| Elemento | Regra |
+|---|---|
+| `M<n>` | Posição da milestone na ordem do roadmap — **não** a versão SemVer. A 1ª milestone é `M1`, a 2ª `M2`, e assim por diante, independente de ela se chamar `v0.1.0` ou `v2.3.0` |
+| `E<n>` | Etapa de desenvolvimento, numerada de forma contínua ao longo do projeto inteiro (E1, E2, … E11) — a numeração **não reinicia** a cada milestone |
+| `F<n>` | Fase do fluxo de 9 fases, quando a issue é de processo e não de produto (ex.: `F9` para a revisão de segurança) |
+| sufixo | Letra minúscula quando uma etapa é subdividida: `E11a`, `E11b` |
+| `<nome curto>` | Descritivo, sem ponto final. Detalhe vai no corpo da issue, não no título |
+
+Exemplos reais do padrão em produção:
+
+```
+[M1] Etapa E1: Fundações
+[M1] Etapa E5: Motor de prazos
+[M2] Etapa E6: UI núcleo (PySide6)
+[M3] Etapa E10: Build & deploy (.exe)
+[M3] Etapa E11a: Migração do legado — dicionário de-para
+[M3] Etapa F9: Revisão de segurança (OWASP + LGPD)
+```
+
+**Duas famílias que não usam esse formato** — não force o prefixo nelas:
+
+| Família | Formato | Quando |
+|---|---|---|
+| Pendência externa | `P<n> — <nome>` | Depende de terceiro e não de desenvolvimento (TI, fornecedor, jurídico). Numeração própria e contínua. Ex.: `P14 — Solicitar à TI acesso de envio à caixa compartilhada` |
+| Issue avulsa | título descritivo, sem prefixo | Bug, melhoria ou débito que surgiu depois do planejamento e não corresponde a uma etapa do CHECKLIST. Ex.: `Refinamento visual: tema dark, shell e dashboard gerencial` |
+
+Ao provisionar a partir do `CHECKLIST.md`, toda issue nasce no formato de etapa. As outras duas famílias aparecem depois, ao longo do projeto — reconheça-as pelo formato ao rodar o inventário do Passo 2 e não tente renomeá-las.
 
 ### Board (Project)
 
@@ -161,7 +196,7 @@ gh api repos/:owner/:repo/milestones -f title="v0.1.0 - MVP" -f due_on="2026-08-
 #    Grave o corpo em arquivo dentro do SEU diretorio scratchpad (informado no seu
 #    prompt do sistema) — nunca use /tmp, que nao existe no Windows nativo.
 gh issue create \
-  --title "[Fase 1] Etapa: Setup do ambiente" \
+  --title "[M1] Etapa E1: Setup do ambiente" \
   --body-file "<scratchpad>/issue-etapa-1.md" \
   --label "type:chore,P1-high,area:build" \
   --milestone "v0.1.0 - MVP"
@@ -297,6 +332,8 @@ Setar via `save_issue(..., priority: N)`, inclusive nas issues já sincronizadas
 ### Project e Milestones
 
 Um Project por repositório/produto (`save_project` com `addTeams`), nome igual ao do GitHub Project, descrição citando o repo de origem. Um Milestone por marco do roadmap (`save_milestone`), mesmo nome SemVer do GitHub. Toda issue do Project recebe `project` e, quando aplicável, `milestone`.
+
+O `M<n>` do título das issues é a **posição** da milestone nesta lista: a primeira do roadmap é `M1`, independente de se chamar `v0.1.0`. Se você criar uma issue faltante aqui (passo 7 da sequência abaixo), o título segue o mesmo padrão do GitHub — ver "Padrão de título das issues" no Passo 3.
 
 ### Estados do fluxo
 
