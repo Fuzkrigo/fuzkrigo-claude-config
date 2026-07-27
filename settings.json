@@ -2,20 +2,7 @@
   "attribution": {
     "commit": ""
   },
-  "model": "sonnet",
-  "enableWorkflows": true,
-  "extraKnownMarketplaces": {
-    "claude-plugins-official": {
-      "source": {
-        "source": "git",
-        "url": "https://github.com/anthropics/claude-plugins-official.git"
-      }
-    }
-  },
-  "language": "pt-BR",
-  "effortLevel": "high",
-  "tui": "fullscreen",
-  "theme": "dark",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -38,5 +25,18 @@
         ]
       }
     ]
-  }
+  },
+  "enableWorkflows": true,
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/anthropics/claude-plugins-official.git"
+      }
+    }
+  },
+  "language": "pt-BR",
+  "effortLevel": "high",
+  "tui": "fullscreen",
+  "theme": "dark"
 }

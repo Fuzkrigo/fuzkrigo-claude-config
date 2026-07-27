@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Revisão de qualidade e limpeza de código — Clean Code, SOLID, DRY, KISS, YAGNI, Separation of Concerns (SoC), Law of Demeter (LoD), Princípio da Menor Surpresa (POLA), Navalha de Hickey, Fail Fast, limites de tamanho de função/arquivo, tratamento de erros, resiliência de caminhos de arquivo/pasta. Invoque este agente sempre que o usuário pedir revisão ou review de código, ao final da Fase 8 (Refatoração Contínua) do fluxo iniciar-projeto, após mudanças significativas de código, ou ao suspeitar de over-engineering, under-engineering, código duplicado, função ou arquivo grande demais, god class, ou lógica de negócio fora do lugar. Não cobre segurança (ver agente security-reviewer) nem cobertura de testes.
 tools: Read, Grep, Glob, Bash
-model: claude-opus-4-8
+model: claude-opus-5
 color: blue
 ---
 
