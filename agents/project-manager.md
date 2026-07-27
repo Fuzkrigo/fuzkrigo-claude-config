@@ -186,23 +186,36 @@ gh project item-add <number> --owner "@me" --url https://github.com/<owner>/<rep
 # 8. Os sete status do padrao. O Project nasce so com Todo/In Progress/Done;
 #    acrescentar os outros quatro exige gh api graphql (o CLI nao edita opcoes
 #    de um campo que ja existe). Voce tem Bash — execute, nao reporte como manual.
+#    Nao ha nada a renomear: os tres defaults ja sao tres dos sete desejados.
 
-# 8a. Descobrir o id do campo Status (vem como PVTSSF_...)
+# 8a. Ler o id do campo Status (PVTSSF_...) E o id de cada opcao existente.
+#     Os ids das opcoes sao obrigatorios no passo seguinte — nao pule esta query.
 gh api graphql -f query='query($login:String!,$num:Int!){ user(login:$login){
   projectV2(number:$num){ field(name:"Status"){ ... on ProjectV2SingleSelectField {
-  id options { name } } } } } }' -f login=<owner> -F num=<number>
+  id options { id name } } } } } }' -f login=<owner> -F num=<number>
 
-# 8b. Gravar a lista completa. updateProjectV2Field SUBSTITUI todas as opcoes —
-#     envie os sete, incluindo os tres que ja existem, ou eles somem.
+# 8b. Gravar os sete de uma vez. Duas regras que quebram o board se ignoradas:
+#
+#     (1) updateProjectV2Field SUBSTITUI a lista inteira. Envie os sete,
+#         incluindo os tres que ja existem, ou os omitidos somem.
+#
+#     (2) Passe o "id" lido em 8a nas tres opcoes que ja existem. O campo id e
+#         opcional no schema, mas omiti-lo faz o GitHub tratar a opcao como nova:
+#         a antiga e destruida e o Status de toda issue ja classificada e APAGADO.
+#         Com o id preenchido a opcao e preservada e nenhum valor se perde.
+#         Isso so e inofensivo num board recem-criado; como este agente e
+#         idempotente e pode rodar de novo num board em uso, sempre passe o id.
+#
 #     name, color e description sao obrigatorios nos sete.
+#     Cores validas: GRAY BLUE GREEN YELLOW ORANGE RED PINK PURPLE
 gh api graphql -f query='mutation($field:ID!,$opts:[ProjectV2SingleSelectFieldOptionInput!]){
   updateProjectV2Field(input:{fieldId:$field, singleSelectOptions:$opts}){ clientMutationId } }' \
   -f field=<PVTSSF_id> -F opts='[
     {"name":"Backlog","color":"GRAY","description":"Nao priorizado"},
-    {"name":"Todo","color":"BLUE","description":"Pronto para comecar"},
-    {"name":"In Progress","color":"YELLOW","description":"Em andamento"},
+    {"id":"<id-de-Todo>","name":"Todo","color":"BLUE","description":"Pronto para comecar"},
+    {"id":"<id-de-In Progress>","name":"In Progress","color":"YELLOW","description":"Em andamento"},
     {"name":"In Review","color":"ORANGE","description":"Em revisao"},
-    {"name":"Done","color":"GREEN","description":"Concluido"},
+    {"id":"<id-de-Done>","name":"Done","color":"GREEN","description":"Concluido"},
     {"name":"Canceled","color":"RED","description":"Cancelado"},
     {"name":"Duplicate","color":"PINK","description":"Duplicata de outra issue"}]'
 
@@ -211,10 +224,31 @@ gh project field-list <number> --owner "@me"
 gh project item-list <number> --owner "@me"
 ```
 
-**O que continua sem cobertura** (só isto vira checklist manual — não generalize):
+### Campo Iteration — depende de dois dados que só o usuário tem
+
+O `gh` CLI não cria campo de iteração (`field-create` aceita só `TEXT|SINGLE_SELECT|DATE|NUMBER`), mas a API cria. O que falta não é cobertura, são duas decisões de projeto que você não pode inventar:
+
+- **`startDate`** — a data de início da primeira sprint
+- **`duration`** — a duração de cada sprint em dias (o padrão do "Fuzkrigo Projects" é 14)
+
+**Você não tem canal para perguntar** — é o mesmo limite do ritual de release. Então monte o comando abaixo com os dois valores marcados e devolva no relatório final, com a nota explícita para quem te invocou perguntar ao usuário e executar. Não invente uma data nem assuma que 14 serve.
+
+Se — e somente se — quem te invocou já tiver passado os dois valores no pedido, execute direto:
+
+```bash
+# startDate: formato YYYY-MM-DD. duration: inteiro, em dias.
+# iterations: [] deixa o GitHub gerar as iteracoes a partir de startDate.
+gh api graphql -f query='mutation($proj:ID!){ createProjectV2Field(input:{
+  projectId:$proj, dataType:ITERATION, name:"Iteration",
+  iterationConfiguration:{ startDate:"<AAAA-MM-DD>", duration:<dias>, iterations:[] }
+  }){ clientMutationId } }' -f proj=<PVT_id>
+```
+
+Sem o campo Iteration as Views 1 e 5 não podem ser montadas — elas filtram por `Iteration=@current` e `Iteration=@previous`.
+
+**O único item genuinamente sem cobertura** (só isto vira checklist manual — não generalize):
 
 - **Views salvas** (as 5 acima): a API pública não expõe mutation de view em Projects v2.
-- **Campo Iteration**: `gh project field-create` aceita apenas `TEXT|SINGLE_SELECT|DATE|NUMBER`.
 
 Todo o resto — Project, vínculo com o repo, campos customizados, os sete status e a inclusão das issues — **você executa**. Se algum desses falhar, reporte a mensagem de erro real; nunca classifique como "sem cobertura" o que você apenas não conseguiu rodar.
 
@@ -369,8 +403,9 @@ Devolva sempre:
 - **O que foi criado**: labels, milestones, issues, Project, campos, itens adicionados ao board — com números/links quando existirem
 - **O que foi pulado por já existir** (Passo 2) — separado do que foi criado
 - **O que falhou**, com a mensagem de erro real e literal — nunca substitua um erro por "não é possível"
-- **O que ficou como checklist manual**: apenas as views salvas e o campo Iteration (mais os equivalentes do Linear). Se algo além disso virou manual, explique o porquê com o erro concreto — os sete status têm cobertura via `gh api graphql` e devem ser executados
+- **O que ficou como checklist manual**: apenas as views salvas do board (mais os equivalentes do Linear). Se algo além disso virou manual, explique o porquê com o erro concreto — os sete status têm cobertura via `gh api graphql` e devem ser executados
 - **Os sete status**, confirmando que estão nos dois lados: os sete no GitHub (`gh project field-list`) e os sete no Linear (`list_issue_statuses`)
+- **Se o campo Iteration ainda não existir**: o comando `createProjectV2Field` montado, com `startDate` e `duration` marcados, e a nota explícita: "Pergunte ao usuário a data de início da primeira sprint e a duração em dias, depois execute este comando — sem ele as Views 1 e 5 não podem ser montadas."
 - **Se for ritual de release**: o CHANGELOG.md e texto do release prontos, o bloco de comandos Git completo, e uma nota explícita para quem te invocou: "Pergunte ao usuário se ele quer executar isso ou se você deve executar por ele."
 
 ---
