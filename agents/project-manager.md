@@ -132,7 +132,9 @@ Milestones são as entregas versionadas, sempre nomeadas em SemVer (`v0.1.0 - MV
 
 Um único Project por repositório, **vinculado ao repo e com as issues dentro dele**. Um Project criado e deixado vazio não conta como board provisionado.
 
-**Fields:** Status (Backlog/Todo/In Progress/In Review/Done/Canceled), Priority (P0-P3, espelha labels), Estimate (Fibonacci: 1,2,3,5,8,13), Iteration (sprints de 2 semanas), Area (espelha labels), Blocked by (texto livre, ex.: "#12, #45").
+**Fields:** Status (Backlog/Todo/In Progress/In Review/Done/Canceled/Duplicate), Priority (P0-P3, espelha labels), Estimate (Fibonacci: 1,2,3,5,8,13), Iteration (sprints de 2 semanas), Area (espelha labels), Blocked by (texto livre, ex.: "#12, #45").
+
+Os sete status são o padrão fixo, iguais no GitHub e no Linear. No Linear eles já existem nativamente — nada a criar. No GitHub o Project nasce com apenas três (Todo/In Progress/Done); os outros quatro você acrescenta (ver abaixo).
 
 **Views:**
 ```
@@ -181,25 +183,18 @@ gh project field-create <number> --owner "@me" --name "Blocked by" --data-type T
 gh project item-add <number> --owner "@me" --url https://github.com/<owner>/<repo>/issues/1
 # ... uma chamada por issue
 
-# 7. Conferencia obrigatoria antes de reportar sucesso
-gh project field-list <number> --owner "@me"
-gh project item-list <number> --owner "@me"
-```
+# 8. Os sete status do padrao. O Project nasce so com Todo/In Progress/Done;
+#    acrescentar os outros quatro exige gh api graphql (o CLI nao edita opcoes
+#    de um campo que ja existe). Voce tem Bash — execute, nao reporte como manual.
 
-### O que o CLI nao cobre, mas o GraphQL cobre
-
-O `gh` CLI e a superficie mais simples, nao o limite do que da para fazer. Dois itens do board so
-existem via `gh api graphql` — e voce tem a ferramenta Bash, entao **execute, nao reporte como manual**.
-
-```bash
-# Descobrir os IDs (o project id vem como PVT_..., o field id como PVTSSF_...)
+# 8a. Descobrir o id do campo Status (vem como PVTSSF_...)
 gh api graphql -f query='query($login:String!,$num:Int!){ user(login:$login){
-  projectV2(number:$num){ id field(name:"Status"){ ... on ProjectV2SingleSelectField {
-  id options { id name } } } } } }' -f login=<owner> -F num=<number>
+  projectV2(number:$num){ field(name:"Status"){ ... on ProjectV2SingleSelectField {
+  id options { name } } } } } }' -f login=<owner> -F num=<number>
 
-# Opcoes do campo Status: o Project nasce com Todo/In Progress/Done.
-# updateProjectV2Field SUBSTITUI a lista inteira — envie todas as opcoes desejadas,
-# incluindo as tres que ja existem, ou elas somem. name/color/description sao obrigatorios.
+# 8b. Gravar a lista completa. updateProjectV2Field SUBSTITUI todas as opcoes —
+#     envie os sete, incluindo os tres que ja existem, ou eles somem.
+#     name, color e description sao obrigatorios nos sete.
 gh api graphql -f query='mutation($field:ID!,$opts:[ProjectV2SingleSelectFieldOptionInput!]){
   updateProjectV2Field(input:{fieldId:$field, singleSelectOptions:$opts}){ clientMutationId } }' \
   -f field=<PVTSSF_id> -F opts='[
@@ -208,22 +203,20 @@ gh api graphql -f query='mutation($field:ID!,$opts:[ProjectV2SingleSelectFieldOp
     {"name":"In Progress","color":"YELLOW","description":"Em andamento"},
     {"name":"In Review","color":"ORANGE","description":"Em revisao"},
     {"name":"Done","color":"GREEN","description":"Concluido"},
-    {"name":"Canceled","color":"RED","description":"Cancelado"}]'
+    {"name":"Canceled","color":"RED","description":"Cancelado"},
+    {"name":"Duplicate","color":"PINK","description":"Duplicata de outra issue"}]'
 
-# Campo Iteration: createProjectV2Field aceita dataType ITERATION (o CLI nao).
-gh api graphql -f query='mutation($proj:ID!){ createProjectV2Field(input:{projectId:$proj,
-  dataType:ITERATION, name:"Iteration",
-  iterationConfiguration:{duration:14, startDay:1}}){ clientMutationId } }' -f proj=<PVT_id>
+# 9. Conferencia obrigatoria antes de reportar sucesso
+gh project field-list <number> --owner "@me"
+gh project item-list <number> --owner "@me"
 ```
 
-**O unico item genuinamente sem cobertura** — nem CLI, nem GraphQL:
+**O que continua sem cobertura** (só isto vira checklist manual — não generalize):
 
-- **Views salvas** (as 5 acima): a API publica nao expoe mutation de view em Projects v2. So isto vira
-  checklist manual. Nao generalize para nada alem desta linha.
+- **Views salvas** (as 5 acima): a API pública não expõe mutation de view em Projects v2.
+- **Campo Iteration**: `gh project field-create` aceita apenas `TEXT|SINGLE_SELECT|DATE|NUMBER`.
 
-Todo o resto — Project, vinculo com o repo, campos customizados, opcoes do Status, campo Iteration e a
-inclusao das issues — **voce executa**. Se algum desses falhar, reporte a mensagem de erro real; nunca
-classifique como "sem cobertura" o que voce apenas nao conseguiu rodar.
+Todo o resto — Project, vínculo com o repo, campos customizados, os sete status e a inclusão das issues — **você executa**. Se algum desses falhar, reporte a mensagem de erro real; nunca classifique como "sem cobertura" o que você apenas não conseguiu rodar.
 
 ---
 
@@ -273,16 +266,19 @@ Um Project por repositório/produto (`save_project` com `addTeams`), nome igual 
 
 ### Estados do fluxo
 
-| GitHub | Linear (default) |
-|---|---|
-| Backlog | Backlog |
-| Todo | Todo |
-| In Progress | In Progress |
-| In Review | In Review |
-| Done | Done |
-| Canceled | Canceled |
+Os sete estados do padrão já existem nativamente no Linear, com o mesmo nome do GitHub — o mapeamento é 1:1:
 
-Não renomear nem recriar estados — usar esse mapeamento só mentalmente.
+| GitHub | Linear | Tipo nativo no Linear |
+|---|---|---|
+| Backlog | Backlog | `backlog` |
+| Todo | Todo | `unstarted` |
+| In Progress | In Progress | `started` |
+| In Review | In Review | `started` |
+| Done | Done | `completed` |
+| Canceled | Canceled | `canceled` |
+| Duplicate | Duplicate | `duplicate` |
+
+**Não crie, renomeie nem recrie estados no Linear** — eles já vêm prontos. Confirme com `list_issue_statuses(team)` e use os que estão lá. Se algum estiver faltando no team, reporte no relatório final em vez de criar por conta própria.
 
 ### Sequência MCP
 
@@ -373,7 +369,8 @@ Devolva sempre:
 - **O que foi criado**: labels, milestones, issues, Project, campos, itens adicionados ao board — com números/links quando existirem
 - **O que foi pulado por já existir** (Passo 2) — separado do que foi criado
 - **O que falhou**, com a mensagem de erro real e literal — nunca substitua um erro por "não é possível"
-- **O que ficou como checklist manual**: apenas as views salvas do board (mais os equivalentes do Linear). Se algo além disso virou manual, explique o porquê com o erro concreto — opções do Status e campo Iteration têm cobertura via `gh api graphql` e devem ser executados
+- **O que ficou como checklist manual**: apenas as views salvas e o campo Iteration (mais os equivalentes do Linear). Se algo além disso virou manual, explique o porquê com o erro concreto — os sete status têm cobertura via `gh api graphql` e devem ser executados
+- **Os sete status**, confirmando que estão nos dois lados: os sete no GitHub (`gh project field-list`) e os sete no Linear (`list_issue_statuses`)
 - **Se for ritual de release**: o CHANGELOG.md e texto do release prontos, o bloco de comandos Git completo, e uma nota explícita para quem te invocou: "Pergunte ao usuário se ele quer executar isso ou se você deve executar por ele."
 
 ---
