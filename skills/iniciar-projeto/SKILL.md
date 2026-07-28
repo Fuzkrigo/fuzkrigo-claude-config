@@ -84,26 +84,40 @@ Se o usuário pedir para pular uma fase ou começar implementação sem as anter
 
 Só prosseguir se o usuário justificar conscientemente o bypass.
 
-> Esta checagem também é reforçada por um hook `PreToolUse` (`~/.claude/hooks/check_planning_docs.py`), que pergunta automaticamente antes de qualquer escrita de código de produção sem `ROADMAP.md`/`CHECKLIST.md` na raiz — garante que a pergunta nunca seja esquecida, mesmo que eu não perceba o contexto. O texto acima continua valendo como orientação de julgamento para a resposta.
+> Esta checagem também é reforçada por um hook `PreToolUse` (`~/.claude/hooks/check_planning_docs.py`), que pergunta automaticamente antes de qualquer escrita de código de produção sem `ROADMAP.md`/`CHECKLIST.md` — garante que a pergunta nunca seja esquecida, mesmo que eu não perceba o contexto. O hook procura em `docs/` e aceita a raiz como fallback, para não disparar falso positivo em projeto ainda não migrado. O texto acima continua valendo como orientação de julgamento para a resposta.
 
 ---
 
-## 4. Documentos de Projeto (na raiz)
+## 4. Documentos de Projeto (em `docs/`)
 
-Todo projeto novo gera **dois** arquivos na raiz, uma única vez, logo ao final da Fase 1 — mantidos pelo Claude principal por serem editados com alta frequência:
+**Local canônico: a pasta `docs/` na raiz do projeto.** Criar a pasta se não existir; se já existir, apenas gravar dentro. Vale para os sete documentos desta seção — a raiz fica reservada ao código, ao `README.md`, ao `CHANGELOG.md` e à pasta `.github/`.
 
-1. **`ROADMAP.md`** — plano vivo (estratégia macro: o que e por quê)
-2. **`CHECKLIST.md`** — fases da metodologia + itens acionáveis, com checkboxes
+Duas exceções que **não** entram em `docs/`, por convenção externa e não por organização:
+
+- **`CHANGELOG.md`** — fica na raiz. É onde o GitHub e as ferramentas de release automation esperam encontrá-lo.
+- **`.github/`** — fica na raiz. O GitHub só reconhece templates de issue e PR nesse caminho exato.
+
+**Projeto que já tem os documentos na raiz** (anterior a esta regra): ao detectar, propor a migração com `git mv` para preservar o histórico, e só executar depois da confirmação do usuário. Nunca mover em silêncio. Enquanto a migração não acontece, ler da raiz normalmente — o fallback existe justamente para isso.
+
+```bash
+mkdir -p docs
+git mv ROADMAP.md CHECKLIST.md ARCHITECTURE.md docs/   # apenas os que existirem
+```
+
+Todo projeto novo gera **dois** arquivos em `docs/`, uma única vez, logo ao final da Fase 1 — mantidos pelo Claude principal por serem editados com alta frequência:
+
+1. **`docs/ROADMAP.md`** — plano vivo (estratégia macro: o que e por quê)
+2. **`docs/CHECKLIST.md`** — fases da metodologia + itens acionáveis, com checkboxes
 
 Estrutura detalhada de ROADMAP.md e CHECKLIST.md: ver seção 6.
 
 Outros **cinco** documentos são gerados e mantidos pelo agente `project-documentation` (ferramenta Agent) — baixa frequência de edição, por isso não ficam com o Claude principal:
 
-3. **`ARCHITECTURE.md`** — diagramas Mermaid da arquitetura (estrutura, fluxo, dados). Vivo e oficial: gerado na Fase 1, atualizado quando a estrutura muda (Fase 8). Estrutura e templates: ver `references/architecture-md.md`
-4. **`RESUMO-EXECUTIVO.md`** — resumo executivo e retrospecto por fase (Fase 2)
-5. **`DOCUMENTACAO-TECNICA.md`** — decisões técnicas, API, configuração (Fase 3)
-6. **`MANUAL.md`** — manual do usuário final (Fase 3)
-7. **`APRESENTACAO.md`** — apresentação corporativa ou comercial, conforme o contexto (Fase 4)
+3. **`docs/ARCHITECTURE.md`** — diagramas Mermaid da arquitetura (estrutura, fluxo, dados). Vivo e oficial: gerado na Fase 1, atualizado quando a estrutura muda (Fase 8). Estrutura e templates: ver `references/architecture-md.md`
+4. **`docs/RESUMO-EXECUTIVO.md`** — resumo executivo e retrospecto por fase (Fase 2)
+5. **`docs/DOCUMENTACAO-TECNICA.md`** — decisões técnicas, API, configuração (Fase 3)
+6. **`docs/MANUAL.md`** — manual do usuário final (Fase 3)
+7. **`docs/APRESENTACAO.md`** — apresentação corporativa ou comercial, conforme o contexto (Fase 4)
 
 Detalhes de geração de cada um: `~/.claude/agents/project-documentation.md`.
 
@@ -115,7 +129,7 @@ Detalhes de geração de cada um: `~/.claude/agents/project-documentation.md`.
 
 Provisionamento de GitHub (board, labels, views, issues, milestones) e o espelho no Linear são feitos pelo agente `project-manager` (ferramenta Agent) — invocar ao final da Fase 2, com roadmap e milestones já definidos. O agente decide sozinho a ordem (GitHub primeiro, Linear só completa lacunas) e o guardrail de duplicidade — não preciso orquestrar isso manualmente.
 
-Quando uma milestone termina, o mesmo agente monta o CHANGELOG.md, o texto do release e o bloco de comandos Git — mas a execução da parte Git (commit, tag, release, fechamento de milestone) segue a política de `references/git-conventions.md`: pergunto se você executa ou se eu executo.
+Quando uma milestone termina, o mesmo agente monta o CHANGELOG.md (na raiz, não em `docs/` — ver seção 4), o texto do release e o bloco de comandos Git — mas a execução da parte Git (commit, tag, release, fechamento de milestone) segue a política de `references/git-conventions.md`: pergunto se você executa ou se eu executo.
 
 - Commits semânticos, branches, PRs, releases e a política de execução: `references/git-conventions.md`
 - Detalhes de provisionamento GitHub/Linear e do ritual de release: `~/.claude/agents/project-manager.md`
@@ -162,7 +176,7 @@ Explicar a legenda no topo do arquivo. Consultar o CHECKLIST.md **no início de 
 
 ### 6.3. Regras Inegociáveis dos Documentos
 
-1. Os três arquivos ficam na **raiz** do projeto.
+1. Os três arquivos ficam em **`docs/`** (criar a pasta se não existir). Exceções que permanecem na raiz e o procedimento de migração de projeto legado: seção 4.
 2. Gerados **uma única vez** — atualizações são edições, nunca recriação.
 3. Bloquear implementação (Fase 7) se ROADMAP.md e CHECKLIST.md não existirem.
 4. **Nunca deletados** durante o projeto.
