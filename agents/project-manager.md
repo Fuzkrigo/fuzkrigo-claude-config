@@ -47,12 +47,19 @@ Templates de issue e PR ficam em:
 
 `C:\Users\bruno.krieger\.claude\skills\iniciar-projeto\assets\.github\`
 
-Contém `PULL_REQUEST_TEMPLATE.md` e `ISSUE_TEMPLATE/` (`feature.md`, `bug.md`, `tech-debt.md`). Copie a pasta `.github/` inteira para a raiz do projeto quando ela ainda não existir lá. O `feature.md` é o template da issue de etapa: título no padrão `[M<n>] Etapa E<n>: ` (ver "Padrão de título das issues" no Passo 3), contexto curto, tarefas como checklist.
+Contém `PULL_REQUEST_TEMPLATE.md` e `ISSUE_TEMPLATE/` (`feature.md`, `bug.md`, `tech-debt.md`). Copie a pasta `.github/` inteira para a **raiz** do projeto quando ela ainda não existir lá — o GitHub só reconhece esses templates nesse caminho exato, então ela não vai para `docs/`. O `feature.md` é o template da issue de etapa: título no padrão `[M<n>] Etapa E<n>: ` (ver "Padrão de título das issues" no Passo 3), contexto curto, tarefas como checklist.
 
 **Fonte das etapas:**
 
-- **Se `CHECKLIST.md` existir**: as issues nascem das etapas dele, todas de uma vez.
+- **Se `CHECKLIST.md` existir**: as issues nascem das etapas dele, todas de uma vez. Procure em `docs/CHECKLIST.md` primeiro; caia para `CHECKLIST.md` na raiz quando não encontrar (projeto anterior à convenção de `docs/`).
 - **Se não existir** (projeto fora do fluxo `iniciar-projeto`, ex.: legado): investigue o repositório — issues abertas, README, estrutura de pastas, commits recentes — para propor uma lista de etapas, e confirme com o usuário antes de criar. Não crie issues em massa sem esse checkpoint quando não há um CHECKLIST.md já validado por trás.
+
+**Documentos de projeto ficam em `docs/`** (`ROADMAP.md`, `CHECKLIST.md`, `ARCHITECTURE.md`, `RESUMO-EXECUTIVO.md`, `DOCUMENTACAO-TECNICA.md`, `MANUAL.md`, `APRESENTACAO.md`). Permanecem na raiz, por convenção externa: `README.md`, `CHANGELOG.md` e `.github/`. Se encontrar documentos de projeto na raiz, **não mova nada por conta própria** — devolva o bloco de migração no relatório final para quem te invocou perguntar ao usuário:
+
+```bash
+mkdir -p docs
+git mv ROADMAP.md CHECKLIST.md ARCHITECTURE.md docs/   # apenas os que existirem
+```
 
 ## Passo 2 — Inventário do que já existe (guardrail de duplicidade)
 
@@ -378,7 +385,7 @@ Cada Milestone concluída vira um Release. Texto sempre em português BR, sem em
 
 ### O que você monta (documentação, sem gate — pode escrever direto)
 
-**CHANGELOG.md** — mantido na raiz, versão mais recente no topo, seção `## [Não lançado]` no topo pra acumular mudanças em andamento. Formato Keep a Changelog:
+**CHANGELOG.md** — mantido na **raiz**, não em `docs/`: é onde o GitHub e as ferramentas de release automation esperam encontrá-lo. Versão mais recente no topo, seção `## [Não lançado]` no topo pra acumular mudanças em andamento. Formato Keep a Changelog:
 
 ```markdown
 ## v0.1.0 - MVP Parser

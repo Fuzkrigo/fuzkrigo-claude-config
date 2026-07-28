@@ -3,8 +3,13 @@
 
 Pergunta (nao bloqueia direto - hooks nao veem a conversa, entao nao sabem
 se estamos em #tarefa ou correcao pequena; quem decide e o usuario) quando
-codigo de producao esta sendo escrito sem ROADMAP.md/CHECKLIST.md na
-raiz do projeto.
+codigo de producao esta sendo escrito sem ROADMAP.md/CHECKLIST.md.
+
+Local canonico dos documentos e docs/ (SKILL.md secao 4). A raiz continua
+sendo aceita como fallback: projetos anteriores a essa mudanca tem os
+documentos la, e a migracao para docs/ e proposta pelo agente ao rodar, nao
+forcada. Sem esse fallback o hook perguntaria em toda escrita de codigo
+desses projetos.
 
 Excecao: se existir o arquivo-marcador de Modo Tarefa desta sessao (criado
 pelo Claude ao ativar #tarefa - CLAUDE.md secao 7), libera direto sem
@@ -27,6 +32,11 @@ CODE_EXTENSIONS = {
 def allow():
     print(json.dumps({"continue": True}))
     sys.exit(0)
+
+
+def doc_existe(nome):
+    """Procura o documento em docs/ (canonico) e na raiz (legado)."""
+    return os.path.isfile(os.path.join("docs", nome)) or os.path.isfile(nome)
 
 
 def modo_tarefa_ativo(session_id):
@@ -62,15 +72,15 @@ def main():
         allow()
         return
 
-    if os.path.isfile("ROADMAP.md") and os.path.isfile("CHECKLIST.md"):
+    if doc_existe("ROADMAP.md") and doc_existe("CHECKLIST.md"):
         allow()
         return
 
     reason = (
         "Antes de prosseguir com a escrita de codigo de producao, ainda "
-        "preciso da Fase 1-2 (ROADMAP.md e CHECKLIST.md na raiz do "
-        "projeto). Quer fazer isso agora, ou tem uma razao especifica para "
-        "pular esta etapa (#tarefa, correcao pequena, ajuste estetico)?"
+        "preciso da Fase 1-2 (ROADMAP.md e CHECKLIST.md em docs/). Quer "
+        "fazer isso agora, ou tem uma razao especifica para pular esta "
+        "etapa (#tarefa, correcao pequena, ajuste estetico)?"
     )
     print(json.dumps({
         "hookSpecificOutput": {

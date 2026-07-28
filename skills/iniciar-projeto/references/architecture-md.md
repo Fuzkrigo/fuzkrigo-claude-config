@@ -1,6 +1,6 @@
 # ARCHITECTURE.md — Diagramas de Arquitetura
 
-Documento vivo, gerado na raiz do projeto ao final da Fase 1. Usa **Mermaid**, que renderiza nativamente no GitHub (README, issues, PRs) e no Google Antigravity, sem plugin nem servidor. É a base do portfólio de engenharia e arquitetura de software.
+Documento vivo, gerado em `docs/ARCHITECTURE.md` ao final da Fase 1. Usa **Mermaid**, que renderiza nativamente no GitHub (README, issues, PRs) e no Google Antigravity, sem plugin nem servidor. É a base do portfólio de engenharia e arquitetura de software.
 
 ## Índice
 - [Princípios](#princípios)
@@ -10,7 +10,7 @@ Documento vivo, gerado na raiz do projeto ao final da Fase 1. Usa **Mermaid**, q
 
 ## Princípios
 
-- Um `ARCHITECTURE.md` por projeto, na raiz.
+- Um `ARCHITECTURE.md` por projeto, em `docs/` (criar a pasta se não existir).
 - Diagramas primeiro, texto curto de apoio depois. O diagrama é o protagonista.
 - Sem emojis no conteúdo (regra global). Rótulos de nós em português.
 - Cada diagrama tem um título e uma frase explicando o que ele mostra.
