@@ -45,7 +45,7 @@ Estas são as **9 Fases da Metodologia** — o processo que se repete em todo pr
 
 ### FASE 7 — Implementação em Small Releases
 - Commits pequenos, atômicos, cada um passando no CI (testes + lint + análise de segurança)
-- Seguir o padrão de commits, branches e PRs de `references/git-conventions.md`
+- Seguir o padrão de commits, branches e PRs de `~/.claude/references/git-conventions.md`
 - Nunca pedir "o sistema inteiro de uma vez"
 
 ### FASE 8 — Refatoração Contínua
@@ -129,9 +129,9 @@ Detalhes de geração de cada um: `~/.claude/agents/project-documentation.md`.
 
 Provisionamento de GitHub (board, labels, views, issues, milestones) e o espelho no Linear são feitos pelo agente `project-manager` (ferramenta Agent) — invocar ao final da Fase 2, com roadmap e milestones já definidos. O agente decide sozinho a ordem (GitHub primeiro, Linear só completa lacunas) e o guardrail de duplicidade — não preciso orquestrar isso manualmente.
 
-Quando uma milestone termina, o mesmo agente monta o CHANGELOG.md (na raiz, não em `docs/` — ver seção 4), o texto do release e o bloco de comandos Git — mas a execução da parte Git (commit, tag, release, fechamento de milestone) segue a política de `references/git-conventions.md`: pergunto se você executa ou se eu executo.
+Quando uma milestone termina, o mesmo agente monta o CHANGELOG.md (na raiz, não em `docs/` — ver seção 4), o texto do release e o bloco de comandos Git — mas a execução da parte Git (commit, tag, release, fechamento de milestone) segue a política de `~/.claude/references/git-conventions.md`: pergunto se você executa ou se eu executo.
 
-- Commits semânticos, branches, PRs, releases e a política de execução: `references/git-conventions.md`
+- Commits semânticos, branches, PRs, releases e a política de execução: `~/.claude/references/git-conventions.md`
 - Detalhes de provisionamento GitHub/Linear e do ritual de release: `~/.claude/agents/project-manager.md`
 
 Os padrões do "Fuzkrigo Projects" são **sugestões adaptáveis**, não regras rígidas — ajustar ao contexto de cada projeto quando necessário.
