@@ -118,6 +118,44 @@ Comandos: `init [--preset base|lgpd-educacao]` · `new <feature>` ·
 
 Abaixo, `fuzkrigo-spec <comando>` é abreviação dessa invocação.
 
+## Configurar a prova por stack (faça isso no `init`)
+
+O `verify` lê a saída do SEU test runner. Sem o par certo de `testCommand` e
+`reporter` em `onpspec.config.json`, ele lê zero testes e todo critério fica
+sem prova — mesmo com os testes passando:
+
+| Stack | `testCommand` | `reporter` |
+|---|---|---|
+| Node nativo | `node --test --test-reporter=tap` | `tap` |
+| Vitest | `npx vitest run --reporter=json --outputFile=.spec/verification/raw.json` | `vitest-json` |
+| Jest | `npx jest --json` | `jest-json` |
+| pytest | `pytest --junitxml=.spec/verification/raw.xml` | `junit-xml` |
+| outro | qualquer comando | `exitcode` (prova fraca, sem granularidade) |
+
+Os reporters que gravam em arquivo (`vitest-json`, `jest-json`, `junit-xml`)
+exigem também `reporterOutputFile` apontando para o MESMO caminho do comando.
+
+O `--test-reporter=tap` do Node não é opcional: do Node 20 em diante o padrão
+é o reporter `spec`, que o parser TAP não entende.
+
+### Python: a etiqueta vive no nome da função
+
+`@` e `:` são inválidos num identificador Python, então a etiqueta não cabe no
+nome do teste. A convenção é dupla, e o `scaffold` já gera assim:
+
+```python
+def test_ac_001():
+    """AC-001: Entrega antes do prazo e "no prazo" @spec:AC-001"""
+```
+
+- A **docstring** com `@spec:AC-001` é o que o audit lê no arquivo para saber
+  que o critério tem teste.
+- O **nome** `test_ac_001` é o que o runner reporta, e é por ele que o verify
+  casa a prova.
+
+Renomear a função quebra a prova; apagar a docstring faz o critério parecer sem
+teste. Mantenha os dois. Vale o mesmo para princípios: `test_p_001`.
+
 **Degradação graciosa** — se `node` não existir no ambiente: execute a
 auditoria manualmente (releia especificação/tarefas/testes cruzando cada
 problema do catálogo abaixo) e rotule o resultado, textualmente, como

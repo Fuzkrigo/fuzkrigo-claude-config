@@ -24,4 +24,13 @@ AC_SEM_PROVA, TASK_CONCLUIDA_SEM_PROVA) — não precisa de teste extra seu.
 
 Chaves e senhas vêm de variáveis de ambiente, nunca hard-coded.
 
-- verificação(proibido): `(api[_-]?key|senha|password)\s*[:=]\s*['"][^'"]{8,}` em `src/**/*.js`
+- verificação(proibido): `(api[_-]?key|senha|password)\s*[:=]\s*['"][^'"]{8,}` em `src/**`
+
+<!--
+  O glob acima é neutro de linguagem de propósito: `src/**` casa qualquer
+  arquivo de código. Restrinja quando quiser (`src/**/*.py`, `app/**/*.ts`),
+  mas lembre que glob sem nenhum arquivo correspondente vira aviso de
+  verificação inerte (GLOB_SEM_ARQUIVOS) — o audit não deixa passar em
+  silêncio uma verificação que não olha nada.
+-->
+

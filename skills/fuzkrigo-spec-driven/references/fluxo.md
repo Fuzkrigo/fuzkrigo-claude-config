@@ -59,6 +59,24 @@ fuzkrigo-spec scaffold entrega-dever-casa
 #   (inclui esqueletos p/ princípios da constituição com verificação(teste))
 ```
 
+O scaffold segue a stack do `testCommand`: com `pytest` no comando, ele gera
+`tests/test_spec_<feature>.py` com funções `test_ac_001`, `test_p_001` e a
+etiqueta na docstring. Configuração por stack e a convenção dupla do Python
+(nome da função mais docstring): ver a seção "Configurar a prova por stack"
+na SKILL.md.
+
+Projeto Python, config mínima:
+
+```json
+{
+  "testCommand": "pytest --junitxml=.spec/verification/raw.xml",
+  "reporter": "junit-xml",
+  "reporterOutputFile": ".spec/verification/raw.xml",
+  "testGlobs": ["tests/**"],
+  "srcGlobs": ["src/**"]
+}
+```
+
 ## Paralelizando: `fuzkrigo-spec plano` (2+ tarefas pendentes)
 
 Com as tarefas escritas em `tasks.md` (com `Arquivos:` honestos), o motor

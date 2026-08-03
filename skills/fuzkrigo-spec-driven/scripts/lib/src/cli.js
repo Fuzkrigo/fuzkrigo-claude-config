@@ -166,14 +166,18 @@ function cmdInit(rootDir, flags) {
   if (existsSync(configPath)) {
     console.log('· onpspec.config.json já existe — mantido');
   } else {
+    // --test-reporter=tap e obrigatorio: do Node 20 em diante o reporter
+    // padrao e o "spec", que o parser TAP nao entende — sem a flag, o
+    // verify le zero testes e todo criterio fica sem prova.
     const cfg = {
-      testCommand: 'node --test',
+      testCommand: 'node --test --test-reporter=tap',
       reporter: 'tap',
       testGlobs: DEFAULT_CONFIG.testGlobs,
       srcGlobs: DEFAULT_CONFIG.srcGlobs,
     };
     writeFileSync(configPath, `${JSON.stringify(cfg, null, 2)}\n`);
-    console.log('✔ onpspec.config.json criado (testCommand: "node --test" — ajuste à sua stack)');
+    console.log('✔ onpspec.config.json criado (testCommand: "node --test --test-reporter=tap" — ajuste à sua stack)');
+    console.log('  Python: "pytest --junitxml=.spec/verification/raw.xml" com reporter "junit-xml" e reporterOutputFile no mesmo caminho');
   }
 
   const gitignorePath = path.join(specRoot, 'verification', '.gitkeep');

@@ -11,12 +11,35 @@ export const DEFAULT_CONFIG = {
   testGlobs: ['test/**', 'tests/**', 'src/**/*.test.*', 'src/**/*.spec.*', '__tests__/**'],
   // arquivos de implementação que precisam estar mapeados em alguma task
   srcGlobs: ['src/**'],
-  ignoreGlobs: ['node_modules/**', '.git/**', 'dist/**', 'build/**', 'coverage/**', '.spec/**'],
+  // artefatos de build/cache que nao sao codigo-fonte — sem eles, o audit
+  // acusa cada .pyc como "codigo orfao" em qualquer projeto Python
+  ignoreGlobs: [
+    'node_modules/**',
+    '.git/**',
+    'dist/**',
+    'build/**',
+    'coverage/**',
+    '.spec/**',
+    '**/__pycache__/**',
+    '**/*.pyc',
+    '.venv/**',
+    'venv/**',
+    '.pytest_cache/**',
+    '.mypy_cache/**',
+    '.ruff_cache/**',
+    'htmlcov/**',
+    '**/*.egg-info/**',
+  ],
   // comando que roda os testes; usado por `fuzkrigo-spec verify`
   testCommand: null,
-  // como interpretar a saída: tap | vitest-json | jest-json | exitcode
+  // como interpretar a saída: tap | vitest-json | jest-json | junit-xml | exitcode
+  // junit-xml atende o pytest sem plugin nenhum:
+  //   testCommand: "pytest --junitxml=.spec/verification/raw.xml"
+  //   reporter: "junit-xml"
+  //   reporterOutputFile: ".spec/verification/raw.xml"
   reporter: 'tap',
-  // arquivo de saída para reporters json (vitest-json/jest-json)
+  // arquivo de saída para reporters que gravam em arquivo
+  // (vitest-json/jest-json/junit-xml)
   reporterOutputFile: null,
   // camada de lições: limiares de promoção/quarentena, janela e tetos
   licoes: { ...LICOES_DEFAULTS },
