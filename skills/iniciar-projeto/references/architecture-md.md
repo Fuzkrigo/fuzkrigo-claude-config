@@ -1,6 +1,6 @@
 # ARCHITECTURE.md — Diagramas de Arquitetura
 
-Documento vivo, gerado em `docs/ARCHITECTURE.md` ao final da Fase 1. Usa **Mermaid**, que renderiza nativamente no GitHub (README, issues, PRs) e no Google Antigravity, sem plugin nem servidor. É a base do portfólio de engenharia e arquitetura de software.
+Documento vivo, gerado em `docs/ARCHITECTURE.md` ao final de A2. Usa **Mermaid**, que renderiza nativamente no GitHub (README, issues, PRs) e no Google Antigravity, sem plugin nem servidor. É a base do portfólio de engenharia e arquitetura de software.
 
 ## Índice
 - [Princípios](#princípios)
@@ -75,7 +75,7 @@ graph LR
 ```
 
 ### Fluxo / sequência
-Passo a passo do caso de uso central. Bom para documentar a lógica na Fase 3.
+Passo a passo do caso de uso central. Bom para documentar a lógica na Documentação Técnica (C2).
 
 ```mermaid
 sequenceDiagram
@@ -129,7 +129,7 @@ Para projetos maiores, seguir a lógica do modelo C4 usando `graph` do Mermaid: 
 
 ## Quando atualizar
 
-O `ARCHITECTURE.md` é vivo, mantido pelo agente `project-documentation`. Invocá-lo quando:
+O `ARCHITECTURE.md` é vivo, mantido pelo agente `project-documentation`. Nasce em A2, é atualizado no Portão 3 do Bloco B (quando a feature mexeu na estrutura) e consolidado em C2. Invocá-lo quando:
 - Um novo módulo ou integração externa entra.
 - Uma decisão de arquitetura muda (refletir também no ROADMAP.md).
 - O modelo de dados ganha ou perde entidades.

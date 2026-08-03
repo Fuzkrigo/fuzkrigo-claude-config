@@ -6,6 +6,7 @@ Padrão único para todos os projetos. Toda escrita em português BR. Sem emojis
 
 ## Índice
 - [Commits semânticos](#commits-semânticos)
+- [Commits de tarefa e execução paralela](#commits-de-tarefa-e-execução-paralela)
 - [Branches](#branches)
 - [Pull Requests](#pull-requests)
 - [Fluxo completo de comandos](#fluxo-completo-de-comandos)
@@ -55,6 +56,33 @@ Descoberto durante #23.
 ```
 
 Breaking change: adicionar `!` após o tipo/escopo e uma seção `BREAKING CHANGE:` no corpo.
+
+## Commits de tarefa e execução paralela
+
+O plano de execução da skill `fuzkrigo-spec-driven` quebra uma feature em faixas paralelas, cada uma numa branch própria (`spec/<feature>-faixa-N`), com um commit por tarefa no formato do motor:
+
+```
+T-003 login-email: validar formato do e-mail
+```
+
+**Esses commits são efêmeros.** Eles existem para rastrear a execução dentro da faixa, não para virar histórico da `main`. A regra:
+
+| Onde | Formato | Por quê |
+| ---- | ------- | ------- |
+| Dentro da faixa | `T-xxx <feature>: <título>` | É o que o executor gera; mexer nisso exigiria alterar o motor |
+| Branch da feature e `main` | `<tipo>(<escopo>): <descrição> (T-003, T-004)` | O histórico permanente segue Conventional Commits, com os códigos de tarefa preservados para rastreabilidade |
+
+Na prática, ao integrar uma feature que foi executada em faixas, usar squash:
+
+```bash
+gh pr merge --squash --delete-branch \
+  --subject "feat(auth): adicionar login por e-mail (T-003, T-004)" \
+  --body "Closes #12"
+```
+
+Feature implementada à mão, sem faixas paralelas, não precisa de squash: os commits já nascem semânticos e o merge normal preserva cada um (ver o passo 6 do fluxo completo).
+
+Os códigos entre parênteses são o elo com o `tasks.md` da feature: quem lê o histórico consegue voltar à tarefa, à especificação e ao critério de aceite que ela atende.
 
 ## Branches
 
