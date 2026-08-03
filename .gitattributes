@@ -1,0 +1,6 @@
+# Scripts executados por bash/python precisam de LF mesmo no Windows: com
+# CRLF, o bash quebra no shebang e em cada linha ($'\r': command not found).
+# Sem isso, restaurar este backup entregaria um statusline.sh inutilizavel.
+*.sh text eol=lf
+*.py text eol=lf
+*.mjs text eol=lf
