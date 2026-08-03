@@ -170,7 +170,9 @@ End Sub
 
 ## 8. Camadas de Teste e Mocks
 
-Detalhamento operacional do TDD. O piso (testes antes, cobertura 80%/95%, ratio ~1.5x) está no CLAUDE.md global; o fluxo por fase é conduzido pela skill `iniciar-projeto` (Fase 6). Aqui ficam as camadas e a estratégia de mock.
+Detalhamento operacional do TDD. O piso (testes antes, cobertura 80%/95%, ratio ~1.5x) está no CLAUDE.md global; o ciclo por feature é conduzido pela skill `fuzkrigo-spec-driven` (`scaffold` cria o teste que falha, `verify` grava a prova, `audit` julga). Aqui ficam as camadas e a estratégia de mock.
+
+O teste que prova um critério de aceite carrega a etiqueta `@spec:AC-xxx` no título; o que prova um princípio da constituição carrega `@principle:P-xxx`. É por essa etiqueta que a prova é casada — nunca alterá-la ao refatorar ou renomear testes.
 
 **Camadas obrigatórias:**
 

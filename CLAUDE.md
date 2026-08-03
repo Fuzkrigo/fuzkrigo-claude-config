@@ -65,20 +65,27 @@ Detalhamento (SOLID, Clean Code, teste de complexidade, tratamento de erros): `@
 
 ## 4. Início Obrigatório de Todo Projeto
 
-Ao iniciar projeto novo ou refatoração grande, carregar a skill `/iniciar-projeto`, que conduz o briefing, o fluxo de 9 fases e a geração dos documentos. Concluído o planejamento, `ROADMAP.md` e `CHECKLIST.md` passam a ser a referência da sessão — não recarregar a skill a cada sessão; consultar os documentos direto.
+O trabalho se divide em duas camadas, com duas skills:
+
+- **`/iniciar-projeto`** — abertura, documentação e gestão. Conduz o **Bloco A** (A1 briefing, A2 documentos-base, A3 provisionamento e constituição) e o **Bloco C** (C1 segurança da milestone, C2 documentação, C3 release).
+- **`/fuzkrigo-spec-driven`** — o desenvolvimento em si. Conduz o **Bloco B**: uma feature por vez, do critério de aceite à prova mecânica (`audit --ci` com saída 0).
+
+Ao iniciar projeto novo ou refatoração grande, carregar `/iniciar-projeto`. Concluído o Bloco A, `ROADMAP.md` e `CHECKLIST.md` passam a ser a referência da sessão — não recarregar a skill a cada sessão; consultar os documentos direto. A cada nova feature, carregar `/fuzkrigo-spec-driven`.
 
 **QUANDO CARREGAR CADA SKILL OU ARQUIVO DE REFERÊNCIA:**
 
 | Arquivo/Skill/Agente          | Quando usar                                                                            |
 | ------------------------------ | --------------------------------------------------------------------------------------- |
-| Skill - `/iniciar-projeto`     | Início de projeto novo ou refatoração grande                                            |
-| Agente - `security-reviewer`   | Fase 9 (revisão de segurança) ou ao tocar em features sensíveis — invocar via tool Agent |
-| Agente - `code-reviewer`       | Fase 8 (refatoração contínua) ou pedido de review de código — invocar via tool Agent     |
-| Agente - `project-manager`     | Fase 2 (provisionar GitHub/Linear) ou ritual de release — invocar via tool Agent         |
-| Agente - `project-documentation` | Fase 1/2/3/4/8 (Arquitetura, Resumo Executivo, Documentação Técnica, Manual, Apresentação) — invocar via tool Agent |
-| Agente - `docstrings-manager`  | Fase 8 (documentar código após o code-reviewer), ou pedido pontual de docstring/comentário — invocar via tool Agent |
+| Skill - `/iniciar-projeto`     | Início de projeto novo ou refatoração grande (Bloco A); fechamento de milestone (Bloco C) |
+| Skill - `/fuzkrigo-spec-driven` | Toda feature nova, e sempre que a pergunta for "isso está provado?" (Bloco B)           |
+| Agente - `security-reviewer`   | C1 (revisão da milestone) ou feature sensível no Portão 2 — invocar via tool Agent       |
+| Agente - `code-reviewer`       | Portão 2 do Bloco B (após o audit sair 0) ou pedido de review — invocar via tool Agent   |
+| Agente - `project-manager`     | A3 (provisionar GitHub/Linear) ou C3 (ritual de release) — invocar via tool Agent        |
+| Agente - `project-documentation` | A2 (Arquitetura), Portão 3 do Bloco B (Arquitetura, se a estrutura mudou) e C2 (demais documentos) — invocar via tool Agent |
+| Agente - `docstrings-manager`  | Portão 2 do Bloco B, após o code-reviewer, ou pedido pontual — invocar via tool Agent    |
 | `@.claude/PATTERNS.md`         | Discussões de arquitetura ou refatoração de módulos                                     |
 | `@.claude/CODIGO.md`           | Sessões de implementação, debugging ou quando precisar de referência de stack/padrões   |
+| `~/.claude/references/git-conventions.md` | Qualquer commit, branch, PR ou release                                       |
 
 ---
 
@@ -99,8 +106,11 @@ Ao iniciar projeto novo ou refatoração grande, carregar a skill `/iniciar-proj
 - Testes **SEMPRE ANTES** do código de produção.
 - **RECUSE CÓDIGO DE PRODUÇÃO** até os testes estarem definidos e cobrindo os requisitos.
 - **COBERTURA MÍNIMA:** 80% geral / 95% em lógica de negócio. Ratio esperado ~1.5x (mais teste que produção).
+- **QUEM DECIDE SE PASSOU É O TEST RUNNER, NUNCA EU.** Cada critério de aceite tem um teste anotado e uma prova gravada; `audit --ci` com saída 0 é o único "pronto" aceito. Declarar conclusão sem colar a saída do audit é violação.
 
-Camadas de teste, estratégia de mocks e detalhamento operacional: `@.claude/CODIGO.md`. O fluxo de TDD por fase é conduzido pela skill `iniciar-projeto` (Fase 6).
+Cobertura e prova são coisas diferentes: o audit garante que todo critério tem um teste que passou; os 80%/95% continuam sendo medidos à parte, no CI. Um não substitui o outro.
+
+Camadas de teste, estratégia de mocks e detalhamento operacional: `@.claude/CODIGO.md`. O ciclo (teste que falha primeiro, implementação, prova) é conduzido pela skill `fuzkrigo-spec-driven` — `scaffold` gera o teste que falha, `verify` grava a prova, `audit` julga.
 
 ---
 
@@ -110,7 +120,7 @@ Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da ses
 
 **Marcador para o hook de bloqueio:** ao ativar, criar o arquivo `<temp>/claude-modo-tarefa/<session_id>.flag` (session id extraído do caminho do diretório scratchpad informado no prompt do sistema — é o penúltimo segmento do caminho). Isso é necessário porque o hook `check_planning_docs.py` (que reforça a Regra de Bloqueio da skill `iniciar-projeto`) roda como processo isolado sem acesso à conversa — sem esse marcador, ele não tem como saber que a regra foi desativada nesta sessão e continuaria perguntando a cada edição de código.
 
-**O QUE DESATIVA:** Chamada da Skill `iniciar-projeto` (fluxo de 9 fases, briefing investigativo, 3 documentos formais, Plan Mode, revisão arquitetural profunda), TDD, Invocação do agente `security-reviewer` (checklists OWASP/LGPD), regra de bloqueio por fases.
+**O QUE DESATIVA:** Chamada da Skill `iniciar-projeto` (Blocos A e C: briefing investigativo, documentos formais, board, release) e da Skill `fuzkrigo-spec-driven` (Bloco B: especificação, tarefas, verify e audit), TDD, invocação do agente `security-reviewer` (checklists OWASP/LGPD), regra de bloqueio.
 
 **O QUE MANTÉM (INEGOCIÁVEL):**
 
@@ -132,7 +142,8 @@ Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da ses
 - **NÃO ASSUMIR** quando há ambiguidade. Pergunte.
 - **NÃO INVENTAR** APIs, funções, sintaxe. Se não souber, diga.
 - **NÃO GERAR** código de produção sem testes definidos antes.
-- **NÃO PULAR** fases do fluxo de desenvolvimento (Skill `iniciar-projeto`) sem eu justificar conscientemente.
+- **NÃO PULAR** blocos ou portões do fluxo de desenvolvimento (skills `iniciar-projeto` e `fuzkrigo-spec-driven`) sem eu justificar conscientemente.
+- **NÃO DECLARAR "PRONTO"** sem a saída do `audit --ci` colada na conversa; e nunca enfraquecer, pular ou apagar teste para o gate passar.
 - **NÃO ENGOLIR ERROS** silenciosamente no código.
 - **NÃO SUGERIR MUDANÇAS** fora do escopo pedido sem avisar explicitamente.
 - **NÃO ESQUECER** decisões anteriores no mesmo projeto/conversa.
@@ -147,12 +158,13 @@ Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da ses
 ## 9. Resumo Operacional (TL;DR)
 
 - **HUMANO DECIDE O QUÊ; IA DECIDE O COMO, SOB SUPERVISÃO.**
-- **FLUXO RIGOROSO** (conduzido pela skill `iniciar-projeto`): Briefing → Docs (3) → Plan Mode → TDD → Implementação → Refatoração → Revisão de Segurança. Pular é bloqueado.
+- **FLUXO RIGOROSO, EM DOIS NÍVEIS.** Projeto (`iniciar-projeto`): A1 Briefing → A2 Documentos-base → A3 Provisionamento e Constituição … C1 Segurança → C2 Documentação → C3 Release. Feature (`fuzkrigo-spec-driven`): Especificar → Tarefas → Executar → **Auditar** → Qualidade → PR. Pular é bloqueado.
+- **"PRONTO" É EXIT CODE 0**, não opinião minha.
 - **SIMPLICIDADE PRIMEIRO**: KISS, YAGNI, só complique quando justificar.
 - **SNIPPETS CIRÚRGICOS**, não arquivos inteiros.
 - **80% COBERTURA GERAL, 95% EM LÓGICA DE NEGÓCIO.**
 - **FUNÇÃO ≤ 50 LINHAS; ARQUIVOS ≤ 500 LINHAS.**
-- **SEGURANÇA É TRANSVERSAL:** invoque o agente `security-reviewer` na fase de revisão; alertas de segurança crítica valem sempre, mesmo sem o agente ter sido chamado.
+- **SEGURANÇA É TRANSVERSAL:** invoque o agente `security-reviewer` em C1 e em feature sensível; achado aceito vira princípio verificável da constituição. Alertas de segurança crítica valem sempre, mesmo sem o agente ter sido chamado.
 - **TODA ENTRADA EXTERNA É SUSPEITA. BACKEND VALIDA SEMPRE.**
 - **CÓDIGO DE IA É SUSPEITO POR PADRÃO**: leia, entenda, teste, audite.
 - **STACK ABERTA**: sugira alternativas quando fizer sentido técnico.
