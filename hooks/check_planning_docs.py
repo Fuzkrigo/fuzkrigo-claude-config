@@ -1,11 +1,23 @@
 #!/usr/bin/env python3
-"""Hook PreToolUse (Write|Edit) - iniciar-projeto SKILL.md secao 3, Regra de Bloqueio.
+"""Hook PreToolUse (Write|Edit) - iniciar-projeto SKILL.md secao 4, Regra de Bloqueio.
 
 Pergunta (nao bloqueia direto - hooks nao veem a conversa, entao nao sabem
 se estamos em #tarefa ou correcao pequena; quem decide e o usuario) quando
-codigo de producao esta sendo escrito sem ROADMAP.md/CHECKLIST.md.
+codigo de producao esta sendo escrito sem evidencia de planejamento.
 
-Local canonico dos documentos e docs/ (SKILL.md secao 4). A raiz continua
+Duas evidencias sao aceitas, porque o fluxo tem duas camadas (SKILL.md
+secao 1):
+
+  - Abertura do projeto (A1-A2), skill iniciar-projeto: ROADMAP.md e
+    CHECKLIST.md.
+  - Especificacao de feature (Bloco B), skill fuzkrigo-spec-driven:
+    qualquer .spec/features/<feature>/spec.md.
+
+Basta uma das duas. Projeto pequeno que roda so com spec (script pessoal,
+sem board nem roadmap) e um caso legitimo e nao deve ser interrogado a cada
+arquivo; projeto com roadmap mas ainda sem a primeira spec tambem nao.
+
+Local canonico dos documentos e docs/ (SKILL.md secao 5). A raiz continua
 sendo aceita como fallback: projetos anteriores a essa mudanca tem os
 documentos la, e a migracao para docs/ e proposta pelo agente ao rodar, nao
 forcada. Sem esse fallback o hook perguntaria em toda escrita de codigo
@@ -16,6 +28,7 @@ pelo Claude ao ativar #tarefa - CLAUDE.md secao 7), libera direto sem
 perguntar. O hook nao ve a conversa, entao esse marcador e o unico jeito
 dele saber que a Regra de Bloqueio foi desativada nesta sessao.
 """
+import glob
 import json
 import os
 import sys
@@ -37,6 +50,11 @@ def allow():
 def doc_existe(nome):
     """Procura o documento em docs/ (canonico) e na raiz (legado)."""
     return os.path.isfile(os.path.join("docs", nome)) or os.path.isfile(nome)
+
+
+def spec_de_feature_existe():
+    """Alguma feature ja especificada em .spec/features/<feature>/spec.md?"""
+    return bool(glob.glob(os.path.join(".spec", "features", "*", "spec.md")))
 
 
 def modo_tarefa_ativo(session_id):
@@ -76,11 +94,17 @@ def main():
         allow()
         return
 
+    if spec_de_feature_existe():
+        allow()
+        return
+
     reason = (
         "Antes de prosseguir com a escrita de codigo de producao, ainda "
-        "preciso da Fase 1-2 (ROADMAP.md e CHECKLIST.md em docs/). Quer "
-        "fazer isso agora, ou tem uma razao especifica para pular esta "
-        "etapa (#tarefa, correcao pequena, ajuste estetico)?"
+        "preciso de uma das duas evidencias de planejamento: a abertura do "
+        "projeto (A1-A2: ROADMAP.md e CHECKLIST.md em docs/) ou uma "
+        "especificacao de feature em .spec/features/. Quer fazer isso "
+        "agora, ou tem uma razao especifica para pular esta etapa (#tarefa, "
+        "correcao pequena, ajuste estetico)?"
     )
     print(json.dumps({
         "hookSpecificOutput": {

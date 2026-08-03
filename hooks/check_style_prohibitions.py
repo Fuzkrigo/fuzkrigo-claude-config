@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
-"""Hook PreToolUse (Write|Edit) - iniciar-projeto SKILL.md secao 7, Proibicoes de Estilo.
+"""Hook PreToolUse (Write|Edit) - iniciar-projeto SKILL.md secao 8, Proibicoes de Estilo.
 
 Bloqueia (nao so avisa - isto e mecanico, nao precisa de julgamento) emoji
-decorativo e frases que reivindicam coautoria/geracao automatica por IA.
+decorativo e frases que reivindicam coautoria ou autoria de maquina.
 
 Escopo deliberadamente restrito a frases de reivindicacao de coautoria
-("Co-authored-by", "Generated with Claude Code" etc), NAO a palavra
+("Co-authored-by: Claude", "Generated with Claude Code" etc), NAO a palavra
 "Claude"/"Anthropic" isolada - um bloqueio amplo quebraria a edicao de
 documentacao legitima sobre configuracao do proprio Claude Code (este
 repositorio de backup incluido).
+
+Excecao por caminho (DOC_EXCEPTION_PATHS): dentro da propria configuracao,
+citar as frases proibidas e necessario para documentar a regra. Sem essa
+excecao o hook impede editar o texto que o define - foi exatamente o que
+aconteceu ao instalar esta versao: a anterior barrou tanto o docstring
+quanto a propria lista de padroes. A excecao vale SO para as frases; emoji
+continua bloqueado em todo lugar.
 """
 import json
+import os
 import re
 import sys
 
@@ -24,6 +32,17 @@ FORBIDDEN_PATTERNS = [
     r"gera[cç][aã]o autom[aá]tica",
 ]
 FORBIDDEN_RE = re.compile("|".join(FORBIDDEN_PATTERNS), re.IGNORECASE)
+
+# Onde a documentacao da propria regra vive. Nestes caminhos, citar as
+# frases da lista acima e legitimo - a secao 8 da SKILL.md e este proprio
+# arquivo precisam cita-las para explicar o que e proibido. Sem esta
+# excecao, o hook impede editar o documento que o define. Mover qualquer
+# uma das pastas exige atualizar a lista: o hook volta a bloquear, que e o
+# comportamento seguro (falha fechada). A excecao NAO vale para emoji.
+DOC_EXCEPTION_PATHS = [
+    os.path.join(os.path.expanduser("~"), ".claude"),
+    os.path.join(os.path.expanduser("~"), "Desktop", "PESSOAL", "Claude Config Backup"),
+]
 
 EMOJI_RANGES = [
     (0x1F300, 0x1FAFF),
@@ -64,6 +83,21 @@ def find_blocking_emoji(content):
     return None
 
 
+def e_documentacao_da_regra(file_path):
+    """O arquivo faz parte da configuracao que documenta a propria regra?"""
+    if not file_path:
+        return False
+    try:
+        alvo = os.path.normcase(os.path.abspath(file_path))
+    except (TypeError, ValueError):
+        return False
+    for base in DOC_EXCEPTION_PATHS:
+        base = os.path.normcase(os.path.abspath(base))
+        if alvo == base or alvo.startswith(base + os.sep):
+            return True
+    return False
+
+
 def main():
     try:
         data = json.load(sys.stdin)
@@ -83,17 +117,21 @@ def main():
     emoji = find_blocking_emoji(content)
     if emoji:
         deny(
-            f"Bloqueado pela regra de zero emoji (iniciar-projeto secao 7): "
+            f"Bloqueado pela regra de zero emoji (iniciar-projeto secao 8): "
             f"encontrado '{emoji}' (U+{ord(emoji):04X}) no conteudo. Remova "
             f"antes de gravar."
         )
         return
 
+    if e_documentacao_da_regra(tool_input.get("file_path", "")):
+        allow()
+        return
+
     match = FORBIDDEN_RE.search(content)
     if match:
         deny(
-            f"Bloqueado pela regra de nao reivindicar coautoria de IA "
-            f"(iniciar-projeto secao 7): encontrado '{match.group()}' no "
+            f"Bloqueado pela regra de nao reivindicar coautoria de maquina "
+            f"(iniciar-projeto secao 8): encontrado '{match.group()}' no "
             f"conteudo. Reescreva sem essa mencao."
         )
         return
