@@ -9,12 +9,15 @@ labels: type:feature
 
 [Uma ou duas frases: o que esta etapa entrega]
 
-## Tarefas
+## Especificacao
 
-- [ ] Tarefa 1
-- [ ] Tarefa 2
-- [ ] Tarefa 3
+`.spec/features/<nome-da-feature>/` — historias, criterios de aceite e tarefas.
+[Se a spec ainda nao existe, escrever: spec ainda nao criada]
 
 ## Criterio de conclusao
 
-[Quando esta etapa esta pronta]
+`fuzkrigo-spec audit --ci` com saida 0 para esta feature, revisao de qualidade
+aplicada e PR mesclado.
+
+[Complementar aqui apenas o que for especifico desta etapa e nao estiver nos
+criterios de aceite da spec]
