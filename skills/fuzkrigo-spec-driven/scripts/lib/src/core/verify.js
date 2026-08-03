@@ -53,10 +53,45 @@ export function parseJsonReport(jsonText) {
   return tests;
 }
 
+// pytest --junitxml (nativo do pytest, sem plugin): cada <testcase> tem
+// classname/name, e o veredito vem dos filhos — <failure>/<error> reprovam,
+// <skipped> nao e prova. Testcase auto-fechado (<testcase .../>) passou.
+const RE_TESTCASE = /<testcase\b([^>]*?)(\/>|>([\s\S]*?)<\/testcase\s*>)/g;
+
+function xmlAttr(attrs, nome) {
+  const m = attrs.match(new RegExp(`\\b${nome}\\s*=\\s*"([^"]*)"`));
+  return m ? m[1] : '';
+}
+
+export function parseJUnitXml(xmlText) {
+  const tests = [];
+  for (const m of xmlText.matchAll(RE_TESTCASE)) {
+    const attrs = m[1] || '';
+    const corpo = m[3] || '';
+    const title = [xmlAttr(attrs, 'classname'), xmlAttr(attrs, 'name')]
+      .filter(Boolean)
+      .join(' ');
+    const skip = /<skipped\b/.test(corpo);
+    const falhou = /<(failure|error)\b/.test(corpo);
+    tests.push({ title, pass: !falhou && !skip, skip });
+  }
+  return tests;
+}
+
+// Em Python a etiqueta nao cabe no nome do teste (`@` e `:` sao invalidos
+// em identificador), e o runner reporta o NOME da funcao — a etiqueta da
+// docstring nao chega ao relatorio. Por isso o nome gerado pelo scaffold
+// (test_ac_001, test_p_001) tambem vale como etiqueta. Exige 3+ digitos,
+// a mesma gramatica dos codigos de rastreio, para nao casar por acidente.
+const RE_NOME_AC = /\btest_ac[_-]?(\d{3,})\b/gi;
+const RE_NOME_PRINCIPIO = /\btest_p[_-]?(\d{3,})\b/gi;
+
 export function extractTags(title) {
   const acs = [...title.matchAll(RE_SPEC_TAG)].map((m) => m[1]);
   const principles = [...title.matchAll(RE_PRINCIPLE_TAG)].map((m) => m[1]);
-  return { acs, principles };
+  for (const m of title.matchAll(RE_NOME_AC)) acs.push(`AC-${m[1]}`);
+  for (const m of title.matchAll(RE_NOME_PRINCIPIO)) principles.push(`P-${m[1]}`);
+  return { acs: [...new Set(acs)], principles: [...new Set(principles)] };
 }
 
 // Reduz a lista de testes a um veredito por tag.
@@ -113,7 +148,7 @@ export function runVerify(project, featureName) {
   }
   if (!config.testCommand) {
     throw new Error(
-      'defina "testCommand" em onpspec.config.json (ex.: "node --test" ou "npx vitest run --reporter=json --outputFile=.spec/verification/raw.json")'
+      'defina "testCommand" em onpspec.config.json (ex.: "node --test --test-reporter=tap", "pytest --junitxml=.spec/verification/raw.xml" ou "npx vitest run --reporter=json --outputFile=.spec/verification/raw.json")'
     );
   }
 
@@ -153,6 +188,20 @@ export function runVerify(project, featureName) {
       );
     }
     tests = parseJsonReport(jsonText);
+  } else if (config.reporter === 'junit-xml') {
+    // pytest --junitxml=<arquivo> (nativo, sem plugin). O XML e sempre um
+    // arquivo: o pytest nao escreve junit no stdout.
+    let xmlText = null;
+    if (config.reporterOutputFile) {
+      const p = path.join(config.rootDir, config.reporterOutputFile);
+      if (existsSync(p)) xmlText = readFileSync(p, 'utf-8');
+    }
+    if (xmlText === null) {
+      throw new Error(
+        'reporter junit-xml: não achei o XML — defina "reporterOutputFile" em onpspec.config.json e gere o arquivo no testCommand (ex.: "pytest --junitxml=.spec/verification/raw.xml")'
+      );
+    }
+    tests = parseJUnitXml(xmlText);
   } else if (config.reporter === 'exitcode') {
     tests = []; // sem granularidade por teste
   } else {
@@ -187,10 +236,16 @@ export function runVerify(project, featureName) {
 
   // dica de UX: rodou testes mas nenhum título carrega tag de AC da feature
   const anyTagMatched = featureAcs.some((ac) => acResults[ac.id]);
-  const hint =
-    tests.length > 0 && !anyTagMatched && config.reporter !== 'exitcode'
-      ? `nenhum título de teste contém @spec:${featureAcs[0]?.id || 'AC-xxx'} — a tag vai no TÍTULO do teste`
-      : null;
+  const primeiroAc = featureAcs[0]?.id || 'AC-xxx';
+  let hint = null;
+  if (tests.length > 0 && !anyTagMatched && config.reporter !== 'exitcode') {
+    // AC-001 -> test_ac_001, o nome que o scaffold gera em Python
+    const nomeEmPython = `test_${primeiroAc.toLowerCase().replace('-', '_')}`;
+    hint =
+      config.reporter === 'junit-xml'
+        ? `nenhum teste casou os critérios desta feature — em Python a etiqueta vive no NOME da função: def ${nomeEmPython}(): ...`
+        : `nenhum título de teste contém @spec:${primeiroAc} — a tag vai no TÍTULO do teste`;
+  }
 
   const record = {
     feature: featureName,
