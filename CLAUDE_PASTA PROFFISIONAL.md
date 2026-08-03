@@ -11,7 +11,7 @@
 - **Usuários finais:** sem Python, sem permissão administrativa.
 - **Desenvolvedor:** Python 3.10+, Git Bash, Google Antigravity.
 - **Sem nuvem externa** (sem OneDrive, sem Docker, sem containers).
-- **Versionamento e organização:** Git + GitHub são o hub central do projeto (repositório, board, issues, releases, GitHub Actions para CI). Fluxo conduzido pela skill `iniciar-projeto`.
+- **Versionamento e organização:** Git + GitHub são o hub central do projeto (repositório, board, issues, releases, GitHub Actions para CI). Abertura, documentação e gestão pela skill `iniciar-projeto`; o desenvolvimento de cada feature pela skill `fuzkrigo-spec-driven`.
 - **Distribuição de executáveis:** pasta de rede `S:\CONTROL\FISCAL_REPORTS\10_INTELIGENCIA DE DADOS\1 - Desenvolvimento\0 - Claude\0 - Executáveis\`.
 - Não sugerir containers ou soluções em nuvem externa. Alternativas de execução/distribuição sempre locais ou em drive de rede.
 
@@ -19,7 +19,7 @@
 
 ## 2. Stack e Arquiteturas
 
-**A stack abaixo é uma base inicial sugerida, não uma regra.** Depois do briefing e do levantamento de requisitos (Fases 1-2 da skill `iniciar-projeto`), avaliar se ela atende ou se há opção melhor e mais aprofundada para o sistema em questão — e me apresentar a recomendação (manter a base ou trocar, com justificativa), respeitando a restrição de binário standalone para os usuários finais.
+**A stack abaixo é uma base inicial sugerida, não uma regra.** Depois do briefing e do levantamento de requisitos (A1-A2 da skill `iniciar-projeto`), avaliar se ela atende ou se há opção melhor e mais aprofundada para o sistema em questão — e me apresentar a recomendação (manter a base ou trocar, com justificativa), respeitando a restrição de binário standalone para os usuários finais.
 
 **Stack base:** VBA (front-end Excel) + Python 3.10+ (back-end) + PyInstaller (executável standalone). Bibliotecas padrão: `pandas`, `openpyxl`. Avaliar impacto no tamanho do `.exe` ao adicionar outras.
 
@@ -52,7 +52,7 @@ Se eu não especificar arquitetura, **apresente as duas com prós/contras antes 
 
 ## 5. Versionamento e Backup
 
-- **Git + GitHub é o versionamento oficial** de todo projeto. Histórico, branches, PRs, releases e board seguem a skill `iniciar-projeto` (`references/git-conventions.md` e `references/releases.md`).
+- **Git + GitHub é o versionamento oficial** de todo projeto. Histórico, branches, PRs e board seguem `~/.claude/references/git-conventions.md`; o ritual de release é conduzido pelo agente `project-manager` (C3 do fluxo `iniciar-projeto`).
 - **Backup em rede é complemento, não versionamento.** O mirror/snapshots no drive `S:` cobrem o que não vai para o repositório: o `.exe` compilado, artefatos grandes e cópia de segurança do ambiente local. Procedimentos na skill `pipeline-corporativo`.
 - **Nunca commitar:** `.env`, credenciais, planilhas reais, binários grandes. `.gitignore` configurado antes do primeiro commit.
 

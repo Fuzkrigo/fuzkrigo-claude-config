@@ -52,7 +52,7 @@ pip install pandas openpyxl pyinstaller
 pip freeze > requirements.txt
 ```
 
-O repositório Git, o `.gitignore` e o board são provisionados pelo fluxo da skill `iniciar-projeto` (Fase 1 para o repo local, Fase 2 para o board). Garantir que `.gitignore` cubra `.venv/`, `dist/`, `__pycache__/`, `.env`, `*.xlsm` e `*.log` antes do primeiro commit.
+O repositório Git, o `.gitignore` e o board são provisionados pelo fluxo da skill `iniciar-projeto` (A2 para o repo local, A3 para o board). Garantir que `.gitignore` cubra `.venv/`, `dist/`, `__pycache__/`, `.env`, `*.xlsm` e `*.log` antes do primeiro commit.
 
 ## Retomada de Sessão
 ```bash
