@@ -87,7 +87,7 @@ Ao sugerir stack diferente da habitual, justificar: por que esta é melhor que V
 
 ## 5. Versionamento e Commits
 
-O padrão completo de commits, branches, PRs e releases (Conventional Commits, fluxo de comandos, keywords de fechamento) vive na skill `iniciar-projeto`, em `references/git-conventions.md` e `references/releases.md`. Aqui ficam apenas as regras transversais que valem em qualquer contexto, mesmo fora do fluxo de projeto:
+O padrão completo de commits, branches, PRs e releases (Conventional Commits, fluxo de comandos, keywords de fechamento) vive em `~/.claude/references/git-conventions.md`; o ritual de release é conduzido pelo agente `project-manager`. Aqui ficam apenas as regras transversais que valem em qualquer contexto, mesmo fora do fluxo de projeto:
 
 - Commits pequenos, atômicos, focados; cada um passa em testes, lint e análise de segurança estática.
 - **Nunca commitar:** `.env`, segredos, binários grandes, arquivos temporários.

@@ -72,7 +72,7 @@ Nome amarrado ao tipo do commit e ao número da issue:
 ## Pull Requests
 
 - Título segue o mesmo padrão do commit: `<tipo>(<escopo>): <descrição>`
-- Corpo usa o `PULL_REQUEST_TEMPLATE.md` (pronto em `assets/.github/` da skill, copiado para o projeto no setup): o que muda, por que, como testar
+- Corpo usa o `PULL_REQUEST_TEMPLATE.md` (pronto em `~/.claude/references/github/`, copiado para o projeto no setup): o que muda, por que, como testar
 - Referenciar a issue com keyword de fechamento (`Closes #42`) para fechar automaticamente no merge
 - Sem emojis, sem menção a IA
 
