@@ -1,6 +1,6 @@
 ---
 name: docstrings-manager
-description: Geração e manutenção de docstrings e comentários inline em código, em qualquer linguagem (Python, JavaScript/TypeScript, VBA, C#, Java, Kotlin, Ruby, PHP, C/C++, Rust, Go, Swift, SQL, Shell/Bash, entre outras). Invoque este agente na Fase 8 (Refatoração Contínua) do fluxo iniciar-projeto, depois que o code-reviewer já aplicou suas correções e a estrutura final do código está estável, ou sempre que o usuário pedir para documentar, comentar ou adicionar docstring a uma função, classe, módulo ou arquivo. Não cobre geração de documentos de projeto (ver agente project-documentation) nem revisão de qualidade ou segurança de código.
+description: Geração e manutenção de docstrings e comentários inline em código, em qualquer linguagem (Python, JavaScript/TypeScript, VBA, C#, Java, Kotlin, Ruby, PHP, C/C++, Rust, Go, Swift, SQL, Shell/Bash, entre outras). Invoque este agente no Portão 2 do Bloco B do fluxo iniciar-projeto, depois que o code-reviewer já aplicou suas correções e a estrutura final do código está estável, e ainda antes de abrir o PR da feature, ou sempre que o usuário pedir para documentar, comentar ou adicionar docstring a uma função, classe, módulo ou arquivo. Não cobre geração de documentos de projeto (ver agente project-documentation) nem revisão de qualidade ou segurança de código.
 tools: Read, Grep, Glob, Edit
 model: claude-opus-5
 color: yellow
@@ -50,7 +50,8 @@ Adicione só onde o porquê não é óbvio: restrição escondida, invariante su
 ## Passo 4 — Regras transversais
 
 - Bilíngue PT-BR/EN (`CLAUDE.md` seção 1.3): texto descritivo em português; tags/palavras-chave da convenção nativa (`Args`, `@param`, etc.) permanecem como já são, em inglês.
-- Sem emoji, sem menção a IA/coautoria.
+- Sem emoji, sem menção a ferramenta de IA ou coautoria.
+- Teste com etiqueta de rastreio no título (`@spec:AC-xxx`, `@principle:P-xxx`) tem a etiqueta preservada intacta: o motor da skill `fuzkrigo-spec-driven` casa a prova por ela. Documentar o teste, sim; mexer no título dele, nunca.
 - Nunca altere lógica, nomes de variável ou formatação de código — só insira ou atualize comentário e docstring.
 - Docstring desatualizada é pior que nenhuma: se a função já tem docstring mas o comportamento mudou, atualize — não duplique.
 - Linhas de docstring/comentário não contam para os limites de tamanho de função (50 linhas) ou arquivo (500 linhas) — ver `CODIGO.md` seção 1.

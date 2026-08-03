@@ -6,20 +6,20 @@ Segurança não é uma fase no fim; é uma atividade em **cada** etapa do desenv
 
 Segurança é responsabilidade de todos e está presente do primeiro requisito à aposentadoria do código, não um portão final de qualidade. É checklist **mais** mentalidade: o checklist dá as ações; a mentalidade sustenta que segurança é hábito diário, não evento.
 
-## Mapeamento SDL → Fluxo de 9 Fases
+## Mapeamento SDL → Blocos A / B / C
 
-O SDL não é um processo paralelo — ele se encaixa nas 9 Fases da metodologia (skill `iniciar-projeto`). Onde cada prática entra:
+O SDL não é um processo paralelo — ele se encaixa nos blocos da metodologia (skill `iniciar-projeto`, com o ciclo de feature conduzido pela `fuzkrigo-spec-driven`). Onde cada prática entra:
 
-| Fase da metodologia | Prática de segurança do SDL |
-| ------------------- | --------------------------- |
-| 1. Briefing | Definir requisitos de segurança: que dados o sistema trata? Sensíveis? Regulados (LGPD)? Definir o nível de rigor. |
-| 2. Roadmap | Classificar dados; estabelecer padrões de segurança do projeto; decidir stack por primitivas de segurança maduras. |
-| 3. Doc técnica | **Threat modeling (STRIDE)** — ver `references/threat-modeling.md`. Desenhar controles antes de codar. |
-| 5. Plan Mode | Revisar o plano sob a ótica de ameaças; validar que os controles cobrem o modelo de ameaças. |
-| 6. TDD | Escrever testes de segurança: casos de autorização (BOLA), input malicioso, falha fechada. |
-| 7. Implementação | Validação de input, criptografia, menor privilégio no código. SAST no CI (ver `references/ia-seguranca.md`). |
-| 8. Refatoração | Remover código morto, reduzir superfície de ataque, revisar dependências. |
-| 9. Revisão de Segurança | Auditoria completa: OWASP Top 10, checklist LGPD, revisão manual por quem não escreveu o código. |
+| Etapa do fluxo | Prática de segurança do SDL |
+| -------------- | --------------------------- |
+| A1 — Briefing | Definir requisitos de segurança: que dados o sistema trata? Sensíveis? Regulados (LGPD)? Definir o nível de rigor. |
+| A2 — Documentos-base | Classificar dados; estabelecer padrões de segurança do projeto; decidir stack por primitivas de segurança maduras. |
+| A3 — Constituição | Traduzir cada restrição de segurança em princípio `[DEVE]` com verificação executável (`teste`, `proibido` ou `obrigatório`). É aqui que a política deixa de ser texto e passa a ser gate. |
+| B — Especificar e Projetar | **Threat modeling (STRIDE)** — ver `references/threat-modeling.md`. Cada ameaça relevante vira critério de aceite observável ou princípio da constituição, nunca um lembrete solto. |
+| B — Executar | Escrever os testes de segurança primeiro (autorização/BOLA, input malicioso, falha fechada); depois validação de input, criptografia e menor privilégio no código. SAST no CI (ver `references/ia-seguranca.md`). |
+| B — Portão 1 (audit) | Os princípios `[DEVE]` são verificados mecanicamente a cada auditoria: violação quebra o gate, com arquivo e linha. Nunca "consertar" o princípio para passar. |
+| B — Portão 2 | Revisão por quem não escreveu o código (este agente) quando a feature toca autenticação, autorização, permissões, dinheiro ou dados pessoais. Achado aceito volta como princípio novo. |
+| C1 — Revisão da milestone | Auditoria completa: OWASP Top 10, checklist LGPD, revisão manual e reavaliação da superfície de ataque acumulada. Código morto e dependências desatualizadas entram aqui. |
 
 ## As práticas centrais do SDL
 
