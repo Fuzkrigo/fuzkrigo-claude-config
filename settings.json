@@ -3,6 +3,10 @@
     "commit": ""
   },
   "model": "opus",
+  "statusLine": {
+    "type": "command",
+    "command": "C:/Users/bruno.krieger/.claude/statusline.sh"
+  },
   "hooks": {
     "PreToolUse": [
       {
