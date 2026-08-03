@@ -1,9 +1,10 @@
 ---
 name: fuzkrigo-spec-driven
-description: Desenvolvimento spec-anchored — a especificação continua verdadeira porque é auditada mecanicamente contra o código. Fluxo Especificar → Projetar → Tarefas → Plano → Executar → Auditar → Aprender, com rastreabilidade história→critério de aceite→tarefa→teste, definição de pronto executável (cada critério de aceite vira teste anotado), suposições e perguntas como cidadãs de primeira classe, constituição de princípios verificáveis (preset LGPD/educação), lições aprendidas com lastro mecânico (o motor recusa lição sem sinal real de audit/verify; promoção por recorrência entre features) e plano de execução PARALELA (tarefas de arquivos disjuntos viram faixas em git worktrees, executadas por claude headless com modelo e esforço por tarefa — inclui script pronto e artefato visual com botão). Motor mecânico EMBARCADO na skill (zero instalação — roda com o node do ambiente). Use ao planejar features, implementar com verificação, ou auditar uma implementação contra a spec. Gatilhos "especificar feature", "nova feature", "implementar", "auditar spec", "verificar", "plano de execução", "executar em paralelo", "o que não tem teste", "lições aprendidas". NÃO use para technical design docs (use technical-design-doc-creator) nem análise de decomposição de arquitetura.
+description: Desenvolvimento spec-anchored — a especificação continua verdadeira porque é auditada mecanicamente contra o código. Fluxo Especificar → Projetar → Tarefas → Plano → Executar → Auditar → Aprender, com rastreabilidade história→critério de aceite→tarefa→teste, definição de pronto executável (cada critério de aceite vira teste anotado), suposições e perguntas como cidadãs de primeira classe, constituição de princípios verificáveis (preset LGPD/educação), lições aprendidas com lastro mecânico (o motor recusa lição sem sinal real de audit/verify; promoção por recorrência entre features) e plano de execução PARALELA (tarefas de arquivos disjuntos viram faixas em git worktrees, executadas por claude headless com modelo e esforço por tarefa — inclui script pronto e artefato visual com botão). Motor mecânico EMBARCADO na skill (zero instalação — roda com o node do ambiente). Use ao planejar features, implementar com verificação, ou auditar uma implementação contra a spec. Gatilhos "especificar feature", "nova feature", "implementar", "auditar spec", "verificar", "plano de execução", "executar em paralelo", "o que não tem teste", "lições aprendidas". NÃO use para abertura de projeto, briefing, roadmap, documentação de gestão, board ou release — isso é da skill `iniciar-projeto`.
 license: MIT
 metadata:
-  author: Bruno Krieger [Fuzkrigo]
+  author: "Bruno Krieger [Fuzkrigo] (adaptação)"
+  origem: "onovoprogramador/onp-spec-driven — https://github.com/onovoprogramador/onp-spec-driven (MIT)"
   version: 3.2.0
   agent: claude
 ---
@@ -21,6 +22,33 @@ confia que o agente obedeceu — **a máquina prova, via exit code**.
 └───────────┘  └────────┘  └───────┘  └───────┘  └────────┘  └───────┘
    sempre      se preciso   se grande  2+ tarefas   sempre    SEMPRE (gate)
 ```
+
+## De onde vem a feature — fronteira com a `iniciar-projeto`
+
+Esta skill conduz o **Bloco B** (ciclo de feature) do fluxo definido na skill
+`iniciar-projeto`. A divisão é rígida, e cada artefato tem um dono só:
+
+| | `iniciar-projeto` | esta skill |
+|---|---|---|
+| Território | `docs/`, `.github/`, `CHANGELOG.md`, board | `.spec/` |
+| Decide | qual feature construir, e quando | o que a feature faz, e se está provada |
+
+Na prática:
+
+- **A feature nasce de uma Etapa do `docs/CHECKLIST.md`** — que também é uma issue
+  no board. O nome da pasta em `.spec/features/<kebab>/` casa com o nome da etapa.
+  Se não existe etapa, pergunte antes de criar a feature: o escopo do projeto é
+  decidido lá, não aqui.
+- **Ao terminar** (audit com saída 0), o estado da spec é copiado de volta para a
+  linha da etapa no CHECKLIST, e a issue é fechada pelo PR. Você não inventa
+  status no CHECKLIST — `fuzkrigo-spec status` é a fonte.
+- **Commits das faixas paralelas são efêmeros.** O `T-xxx <feature>: título` vale
+  dentro da faixa; o histórico permanente sai por squash no PR, no formato
+  `<tipo>(<escopo>): <descrição> (T-003, T-004)`. Regra completa em
+  `~/.claude/references/git-conventions.md`.
+- **Projeto sem `docs/` nem board** (script pessoal, experimento): pode rodar só
+  com esta skill. Nesse caso, diga isso explicitamente ao usuário uma vez — para
+  ficar consciente de que não há roadmap nem release por trás.
 
 ## Vocabulário — fale sempre em português simples
 
@@ -134,7 +162,12 @@ crie `tasks.md` — a fase foi pulada por engano.
 
 ### 1. Especificar
 
-- **Antes de escrever, carregue o guia aprendido**: `fuzkrigo-spec licoes list`
+- **Antes de escrever, leia o contexto do projeto**: a etapa correspondente em
+  `docs/CHECKLIST.md` e, no `docs/ROADMAP.md`, o problema, as decisões
+  arquiteturais e as restrições inegociáveis (elas já viraram princípios da
+  constituição — não recriar como critério de aceite). Projeto sem esses
+  documentos: siga em frente, mas registre a suposição de escopo.
+- **Depois, carregue o guia aprendido**: `fuzkrigo-spec licoes list`
   (em projeto grande, filtre: `--escopo <dominio>`). São regras confirmadas
   por falhas reais de features anteriores — aplique-as na spec.
 - `fuzkrigo-spec new <feature>` cria `.spec/features/<feature>/spec.md` e `tasks.md`
@@ -292,3 +325,19 @@ Constituição: [constituicao.md](references/constituicao.md).
 Se você está prestes a dizer "pronto", rode `fuzkrigo-spec audit --ci` e cole a
 saída. Se não saiu 0, não está pronto. Aqui, "pronto" é uma coisa que a máquina
 verifica — não uma frase sua.
+
+---
+
+## Origem e licença
+
+Esta skill é uma adaptação de **onp-spec-driven**, de onovoprogramador —
+<https://github.com/onovoprogramador/onp-spec-driven> — distribuída sob licença
+MIT, que se mantém aqui. A adaptação (renomeação, integração com o fluxo da
+skill `iniciar-projeto` e ajustes locais do motor) é de Bruno Krieger
+[Fuzkrigo].
+
+Por herança do projeto original, alguns nomes internos ainda usam o prefixo
+antigo: o arquivo de configuração lido pelo motor é `onpspec.config.json` e os
+worktrees do plano paralelo nascem em `../onp-worktrees/`. São nomes
+funcionais — mudá-los exige alterar o motor e renomear o arquivo em todo
+projeto já iniciado.
