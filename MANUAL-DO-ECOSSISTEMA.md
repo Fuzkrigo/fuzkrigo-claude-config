@@ -5,6 +5,37 @@
 
 ---
 
+## Antes de tudo: onde se digita cada coisa
+
+Este manual mostra comandos de dois mundos diferentes. Confundir os dois é o erro mais comum de
+quem começa, então: **cada bloco de código aqui é marcado com o lugar a que pertence.**
+
+| Marca | Onde | O que é |
+| ----- | ---- | ------- |
+| **[chat]** | Na conversa com o Claude Code | Linguagem natural, comandos com barra (`/skill`) e o prefixo `#tarefa` |
+| **[terminal]** | No seu terminal (Git Bash) | `fspec`, `git`, `gh`, `node` — coisas que o sistema operacional executa |
+
+E o ponto mais importante, que muda como você lê o resto deste manual:
+
+**No uso normal, você não digita os comandos do motor.** Você conversa; eu é que rodo `new`,
+`scaffold`, `verify` e `audit`, e colo a saída na conversa. Eles estão documentados aqui para você
+**entender e conferir** o que está sendo feito em seu nome — não porque você precise decorá-los.
+
+Você roda um comando à mão quando quiser conferir algo sozinho, sem sessão aberta. E existe um
+meio-termo útil: começando a mensagem do chat com `!`, o comando roda no terminal e a saída entra
+na conversa, onde eu consigo ler.
+
+| O que você quer | Onde | O que digita |
+| --------------- | ---- | ------------ |
+| Abrir projeto, implementar feature, fechar milestone | chat | Linguagem natural |
+| Forçar uma skill específica | chat | `/iniciar-projeto` |
+| Desligar o fluxo para algo pontual | chat | `#tarefa ...` no início da mensagem |
+| Conferir o estado por conta própria | terminal | `fspec status` |
+| Rodar algo e me mostrar o resultado | chat | `!fspec audit --ci` |
+| Commit, PR, release | chat | Eu monto o bloco e pergunto quem executa |
+
+---
+
 ## 1. A ideia em um minuto
 
 O ecossistema responde duas perguntas diferentes, e por isso tem duas camadas:
@@ -93,7 +124,7 @@ uma branch. Esse é o elo que amarra tudo: se você entender só uma coisa deste
 
 ## 4. Antes de começar
 
-Confira uma vez que o ambiente tem o necessário:
+**[terminal]** Confira uma vez que o ambiente tem o necessário:
 
 ```bash
 node --version     # o motor de auditoria roda nele
@@ -101,13 +132,45 @@ git --version
 gh auth status     # so se voce for usar board no GitHub
 ```
 
-Atalho que economiza digitação (o motor mora dentro da skill, sem instalação):
+### O que é o `fspec` deste manual
+
+O motor mora dentro da skill e não tem instalação, então o comando completo é este monstro:
+
+```bash
+node ~/.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs status
+```
+
+Ninguém digita isso dez vezes por dia. A saída é criar um **alias**: um apelido curto que o
+terminal expande para o comando longo. Você digita `fspec status`, o shell entende
+`node ~/.claude/.../fuzkrigo-spec.mjs status`. É só economia de digitação — não instala nada, não
+muda nada no projeto, e sem ele tudo funciona igual (só mais longo).
+
+**[terminal]** No Git Bash, criar o apelido só para a janela aberta:
 
 ```bash
 alias fspec='node ~/.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs'
 ```
 
-Neste manual, `fspec` significa esse comando. Todos eles rodam **a partir da raiz do projeto**.
+Fechou o terminal, o apelido some. Para ele existir sempre, a linha precisa entrar no arquivo que
+o Git Bash lê ao abrir — o seu `~/.bashrc`:
+
+```bash
+echo "alias fspec='node ~/.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs'" >> ~/.bashrc
+```
+
+**[terminal]** No PowerShell a sintaxe é outra (`Set-Alias` não aceita comando com argumentos, então
+se usa uma função):
+
+```powershell
+function fspec { node "$HOME/.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs" @args }
+```
+
+Para valer sempre no PowerShell, essa linha vai no arquivo indicado por `$PROFILE` (no seu caso,
+`Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1` — pode não existir ainda; criar é
+suficiente).
+
+Neste manual, `fspec` significa o comando completo. Todos rodam **a partir da raiz do projeto** —
+o motor procura o `.spec/` na pasta onde você está.
 
 ---
 
@@ -135,7 +198,7 @@ marcar uma versão, ou quer mostrar o trabalho.
 
 ### O passo a passo
 
-Você diz, em linguagem normal:
+**[chat]** Você diz, em linguagem normal:
 
 > "Quero começar um projeto novo: um app para controlar minhas leituras."
 
@@ -165,6 +228,8 @@ Assim fica uma etapa no CHECKLIST:
 
 **A3 — Provisionamento e constituição.** O agente `project-manager` cria repositório, labels,
 board, milestones e as issues (uma por etapa). E o projeto ganha sua constituição:
+
+**[terminal]** (na prática, quem roda sou eu, durante A3)
 
 ```bash
 fspec init                      # ou: fspec init --preset lgpd-educacao
@@ -200,6 +265,11 @@ em `onpspec.config.json`, na raiz.
 Este é o ciclo que você vai repetir. Exemplo: a etapa E2, "Recuperação de senha".
 
 ### Passo 1 — Especificar
+
+Você abre a etapa no chat ("vamos fazer a E2, recuperação de senha") e o ciclo começa. Os comandos
+abaixo são os que eu rodo — acompanhe a saída, não precisa digitar.
+
+**[terminal]**
 
 ```bash
 fspec new recuperacao-senha
@@ -331,7 +401,10 @@ depois da sua aprovação.
 ### Passo 7 — Portão 3: entrega
 
 PR seguindo `~/.claude/references/git-conventions.md`. Se a feature rodou em faixas paralelas, o
-histórico sai por squash:
+histórico sai por squash.
+
+**[terminal]** — aqui vale a política de sempre: eu monto o bloco completo e pergunto se você
+digita ou se eu executo. Nunca decido isso sozinho.
 
 ```bash
 gh pr merge --squash --delete-branch \
@@ -367,7 +440,7 @@ ele confere que todas as features estão `auditada` — issue fechada não é pr
 
 ## 8. Quando você não quer nada disso
 
-Comece a mensagem com `#tarefa`. Isso desliga as duas skills, o TDD e a regra de bloqueio pelo
+**[chat]** Comece a mensagem com `#tarefa`. Isso desliga as duas skills, o TDD e a regra de bloqueio pelo
 resto da sessão. Serve para: corrigir um bug pequeno, mexer em configuração, escrever um script
 descartável.
 
@@ -389,6 +462,9 @@ mas continua sendo software.
 ---
 
 ## 9. Cheat sheet
+
+**[terminal]** — lembrando: no fluxo normal quem roda estes comandos sou eu. Use-os à mão quando
+quiser conferir algo sozinho, ou com `!` no chat para eu ver a saída.
 
 ```bash
 # projeto
