@@ -50,6 +50,17 @@ O que esta skill exige na saída do Bloco B, em ordem:
 
 1. **Portão 1 — prova mecânica.** `fuzkrigo-spec audit --ci --feature <feature>` com saída 0. Sem isso a feature não avança, e nenhum subagente de qualidade é gasto. O filtro tira do veredito os achados de outras features — a próxima etapa, ainda em rascunho, não reprova esta — mas mantém os do projeto, como princípio violado. O audit **sem** filtro é o que vale em C3, antes do release.
 2. **Portão 2 — qualidade.** Invocar o agente `code-reviewer` (auditoria de SOLID, Clean Code e limites de tamanho); com a estrutura já estável, invocar o agente `docstrings-manager`. Invocar o agente `security-reviewer` quando a feature tocar autenticação, autorização, permissões, dinheiro ou dados pessoais — não esperar C1 para isso. Todo achado aceito vira princípio verificável na constituição, para nunca mais voltar em silêncio: o agente não tem permissão de escrita e devolve o bloco do princípio pronto no relatório; **quem cola em `.spec/constituicao.md` é o Claude principal, depois da sua aprovação**.
+
+   **Dimensionar o portão ao tamanho da feature**, pelo mesmo raciocínio de auto-dimensionamento que a `fuzkrigo-spec-driven` já aplica — três subagentes numa feature de dois arquivos é o tipo de peso que faz um processo ser abandonado:
+
+   | Escopo da feature | `code-reviewer` | `docstrings-manager` |
+   | ----------------- | --------------- | -------------------- |
+   | Pequena (até 3 arquivos, sem lógica de negócio nova) | Opcional | Só se nasceu função, classe ou módulo público |
+   | Média ou grande | Sempre | Sempre |
+
+   O `security-reviewer` não entra nessa tabela: o gatilho dele é o que a feature **toca**, não o tamanho dela. Feature de um arquivo que mexe em autenticação é feature sensível.
+
+   **Fechar com o audit de novo, sempre.** Depois do `docstrings-manager`, rodar `fuzkrigo-spec audit --ci --feature <feature>` mais uma vez, antes do PR. Motivo concreto: esse agente tem permissão de edição e trabalha sobre arquivos de teste — se um título anotado com `@spec:AC-xxx` (ou um nome `test_ac_001`, em Python) for alterado, a prova daquele critério desaparece. A regra que o proíbe está escrita no prompt dele, mas regra escrita não é garantia; o audit é. Custa segundos e transforma um estrago silencioso em falha imediata.
 3. **Portão 3 — entrega.** PR e merge conforme `~/.claude/references/git-conventions.md`, incluindo o squash das faixas de execução paralela. Se a feature introduziu mudança estrutural (novo módulo, integração externa, decisão de arquitetura, modelo de dados), invocar o agente `project-documentation` para atualizar `docs/ARCHITECTURE.md` — critério completo em `references/architecture-md.md`. Marcar a Etapa concluída no CHECKLIST.
 
 Momento de avaliar design patterns: consultar `@.claude/PATTERNS.md` (se disponível) e sugerir um pattern apenas quando resolver dor concreta identificada — nunca na primeira versão, nunca por estética.
