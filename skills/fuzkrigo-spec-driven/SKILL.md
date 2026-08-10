@@ -46,9 +46,14 @@ Na prática:
   dentro da faixa; o histórico permanente sai por squash no PR, no formato
   `<tipo>(<escopo>): <descrição> (T-003, T-004)`. Regra completa em
   `~/.claude/references/git-conventions.md`.
-- **Projeto sem `docs/` nem board** (script pessoal, experimento): pode rodar só
-  com esta skill. Nesse caso, diga isso explicitamente ao usuário uma vez — para
-  ficar consciente de que não há roadmap nem release por trás.
+- **Projeto sem `docs/` nem board** (experimento, prova de conceito, script de uso
+  próprio): pode rodar só com esta skill — a especificação e o gate continuam
+  valendo, o que cai fora é a camada de gestão. Diga isso ao usuário uma vez, para
+  ele saber que não há roadmap nem release por trás. Mas **isso não vale para
+  projeto de portfólio, com usuário final ou que vá ganhar release**: nesses, a
+  abertura (Bloco A) é obrigatória, e o critério completo está na seção 4.1 da
+  skill `iniciar-projeto`. Na dúvida sobre em qual caso o projeto está, pergunte
+  antes de seguir.
 
 ## Vocabulário — fale sempre em português simples
 

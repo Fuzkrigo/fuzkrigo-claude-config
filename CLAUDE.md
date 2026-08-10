@@ -63,7 +63,7 @@ Detalhamento (SOLID, Clean Code, teste de complexidade, tratamento de erros): `@
 
 ---
 
-## 4. Início Obrigatório de Todo Projeto
+## 4. Início de Projeto
 
 O trabalho se divide em duas camadas, com duas skills:
 
@@ -71,6 +71,8 @@ O trabalho se divide em duas camadas, com duas skills:
 - **`/fuzkrigo-spec-driven`** — o desenvolvimento em si. Conduz o **Bloco B**: uma feature por vez, do critério de aceite à prova mecânica (`audit --ci` com saída 0).
 
 Ao iniciar projeto novo ou refatoração grande, carregar `/iniciar-projeto`. Concluído o Bloco A, `ROADMAP.md` e `CHECKLIST.md` passam a ser a referência da sessão — não recarregar a skill a cada sessão; consultar os documentos direto. A cada nova feature, carregar `/fuzkrigo-spec-driven`.
+
+**O Bloco A é obrigatório quando o que estou construindo vai para o portfólio, tem usuário final ou vai ganhar release.** Experimento, prova de conceito e script de uso próprio são exceção: rodam só com `/fuzkrigo-spec-driven`, mantendo especificação e gate, sem a camada de gestão. Se um experimento virar projeto, o Bloco A é executado retroativamente, antes do primeiro release. Critério completo e falas de bloqueio: seção 4.1 da skill `iniciar-projeto`.
 
 **QUANDO CARREGAR CADA SKILL OU ARQUIVO DE REFERÊNCIA:**
 
