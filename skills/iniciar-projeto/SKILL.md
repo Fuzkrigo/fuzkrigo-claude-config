@@ -1,6 +1,6 @@
 ---
 name: iniciar-projeto
-description: Abertura, documentação e gestão de projeto — briefing investigativo, geração de ROADMAP.md, CHECKLIST.md e ARCHITECTURE.md, integração com GitHub Projects e Linear (padrão "Fuzkrigo Projects"), ritual de release e padrão de commits. Use esta skill SEMPRE que o usuário mencionar projeto novo, iniciar desenvolvimento, planejar funcionalidade, criar roadmap, briefing de projeto, ou qualquer pedido que envolva começar a construir algo do zero. Também ativar quando o usuário pedir para gerar documentos de planejamento, checklist, diagramas de arquitetura, configurar labels/board/issues no GitHub ou no Linear, definir padrão de commits ou releases, ou fechar uma milestone. O desenvolvimento de cada feature (especificação, testes, implementação e auditoria) NÃO é conduzido aqui — é da skill `fuzkrigo-spec-driven`. Se o usuário tentar implementar código sem ter passado pela abertura do projeto, BLOQUEIE e carregue esta skill.
+description: Abertura, documentação e gestão de projeto — briefing investigativo, geração de ROADMAP.md, CHECKLIST.md e ARCHITECTURE.md, integração com GitHub Projects e Linear (padrão "Fuzkrigo Projects"), ritual de release e padrão de commits. Use esta skill SEMPRE que o usuário mencionar projeto novo, iniciar desenvolvimento, planejar funcionalidade, criar roadmap, briefing de projeto, ou qualquer pedido que envolva começar a construir algo do zero. Também ativar quando o usuário pedir para gerar documentos de planejamento, checklist, diagramas de arquitetura, configurar labels/board/issues no GitHub ou no Linear, definir padrão de commits ou releases, ou fechar uma milestone. O desenvolvimento de cada feature (especificação, testes, implementação e auditoria) NÃO é conduzido aqui — é da skill `fuzkrigo-spec-driven`. Se o usuário tentar implementar código de um projeto que vai para o portfólio, tem usuário final ou vai ganhar release sem ter passado pela abertura (Bloco A), BLOQUEIE e carregue esta skill. Experimento descartável, script de uso próprio e correção pequena são exceção declarada — critério completo na seção 4.1 da skill.
 ---
 
 # Abertura, Documentação e Gestão de Projeto
@@ -38,8 +38,9 @@ Três blocos. O Bloco A roda uma vez, na abertura. O Bloco B roda a cada feature
 - Invocar o agente `project-documentation` (ferramenta Agent) para gerar a versão inicial de `docs/ARCHITECTURE.md`, a partir do ROADMAP.md recém-criado — muda com menos frequência que ROADMAP/CHECKLIST, por isso fica com o agente
 
 #### A3 — Provisionamento e Constituição
-- Invocar o agente `project-manager` (ferramenta Agent) para provisionar GitHub e espelhar no Linear (seção 6). As etapas só ficam concretas aqui, por isso o board nasce nesta fase, não em A2
+- Invocar o agente `project-manager` (ferramenta Agent) para provisionar GitHub e espelhar no Linear (seção 6). O board nasce aqui, e não em A2, porque depende do repositório já provisionado e das etapas já revisadas no CHECKLIST — cada issue nasce de uma etapa que já existe
 - Inicializar a camada de desenvolvimento: `fuzkrigo-spec init` (ver a skill `fuzkrigo-spec-driven`), e escrever a constituição do projeto a partir das restrições levantadas em A1. Princípio `[DEVE]` sem verificação executável é acusado pelo próprio audit — a constituição nasce com dente ou não nasce
+- **Fechar o ciclo do ROADMAP:** com a constituição escrita, voltar ao `docs/ROADMAP.md` e anotar o código de cada princípio (`P-xxx`) ao lado da restrição correspondente. É a segunda passada do documento — em A2 a restrição é texto, aqui ela ganha o código que a verifica (seção 7.1, item 4)
 
 ### BLOCO B — Ciclo de feature
 
@@ -96,7 +97,37 @@ A ambiguidade antiga acabou: "Fase" agora significa apenas o nível do produto d
 
 O critério não é mais "existe documento?", e sim "este código está sob uma especificação?".
 
-Se o usuário pedir para implementar sem a abertura do projeto, responder:
+### 4.1. Quando o Bloco A é obrigatório, e quando não é
+
+Nem todo código nasce projeto. Exigir briefing e board para um script de quarenta linhas é o
+over-engineering que a seção 3 do `CLAUDE.md` proíbe — e, na prática, empurra tudo para o
+`#tarefa`, esvaziando o fluxo inteiro. O critério é o destino do que está sendo construído:
+
+| Situação | Bloco A |
+| -------- | ------- |
+| Vai para o portfólio | **Obrigatório** |
+| Tem usuário final, mesmo que seja só você usando todo dia | **Obrigatório** |
+| Vai ganhar release, tag ou versão | **Obrigatório** |
+| Experimento, prova de conceito descartável | Dispensável |
+| Script de uso próprio, automação pessoal | Dispensável |
+| Correção pequena, ajuste de configuração ou estética | Dispensável |
+
+**Dispensável não significa sem rigor.** O projeto pode rodar só com a skill
+`fuzkrigo-spec-driven`: a especificação e o gate continuam valendo, o que cai fora é a camada de
+gestão (roadmap, board, documentos de comunicação, release). Ao seguir por esse caminho, dizer
+isso em voz alta uma vez — o usuário precisa saber que optou por um projeto sem roadmap nem
+release por trás, e não descobrir isso depois.
+
+**Regra de conversão:** experimento que vira projeto executa o Bloco A retroativamente, antes do
+primeiro release. O momento de perguntar é quando aparecer a primeira dessas três coisas: um
+segundo usuário, uma tag de versão, ou a intenção de mostrar o trabalho.
+
+Na dúvida, pergunte ao usuário em qual dos dois casos ele está — a resposta leva um segundo e
+evita tanto a burocracia inútil quanto o projeto de portfólio sem documentação.
+
+### 4.2. As falas do bloqueio
+
+Se o usuário pedir para implementar um projeto da coluna "obrigatório" sem a abertura, responder:
 
 > "Antes de prosseguir com [o que foi pedido], ainda preciso de [A1/A2/A3]. Especificamente, falta: [item concreto]. Quer fazer isso agora, ou tem uma razão específica para pular esta etapa?"
 
@@ -173,7 +204,7 @@ Conteúdo obrigatório:
 1. **Identidade do projeto** — nome, data de início, responsável, status atual
 2. **Resumo do problema** — o que resolve, 2-3 parágrafos
 3. **Decisões arquiteturais** — stack, padrões aplicados, justificativa
-4. **Restrições inegociáveis** — as que viraram princípios da constituição em A3, com o código do princípio (`P-xxx`) ao lado. O texto explica; o princípio verifica
+4. **Restrições inegociáveis** — preenchido em duas passadas: em **A2** entram as restrições em texto, como saíram do briefing; em **A3**, depois que a constituição existe, cada uma recebe ao lado o código do princípio (`P-xxx`) que passou a verificá-la. Nunca inventar código de princípio antes de A3 — enquanto a constituição não existe, o item fica só com o texto. O texto explica; o princípio verifica
 5. **Skills e configurações ativas** — quais skills e qual CLAUDE.md do projeto se aplicam; quais estão desativados
 6. **Roadmap de desenvolvimento** — milestones e fases ordenadas com descrição curta, cronograma estimado
 7. **Riscos e pontos de atenção**
@@ -225,7 +256,7 @@ Explicar a legenda no topo do arquivo. Consultar o CHECKLIST.md **no início de 
 
 1. Os documentos ficam em **`docs/`** (criar a pasta se não existir). Exceções que permanecem na raiz e o procedimento de migração de projeto legado: seção 5.
 2. Gerados **uma única vez** — atualizações são edições, nunca recriação.
-3. Bloquear implementação se ROADMAP.md e CHECKLIST.md não existirem (seção 4).
+3. Em projeto da coluna "obrigatório" da seção 4.1, bloquear implementação enquanto ROADMAP.md e CHECKLIST.md não existirem. Em projeto dispensável, esta regra não se aplica — lá a evidência de planejamento é a spec da feature.
 4. **Nunca deletados** durante o projeto.
 5. Ao final, arquivar em `_backups/projeto-concluido-YYYY-MM-DD/`.
 
@@ -249,3 +280,9 @@ Estas regras valem para **todo** artefato do projeto — código, documentação
 - **Modo Tarefa (`#tarefa`):** tarefas pontuais não geram planejamento nem board
 - Pequenas correções de bug em projeto existente
 - Ajustes estéticos ou de configuração
+- **Projeto da coluna "dispensável" da seção 4.1** (experimento, script de uso próprio, prova de
+  conceito): o Bloco A não se aplica, mas o Bloco B continua valendo — a feature é especificada e
+  provada normalmente, só não há roadmap, board nem release por trás
+
+A diferença entre as duas últimas linhas importa: `#tarefa` desliga **tudo**, inclusive a
+especificação e o gate; projeto dispensável desliga só a camada de gestão.
