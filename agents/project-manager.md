@@ -389,7 +389,7 @@ node "C:/Users/bruno.krieger/.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrig
 node "C:/Users/bruno.krieger/.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs" audit --ci
 ```
 
-Critério: **toda feature da milestone precisa estar `auditada`**, e o `audit --ci` precisa sair com código 0. Se alguma não estiver, ou se o audit sair 1, não monte o release como se estivesse pronto: reporte quais features não passaram e o que o audit acusou, no topo do seu relatório. Lançar assim mesmo é decisão do usuário, tomada com a informação na mão — não sua.
+Critério: **toda feature da milestone precisa estar `auditada`**, e o `audit --ci` precisa sair com código 0. Rode-o **sem** `--feature`: o filtro por feature existe para o portão de desenvolvimento, e usá-lo aqui esconderia justamente o que um release não pode ignorar. Se alguma não estiver, ou se o audit sair 1, não monte o release como se estivesse pronto: reporte quais features não passaram e o que o audit acusou, no topo do seu relatório. Lançar assim mesmo é decisão do usuário, tomada com a informação na mão — não sua.
 
 Projeto sem `.spec/`: o critério continua sendo as issues da milestone fechadas, e diga isso explicitamente no relatório, para ficar claro que não houve gate mecânico.
 

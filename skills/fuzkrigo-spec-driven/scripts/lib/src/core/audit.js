@@ -19,9 +19,24 @@ function finding(code, severity, message, extra = {}) {
   return { code, severity, message, ...extra };
 }
 
-export function auditProject(project, { ci = false } = {}) {
+// Escopo do audit. Sem `feature`, avalia o projeto inteiro — e e assim que
+// ele deve rodar no CI e antes de um release. Com `feature`, os achados das
+// OUTRAS features saem do veredito, mas os que nao pertencem a feature
+// nenhuma (constituicao violada, projeto invalido) permanecem: sao problemas
+// do projeto, e esconde-los transformaria o filtro num bypass.
+//
+// Nome inexistente e erro alto, nunca auditoria vazia: um typo que filtrasse
+// todos os achados sairia com codigo 0 e daria um "pronto" falso.
+export function auditProject(project, { ci = false, feature = null } = {}) {
   const findings = [];
   const { config } = project;
+
+  if (feature !== null && !project.features.some((f) => f.name === feature)) {
+    const existentes = project.features.map((f) => f.name).join(', ') || 'nenhuma';
+    throw new Error(
+      `feature "${feature}" não encontrada em ${config.specDir}/features/ (existentes: ${existentes})`
+    );
+  }
 
   for (const err of project.errors) {
     findings.push(finding('PROJETO_INVALIDO', 'erro', err));
@@ -560,17 +575,26 @@ export function auditProject(project, { ci = false } = {}) {
     }
   }
 
-  const errors = findings.filter((f) => f.severity === 'erro');
-  const warnings = findings.filter((f) => f.severity === 'aviso');
+  // achado sem `feature` e do projeto: sobrevive ao filtro (ver nota no topo)
+  const noEscopo =
+    feature === null ? findings : findings.filter((f) => !f.feature || f.feature === feature);
+  const featuresNoEscopo =
+    feature === null ? project.features : project.features.filter((f) => f.name === feature);
 
-  const totalAcs = project.features.reduce(
+  const errors = noEscopo.filter((f) => f.severity === 'erro');
+  const warnings = noEscopo.filter((f) => f.severity === 'aviso');
+
+  const totalAcs = featuresNoEscopo.reduce(
     (n, f) => n + (f.spec ? allAcs(f.spec).length : 0),
     0
   );
+  const acIdsNoEscopo = new Set(
+    featuresNoEscopo.flatMap((f) => (f.spec ? allAcs(f.spec).map((ac) => ac.id) : []))
+  );
   const acsWithTest = new Set(
-    testSpecTags.filter((t) => knownAcIds.has(t.acId)).map((t) => t.acId)
+    testSpecTags.filter((t) => acIdsNoEscopo.has(t.acId)).map((t) => t.acId)
   ).size;
-  const acsProven = project.features.reduce((n, f) => {
+  const acsProven = featuresNoEscopo.reduce((n, f) => {
     const v = project.verifications[f.name];
     if (!v?.results || !f.spec) return n;
     return (
@@ -579,20 +603,21 @@ export function auditProject(project, { ci = false } = {}) {
   }, 0);
 
   return {
-    findings,
+    findings: noEscopo,
+    escopo: feature,
     ok: errors.length === 0,
     exitCode: errors.length === 0 ? 0 : 1,
     stats: {
-      features: project.features.length,
-      stories: project.features.reduce((n, f) => n + (f.spec?.stories.length || 0), 0),
+      features: featuresNoEscopo.length,
+      stories: featuresNoEscopo.reduce((n, f) => n + (f.spec?.stories.length || 0), 0),
       acs: totalAcs,
       acsWithTest,
       acsProven,
-      assumptionsOpen: project.features.reduce(
+      assumptionsOpen: featuresNoEscopo.reduce(
         (n, f) => n + (f.spec?.assumptions.filter((a) => a.status === 'aberta').length || 0),
         0
       ),
-      questionsOpen: project.features.reduce(
+      questionsOpen: featuresNoEscopo.reduce(
         (n, f) => n + (f.spec?.questions.filter((q) => q.status === 'aberta').length || 0),
         0
       ),

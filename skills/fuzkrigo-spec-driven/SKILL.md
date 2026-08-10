@@ -175,8 +175,12 @@ fosse o gate mecânico.
    você. `fuzkrigo-spec verify` roda os testes e grava a prova. Você não pode
    declarar vitória. **Teste pulado (skip/todo) não é prova** — o motor recusa
    e o audit acusa.
-3. **A feature só fecha quando `fuzkrigo-spec audit --ci` sai com código 0.** Rodar
-   o audit e **colar a saída** é o último passo, sempre.
+3. **A feature só fecha quando `fuzkrigo-spec audit --ci --feature <feature>` sai
+   com código 0.** Rodar o audit e **colar a saída** é o último passo, sempre.
+   O filtro tira do veredito os achados de OUTRAS features (a próxima ainda em
+   rascunho não reprova esta); o que é do projeto — constituição violada,
+   código órfão — continua contando. **Antes de um release, rode sempre sem
+   `--feature`:** ali a palavra final é a do projeto inteiro.
 4. **Suposições e perguntas em aberto são obrigatórias.** Preencheu lacuna sem
    confirmar? É uma suposição. Faltou informação? É uma pergunta em aberto. A
    seção ausente também é problema (`SECAO_AUSENTE`) — se não houver nenhuma,
@@ -215,6 +219,11 @@ crie `tasks.md` — a fase foi pulada por engano.
   por falhas reais de features anteriores — aplique-as na spec.
 - `fuzkrigo-spec new <feature>` cria `.spec/features/<feature>/spec.md` e `tasks.md`
   com códigos de rastreio contínuos (únicos no projeto inteiro).
+- **Uma spec viva por vez, como prática.** Crie a spec quando for implementar a
+  feature, não antes: as etapas futuras já estão registradas no CHECKLIST com
+  "spec ainda não criada". Spec aberta e parada vira dívida — ela não reprova
+  mais o portão das outras (o `--feature` resolveu isso), mas continua
+  reprovando o audit do projeto, que é o que vale antes do release.
 - Escreva as **histórias de usuário (US-xxx)** e, para cada uma, os
   **critérios de aceite (AC-xxx)** em Dado/Quando/Então. O critério precisa
   ser observável — algo que um teste checa. "Deve ser rápido" não é critério;
@@ -291,9 +300,15 @@ produto).
 - `fuzkrigo-spec verify <feature>` — roda os testes, grava a prova por critério de
   aceite em `.spec/verification/<feature>.json`. Só PASS conta (skip não é
   prova).
-- `fuzkrigo-spec audit --ci` — o veredito. Exit 0 = alinhado. Exit 1 = leia cada
-  problema e resolva. **Cole a saída final na conversa** e traduza em uma
-  frase o que ela significa.
+- `fuzkrigo-spec audit --ci --feature <feature>` — o veredito desta feature.
+  Exit 0 = alinhada. Exit 1 = leia cada problema e resolva. **Cole a saída
+  final na conversa** e traduza em uma frase o que ela significa. O relatório
+  avisa, em amarelo, que o escopo estava filtrado — não omita isso ao resumir.
+- `fuzkrigo-spec audit --ci` (sem filtro) — o veredito do projeto. É o que vale
+  no CI e antes de qualquer release. Rode também sempre que quiser saber se o
+  projeto inteiro está íntegro, não só a feature da vez.
+- Nome de feature errado é recusado com código 2 e a lista das existentes —
+  nunca sai 0 por engano.
 - Falhou? Corrija e re-audite — no máximo **3 iterações**; persistindo, pare e
   escale ao usuário com os problemas ranqueados.
 - Fluxo completo com exemplo: [fluxo.md](references/fluxo.md).
@@ -365,9 +380,12 @@ Constituição: [constituicao.md](references/constituicao.md).
 
 ## Regra de ouro
 
-Se você está prestes a dizer "pronto", rode `fuzkrigo-spec audit --ci` e cole a
-saída. Se não saiu 0, não está pronto. Aqui, "pronto" é uma coisa que a máquina
-verifica — não uma frase sua.
+Se você está prestes a dizer "pronto", rode
+`fuzkrigo-spec audit --ci --feature <feature>` e cole a saída. Se não saiu 0,
+não está pronto. Aqui, "pronto" é uma coisa que a máquina verifica — não uma
+frase sua.
+
+E se você está prestes a dizer "o projeto está pronto", tire o `--feature`.
 
 ---
 

@@ -87,9 +87,13 @@ comandos:
   tarefa <feature> <T-xxx> <status>
                       atualiza o status da tarefa no tasks.md
                       (pendente | em-andamento | concluida)
-  audit [--ci] [--json] [--md <arquivo>]
+  audit [--ci] [--json] [--md <arquivo>] [--feature <feature>]
                       audita especificação ↔ tarefas ↔ testes ↔ código ↔ constituição
                       exit 1 se houver erro (use no CI)
+                      --feature limita o veredito a UMA feature: achados das
+                      outras saem, os do projeto (constituição, projeto
+                      inválido) permanecem. Use no portão de cada feature;
+                      antes do release, rode sempre sem --feature
   verify <feature>    roda os testes e grava a prova de cada critério de aceite
                       (quem decide é o test runner)
   scaffold <feature> [--force]
@@ -667,7 +671,22 @@ export async function run(argv) {
   if (command === 'painel') return cmdPainel(project, positional, flags);
 
   if (command === 'audit') {
-    const audit = auditProject(project, { ci: Boolean(flags.ci) });
+    if (flags.feature === true) {
+      console.error('uso: fuzkrigo-spec audit --feature <nome-da-feature>');
+      return 2;
+    }
+    let audit;
+    try {
+      audit = auditProject(project, {
+        ci: Boolean(flags.ci),
+        feature: typeof flags.feature === 'string' ? flags.feature : null,
+      });
+    } catch (err) {
+      // nome de feature invalido: erro claro e exit 2 (nunca 0 — um typo
+      // que passasse batido daria um "pronto" falso)
+      console.error(`erro: ${err.message}`);
+      return 2;
+    }
     if (flags.json) {
       console.log(renderJson(audit));
     } else {

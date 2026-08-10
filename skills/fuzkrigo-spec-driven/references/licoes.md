@@ -43,7 +43,7 @@ candidatas nem quarentenadas como guia — elas não são confiadas.
 
 ## ESCREVER — depois do gate, nunca antes
 
-Momento exato: depois que `fuzkrigo-spec audit --ci` sai 0. O caminho até o 0 ficou
+Momento exato: depois que `fuzkrigo-spec audit --ci --feature <feature>` sai 0. O caminho até o 0 ficou
 registrado sozinho no histórico de sinais — você não precisa anotar nada
 durante a implementação.
 

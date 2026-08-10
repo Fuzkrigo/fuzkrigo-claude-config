@@ -111,7 +111,10 @@ Agora implemente a lógica e preencha os testes (ou deixe o plano executar). Rod
 # 4. o runner prova (ou não) — teste PULADO não conta como prova
 fuzkrigo-spec verify entrega-dever-casa
 
-# 5. o gate — cole a saída; exit 0 ou não está pronto
+# 5. o gate desta feature — cole a saída; exit 0 ou não está pronto
+fuzkrigo-spec audit --ci --feature entrega-dever-casa
+
+# o gate do PROJETO (sem filtro): é o que vale no CI e antes de um release
 fuzkrigo-spec audit --ci
 ```
 

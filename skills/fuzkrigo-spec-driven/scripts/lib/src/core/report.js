@@ -26,6 +26,16 @@ export function renderTerminal(audit) {
   }
 
   if (findings.length) lines.push('');
+  // escopo sempre visivel: auditoria de uma feature nao pode ser confundida
+  // com a do projeto inteiro, que e a que vale antes de um release
+  if (audit.escopo) {
+    lines.push(
+      c.yellow(
+        `escopo: feature "${audit.escopo}" — achados de outras features ficaram de fora. ` +
+          `Antes do release, rode o audit do projeto inteiro (sem --feature).`
+      )
+    );
+  }
   lines.push(
     `${c.bold('resumo:')} ${stats.features} feature(s) · ${stats.stories} história(s) de usuário ` +
       `· ${stats.acs} critério(s) de aceite · ${stats.acsWithTest}/${stats.acs} com teste ` +
@@ -42,7 +52,11 @@ export function renderTerminal(audit) {
 }
 
 export function renderJson(audit) {
-  return JSON.stringify({ ok: audit.ok, stats: audit.stats, findings: audit.findings }, null, 2);
+  return JSON.stringify(
+    { ok: audit.ok, escopo: audit.escopo ?? null, stats: audit.stats, findings: audit.findings },
+    null,
+    2
+  );
 }
 
 export function renderMarkdown(audit, { title = 'Relatório de auditoria' } = {}) {
