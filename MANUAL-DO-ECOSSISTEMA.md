@@ -58,7 +58,7 @@ Nada aqui impede você de trabalhar rápido. O que ele impede é você **achar**
 | Peça | O que é | Quem dispara |
 | ---- | ------- | ------------ |
 | `CLAUDE.md` | As regras que valem em toda sessão: persona, idioma, TDD, anti-alucinação, proibições | Carregado automaticamente, sempre |
-| `references/` | Padrões consultáveis: convenções de Git, templates de issue e PR | Lido quando o assunto aparece |
+| `references/` | Padrões consultáveis: convenções de Git, templates de issue e PR, workflow de CI | Lido quando o assunto aparece; o `github/` é copiado para o projeto em A3 |
 | `skills/` | Fluxos completos: abertura de projeto, desenvolvimento de feature, ambiente corporativo | Você chama (`/iniciar-projeto`) ou o gatilho da descrição dispara |
 | `agents/` | Especialistas que rodam isolados e devolvem um relatório: revisão de código, segurança, documentação, board, docstrings | Chamados em pontos fixos do fluxo, ou quando você pede |
 | `hooks/` | Dois scripts que o harness executa antes de cada escrita de arquivo | Automático, você não controla |
@@ -103,7 +103,7 @@ grande, justamente porque aplica critérios diferentes dos seus.
 BLOCO A - abertura do projeto (uma vez)
    A1 Briefing e diagnostico
    A2 Documentos-base: ROADMAP, CHECKLIST, ARCHITECTURE
-   A3 Provisionamento: GitHub/Linear, .github/, e a constituicao do projeto
+   A3 Provisionamento: GitHub/Linear, .github/ (templates + CI), constituicao
 
 BLOCO B - ciclo de feature (repete a cada etapa)
    Especificar -> Projetar -> Tarefas -> Plano -> Executar
@@ -232,7 +232,8 @@ board, milestones e as issues (uma por etapa). E o projeto ganha sua constituiç
 **[terminal]** (na prática, quem roda sou eu, durante A3)
 
 ```bash
-fspec init                      # ou: fspec init --preset lgpd-educacao
+fspec init --agents claude                             # projeto generico
+fspec init --agents claude --preset lgpd-educacao      # com dados de aluno
 ```
 
 Isso cria `.spec/` e `.spec/constituicao.md`. Agora traduza as restrições de A1 em princípios que
@@ -485,7 +486,9 @@ quiser conferir algo sozinho, ou com `!` no chat para eu ver a saída.
 
 ```bash
 # projeto
-fspec init [--preset base|lgpd-educacao]   # cria .spec/ e a constituicao
+fspec init --agents claude [--preset base|lgpd-educacao]
+                                           # cria .spec/, a constituicao e
+                                           # copia o motor para o projeto (o CI precisa)
 fspec status                               # onde cada feature esta
 fspec assumptions                          # o que estamos assumindo
 
@@ -558,6 +561,10 @@ Coisas que vão te morder e não são culpa sua:
 4. **Skip não é prova.** `@pytest.mark.skip` ou `test.skip` fazem o critério continuar sem prova,
    por mais verde que o terminal pareça.
 5. **Glob de princípio que não casa arquivo** vira regra inerte. O audit avisa; não ignore.
+6. **`init` sem `--agents claude` deixa o CI meio cego.** Sem a flag, o motor não é copiado para
+   dentro do projeto, e o servidor do GitHub não tem o que executar: o CI roda testes e cobertura,
+   mas pula a auditoria — e avisa isso no log, em vez de falhar. Se você vir esse aviso, rode o
+   `init` de novo com a flag e commite a pasta `.claude/skills/`.
 
 ---
 
