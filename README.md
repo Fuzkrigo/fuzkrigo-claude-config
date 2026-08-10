@@ -15,7 +15,7 @@ Backup e documentação da configuração pessoal do Claude Code (Fuzkrigo) — 
 ├── settings.json                    # Configuração do Claude Code (modelo, idioma, tema, effort level, hooks, status line)
 ├── references/                      # Referências globais, fora de qualquer skill (~/.claude/references/)
 │   ├── git-conventions.md           # Commits semânticos, branches, PRs, squash das faixas paralelas
-│   └── github/                      # Templates de issue e PR, copiados para o .github/ do projeto
+│   └── github/                      # Copiado para o .github/ do projeto: templates de issue e PR + workflow de CI
 ├── skills/                          # Skills empacotadas, extraídas para texto legível
 │   ├── iniciar-projeto/             # Abertura, documentação e gestão de projeto (Blocos A e C)
 │   ├── fuzkrigo-spec-driven/        # Desenvolvimento por feature com prova mecânica (Bloco B), motor node embarcado

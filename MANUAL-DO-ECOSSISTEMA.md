@@ -246,6 +246,23 @@ a máquina verifica:
 Um princípio `[DEVE]` sem verificação executável é acusado pelo próprio audit. Aqui, regra sem
 dente não existe.
 
+**O CI nasce aqui também.** Junto com os templates, o projeto ganha `.github/workflows/ci.yml`: a
+cada pull request e a cada push na `main`, o GitHub roda os testes, publica a cobertura e audita a
+especificação — sozinho, sem sessão aberta. É o que garante que nada entre na `main` sem passar
+pelo mesmo crivo, mesmo quando você mescla às pressas de outra máquina.
+
+Duas coisas fazem o CI funcionar, e as duas acontecem em A3:
+
+- `fspec init --agents claude` — o `--agents claude` copia o motor para `.claude/skills/` dentro do
+  projeto. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina; sem essa cópia
+  commitada, o CI roda testes e cobertura mas pula a auditoria.
+- O `onpspec.config.json` preenchido: o workflow lê o `testCommand` de lá, então a configuração
+  vive num lugar só e o CI acompanha se você trocar de runner.
+
+No pull request a auditoria é informativa, e na `main` ela bloqueia. O motivo é o mesmo do
+`--feature`: auditar o projeto inteiro num PR reprovaria por causa de uma spec de outra feature
+ainda em rascunho, o que não é problema daquele PR.
+
 **Configure a prova antes de sair de A3.** Sem isso o `verify` lê zero testes:
 
 | Sua stack | `testCommand` | `reporter` |

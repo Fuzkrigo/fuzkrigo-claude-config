@@ -1,0 +1,112 @@
+# CI do padrao Fuzkrigo Projects.
+#
+# Um arquivo so, para qualquer stack: os passos se ligam por deteccao de
+# arquivo, e o comando de teste sai do onpspec.config.json — a mesma fonte
+# que o motor usa localmente, entao nao ha configuracao duplicada.
+#
+# Para o audit rodar aqui, o motor precisa estar COMMITADO no projeto:
+#   fuzkrigo-spec init --agents claude
+# instala a skill em .claude/skills/fuzkrigo-spec-driven. Sem isso o passo
+# de auditoria e pulado com aviso, e o CI vira so testes e cobertura.
+#
+# Acrescentar outra stack e adicionar um bloco condicional; nada mais muda.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node entra sempre: o motor de auditoria roda nele, mesmo em projeto
+      # que nao e JavaScript.
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Preparar Python
+        if: hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias Node
+        if: hashFiles('package.json') != ''
+        run: npm ci || npm install
+
+      - name: Instalar dependencias Python
+        if: hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f pyproject.toml ] || [ -f setup.py ]; then pip install -e . || true; fi
+
+      # O comando vem do onpspec.config.json. Fonte unica: se voce mudar de
+      # runner no projeto, o CI acompanha sozinho.
+      - name: Rodar os testes
+        run: |
+          if [ ! -f onpspec.config.json ]; then
+            echo "sem onpspec.config.json — nada a rodar"; exit 0
+          fi
+          CMD=$(node -p "require('./onpspec.config.json').testCommand || ''")
+          if [ -z "$CMD" ]; then
+            echo "testCommand vazio no onpspec.config.json — configure antes de confiar neste CI"; exit 1
+          fi
+          echo "comando: $CMD"
+          eval "$CMD"
+
+      # Cobertura e a parte que nao generaliza: cada stack tem comando e
+      # formato proprios. Os limites (80% geral, 95% em logica de negocio)
+      # sao impostos pela config da propria ferramenta — pytest-cov com
+      # --cov-fail-under, vitest com coverage.thresholds. Aqui so publicamos
+      # o numero; quem reprova e a ferramenta, onde o limite esta declarado.
+      - name: Cobertura (Node)
+        if: hashFiles('package.json') != ''
+        run: |
+          if node -p "Object.keys(require('./package.json').scripts||{})" | grep -q coverage; then
+            npm run coverage
+          else
+            echo "sem script 'coverage' no package.json — passo ignorado"
+          fi
+
+      - name: Cobertura (Python)
+        if: hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
+        run: |
+          if python -c "import pytest_cov" 2>/dev/null; then
+            pytest --cov --cov-report=term-missing
+          else
+            echo "pytest-cov nao instalado — passo ignorado (adicione ao requirements para medir cobertura)"
+          fi
+
+      # No pull request o audit e informativo: auditar o projeto inteiro
+      # reprovaria por causa de spec de OUTRA feature ainda em rascunho, e
+      # isso nao e problema deste PR. O gate por feature ja rodou local, no
+      # Portao 1.
+      - name: Auditar a especificacao (informativo no PR)
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        run: |
+          MOTOR=.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs
+          if [ ! -f "$MOTOR" ]; then
+            echo "motor nao encontrado em $MOTOR — rode 'fuzkrigo-spec init --agents claude' e commite"; exit 0
+          fi
+          node "$MOTOR" audit
+
+      # Na main o audit e bloqueante e SEM filtro: aqui o projeto inteiro
+      # precisa estar integro, incluindo specs que ficaram pela metade.
+      - name: Auditar a especificacao (bloqueante na main)
+        if: github.event_name == 'push'
+        run: |
+          MOTOR=.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs
+          if [ ! -f "$MOTOR" ]; then
+            echo "motor nao encontrado em $MOTOR — rode 'fuzkrigo-spec init --agents claude' e commite"; exit 0
+          fi
+          node "$MOTOR" audit --ci
