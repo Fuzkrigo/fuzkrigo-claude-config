@@ -56,7 +56,7 @@ BLOCO A - abertura do projeto (uma vez)
 
 BLOCO B - ciclo de feature (repete a cada etapa)
    Especificar -> Projetar -> Tarefas -> Plano -> Executar
-   Portao 1  audit --ci = 0        (a maquina prova)
+   Portao 1  audit --ci --feature <f> = 0   (a maquina prova)
    Portao 2  code-reviewer -> docstrings-manager -> security (se sensivel)
    Portao 3  PR, merge, CHECKLIST atualizado
 
@@ -265,9 +265,22 @@ Cada faixa roda em um worktree próprio, com contexto limpo.
 ### Passo 5 — Portão 1: a máquina decide
 
 ```bash
-fspec verify recuperacao-senha    # roda os testes e grava a prova por criterio
-fspec audit --ci                  # o veredito: 0 = alinhado
+fspec verify recuperacao-senha                 # roda os testes e grava a prova
+fspec audit --ci --feature recuperacao-senha   # o veredito desta feature
 ```
+
+O `--feature` limita o veredito à feature da vez: a spec da próxima etapa, ainda em rascunho, não
+reprova esta. O que é do **projeto** — princípio da constituição violado, código órfão — continua
+contando, porque esconder isso transformaria o filtro numa porta dos fundos.
+
+Antes de fechar uma milestone ou lançar qualquer coisa, rode **sem** o filtro:
+
+```bash
+fspec audit --ci                  # o veredito do projeto inteiro
+```
+
+Um relatório filtrado sempre avisa, em amarelo, que o escopo estava reduzido. Se você errar o nome
+da feature, o comando falha com código 2 e lista as existentes — nunca sai 0 por engano.
 
 Teste pulado **não** conta como prova — o motor recusa e o audit acusa. Se o audit sair 1, ele
 diz exatamente o que falta. Corrija e repita, no máximo três vezes; persistindo, pare e reavalie
@@ -361,8 +374,9 @@ fspec painel <feature>                     # acompanhamento ao vivo no navegador
 
 # prova
 fspec verify <feature>                     # roda os testes, grava a prova
-fspec audit                                # relatorio legivel
-fspec audit --ci                           # o gate: exit 0 ou 1
+fspec audit                                # relatorio legivel (projeto inteiro)
+fspec audit --ci --feature <feature>       # o gate da feature: exit 0 ou 1
+fspec audit --ci                           # o gate do projeto (CI e release)
 fspec audit --md relatorio.md              # salva o relatorio
 
 # aprendizado
@@ -409,9 +423,11 @@ Na conversa, use o nome por extenso. O código vai entre parênteses quando prec
 
 Coisas que vão te morder e não são culpa sua:
 
-1. **O audit é global.** Criar a spec da próxima feature reprova o gate da anterior, porque o
-   audit avalia o projeto inteiro e ainda não tem filtro por feature. Enquanto isso não muda,
-   trabalhe com uma spec viva por vez. Está no `PLANO-CORRECOES.md`, item 1.
+1. **O audit sem filtro é do projeto inteiro.** No portão de uma feature, use
+   `--feature <nome>`; sem ele, a spec da próxima etapa ainda em rascunho reprova a feature que
+   você acabou de terminar. E vale o contrário: não use `--feature` para decidir se o projeto está
+   pronto para release, porque aí ele esconde exatamente o que você precisa ver. Boa prática que
+   continua valendo: uma spec viva por vez.
 2. **`node --test` sozinho não gera prova.** Do Node 20 em diante o formato padrão mudou; sem
    `--test-reporter=tap` o verify lê zero testes e reprova tudo, com a suíte inteira verde.
 3. **Nunca renomeie um teste com etiqueta** (`@spec:` ou `test_ac_001`). A prova é casada por ela.

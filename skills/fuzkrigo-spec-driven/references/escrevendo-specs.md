@@ -80,7 +80,9 @@ rascunho → pronta → em-implementacao → implementada → auditada
   para implementar.
 - `em-implementacao`: código em andamento. Perguntas abertas viram aviso.
 - `implementada`: código pronto. Suposições abertas viram **erro**.
-- `auditada`: `audit --ci` saiu 0 com prova de todos os critérios de aceite.
+- `auditada`: `audit --ci --feature <feature>` saiu 0 com prova de todos os
+  critérios de aceite. (O audit do projeto inteiro, sem filtro, é o que vale
+  antes de um release — uma feature auditada não garante um projeto íntegro.)
 
 ## Tarefas: formato dos campos
 

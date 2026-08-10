@@ -9,7 +9,7 @@
 
 | # | Severidade | Furo | Esforço | Risco de mexer | Status |
 | - | ---------- | ---- | ------- | -------------- | ------ |
-| 1 | Crítico | O audit é global e reprova o gate de uma feature por causa de outra | Médio | Médio (mexe no motor) | Aberto |
+| 1 | Crítico | O audit é global e reprova o gate de uma feature por causa de outra | Médio | Médio (mexe no motor) | **Resolvido (B + A)** |
 | 2 | Alto | Contradição: Bloco A é obrigatório ou opcional? | Baixo | Baixo | **Resolvido (opção A)** |
 | 3 | Médio | Dependência circular entre A2 e A3 (códigos `P-xxx` no ROADMAP) | Baixo | Nenhum | **Resolvido** |
 | 4 | Médio | Frase residual do fluxo antigo sobre onde as etapas nascem | Trivial | Nenhum | **Resolvido** |
@@ -26,6 +26,26 @@ Ordem sugerida de execução: 2, 3, 4 (texto puro, destravam o entendimento do f
 ---
 
 ## 1. CRÍTICO — O audit é global e reprova o gate de uma feature por causa de outra
+
+> **RESOLVIDO em 03/08/2026 pela opção B, com a A como regra complementar.**
+>
+> Motor: `audit --feature <nome>` filtra o veredito. Achados de outras features saem; os que não
+> pertencem a feature nenhuma permanecem; as estatísticas passam a ser da feature; o relatório
+> avisa em amarelo que o escopo estava reduzido; e nome inexistente falha com código 2 listando
+> as features existentes — o cenário perigoso (um typo filtrar tudo e sair 0) está coberto por
+> teste. Seis casos novos em `test/audit-por-feature.test.mjs`, mais os 12 da ponte Python sem
+> regressão.
+>
+> Processo: a regra "uma spec viva por vez" entrou no passo Especificar da `spec-driven`, agora
+> com a justificativa correta — spec parada não reprova mais o portão das outras, mas continua
+> reprovando o audit do projeto, que é o que vale antes do release.
+>
+> Documentação: os dois usos ficaram explícitos em toda a cadeia (skills, referências, agente
+> `project-manager`, template de issue, `CLAUDE.md`, manual). O `project-manager` ganhou instrução
+> expressa de **não** usar `--feature` na pré-condição de release.
+>
+> Verificado ponta a ponta no cenário que originou o item: com duas features, o audit global sai
+> 1 e o `--feature` da feature pronta sai 0.
 
 ### O problema
 

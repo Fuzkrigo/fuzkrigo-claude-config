@@ -16,8 +16,8 @@ labels: type:feature
 
 ## Criterio de conclusao
 
-`fuzkrigo-spec audit --ci` com saida 0 para esta feature, revisao de qualidade
-aplicada e PR mesclado.
+`fuzkrigo-spec audit --ci --feature <nome-da-feature>` com saida 0, revisao de
+qualidade aplicada e PR mesclado.
 
 [Complementar aqui apenas o que for especifico desta etapa e nao estiver nos
 criterios de aceite da spec]

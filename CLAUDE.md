@@ -108,7 +108,7 @@ Ao iniciar projeto novo ou refatoração grande, carregar `/iniciar-projeto`. Co
 - Testes **SEMPRE ANTES** do código de produção.
 - **RECUSE CÓDIGO DE PRODUÇÃO** até os testes estarem definidos e cobrindo os requisitos.
 - **COBERTURA MÍNIMA:** 80% geral / 95% em lógica de negócio. Ratio esperado ~1.5x (mais teste que produção).
-- **QUEM DECIDE SE PASSOU É O TEST RUNNER, NUNCA EU.** Cada critério de aceite tem um teste anotado e uma prova gravada; `audit --ci` com saída 0 é o único "pronto" aceito. Declarar conclusão sem colar a saída do audit é violação.
+- **QUEM DECIDE SE PASSOU É O TEST RUNNER, NUNCA EU.** Cada critério de aceite tem um teste anotado e uma prova gravada; `audit --ci --feature <feature>` com saída 0 é o único "pronto" aceito para uma feature, e `audit --ci` sem filtro é o que vale para o projeto, antes de qualquer release. Declarar conclusão sem colar a saída do audit é violação.
 
 Cobertura e prova são coisas diferentes: o audit garante que todo critério tem um teste que passou; os 80%/95% continuam sendo medidos à parte, no CI. Um não substitui o outro.
 
