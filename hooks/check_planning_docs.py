@@ -34,11 +34,10 @@ import os
 import sys
 import tempfile
 
-DOC_EXEMPT = {"ROADMAP.md", "CHECKLIST.md", "ARCHITECTURE.md"}
-
 CODE_EXTENSIONS = {
-    "py", "js", "jsx", "ts", "tsx", "vba", "bas", "java", "go", "rs",
-    "cs", "cpp", "cc", "c", "h", "hpp", "rb", "php", "sh", "ps1", "sql",
+    "py", "js", "mjs", "cjs", "jsx", "ts", "tsx", "vba", "bas", "java",
+    "go", "rs", "cs", "cpp", "cc", "c", "h", "hpp", "rb", "php", "sh",
+    "ps1", "sql",
 }
 
 
@@ -81,10 +80,6 @@ def main():
         return
 
     basename = os.path.basename(file_path)
-    if basename in DOC_EXEMPT:
-        allow()
-        return
-
     ext = basename.rsplit(".", 1)[-1].lower() if "." in basename else ""
     if ext not in CODE_EXTENSIONS:
         allow()

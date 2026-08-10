@@ -13,9 +13,9 @@
 | 2 | Alto | Contradição: Bloco A é obrigatório ou opcional? | Baixo | Baixo | **Resolvido (opção A)** |
 | 3 | Médio | Dependência circular entre A2 e A3 (códigos `P-xxx` no ROADMAP) | Baixo | Nenhum | **Resolvido** |
 | 4 | Médio | Frase residual do fluxo antigo sobre onde as etapas nascem | Trivial | Nenhum | **Resolvido** |
-| 5 | Baixo | Hook de planejamento não cobre `.mjs` / `.cjs` | Trivial | Baixo |
-| 6 | Baixo | `DOC_EXEMPT` é código morto no hook | Trivial | Nenhum |
-| 7 | Baixo | Não está escrito quem aplica o princípio devolvido pelo security-reviewer | Trivial | Nenhum |
+| 5 | Baixo | Hook de planejamento não cobre `.mjs` / `.cjs` | Trivial | Baixo | **Resolvido (parcial)** |
+| 6 | Baixo | `DOC_EXEMPT` é código morto no hook | Trivial | Nenhum | **Resolvido** |
+| 7 | Baixo | Não está escrito quem aplica o princípio devolvido pelo security-reviewer | Trivial | Nenhum | **Resolvido** |
 | 8 | Observação | Portão 2 gasta 2-3 subagentes mesmo em feature minúscula | Baixo | Baixo |
 | 9 | Observação | Proteção das etiquetas de rastreio é textual, não mecânica | Médio | Médio |
 | 10 | Observação | `dataviz` e `DESIGN.md` podem definir paletas conflitantes | Baixo | Nenhum |
@@ -226,6 +226,13 @@ e das etapas já revisadas em A2 — não porque as etapas não existiriam antes
 
 ## 5. BAIXO — Hook de planejamento não cobre `.mjs` e `.cjs`
 
+> **RESOLVIDO EM PARTE em 03/08/2026.** `mjs` e `cjs` entraram em `CODE_EXTENSIONS`, testados em
+> projeto vazio (pergunta) e com spec (libera). **Continua em aberto** a pergunta que este item
+> deixou para você: `vue`, `svelte`, `scss` e `css` entram também? Argumentos: `.vue` e `.svelte`
+> carregam lógica de aplicação, então o caso a favor é forte; `.scss` e `.css` são estilo, e
+> tratá-los como código de produção faria o hook perguntar ao ajustar uma cor. Enquanto não
+> decidir, os quatro seguem fora.
+
 ### O problema
 
 `hooks/check_planning_docs.py`, conjunto `CODE_EXTENSIONS`: cobre `js`, `jsx`, `ts`, `tsx`, mas
@@ -249,6 +256,10 @@ sua: CSS é código de produção para efeito de planejamento, ou não?
 
 ## 6. BAIXO — `DOC_EXEMPT` é código morto
 
+> **RESOLVIDO em 03/08/2026.** O conjunto e a checagem foram removidos. Regressão confirmada:
+> `ROADMAP.md`, `docs/CHECKLIST.md` e qualquer outro `.md` continuam liberados — agora pela
+> checagem de extensão, que já os cobria.
+
 ### O problema
 
 O mesmo hook mantém `DOC_EXEMPT = {"ROADMAP.md", "CHECKLIST.md", "ARCHITECTURE.md"}` e checa esse
@@ -268,6 +279,10 @@ que não existe é ruído.
 ---
 
 ## 7. BAIXO — Não está escrito quem aplica o princípio devolvido pelo security-reviewer
+
+> **RESOLVIDO em 03/08/2026.** O Portão 2 agora diz explicitamente que o agente não tem permissão
+> de escrita, devolve o bloco pronto no relatório, e que quem cola em `.spec/constituicao.md` é o
+> Claude principal, após aprovação do usuário.
 
 ### O problema
 
