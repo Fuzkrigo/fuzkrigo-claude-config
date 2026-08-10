@@ -34,10 +34,14 @@ import os
 import sys
 import tempfile
 
+# Arquivos que IMPLEMENTAM comportamento. Componente de framework entra
+# (vue/svelte/astro carregam a logica junto do template); folha de estilo
+# fica de fora de proposito: ajustar uma cor nao e implementar feature, e um
+# hook que pergunta a cada retoque visual e um hook que se aprende a ignorar.
 CODE_EXTENSIONS = {
-    "py", "js", "mjs", "cjs", "jsx", "ts", "tsx", "vba", "bas", "java",
-    "go", "rs", "cs", "cpp", "cc", "c", "h", "hpp", "rb", "php", "sh",
-    "ps1", "sql",
+    "py", "js", "mjs", "cjs", "jsx", "ts", "tsx", "vue", "svelte", "astro",
+    "vba", "bas", "java", "go", "rs", "cs", "cpp", "cc", "c", "h", "hpp",
+    "rb", "php", "sh", "ps1", "sql",
 }
 
 

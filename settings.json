@@ -3,6 +3,12 @@
     "commit": ""
   },
   "model": "opus",
+  "permissions": {
+    "allow": [
+      "Bash(jq --version)",
+      "Read(//tmp/**)"
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "C:/Users/bruno.krieger/.claude/statusline.sh"
