@@ -42,7 +42,27 @@ Sobre os hooks, que são a parte que ninguém pode desligar sem querer:
   (`docs/ROADMAP.md` + `docs/CHECKLIST.md`, **ou** uma spec em `.spec/features/`). Se não houver,
   ele **pergunta** (não bloqueia): quem decide é você.
 - `check_style_prohibitions.py` — bloqueia emoji e frases que atribuem autoria do trabalho a uma
-  ferramenta. Esse **bloqueia mesmo**, e é intencional.
+  ferramenta. Esse **bloqueia mesmo**, e é intencional. Tem uma exceção por caminho: dentro de
+  `~/.claude/` e do repositório de backup, citar as frases proibidas é permitido, porque é onde a
+  regra precisa ser documentada. Emoji continua bloqueado em todo lugar.
+
+### Não confunda com as ferramentas que já vêm no Claude Code
+
+Além do que é seu, o produto traz skills próprias, acionadas por barra. Duas têm nome parecido com
+os seus agentes, e fazem coisas diferentes:
+
+| Você digita | O que roda | Não confundir com |
+| ----------- | ---------- | ----------------- |
+| `/code-review` | Skill do produto: revisa o diff atual, um PR ou uma branch, com critérios genéricos | Seu agente `code-reviewer`, que aplica o seu `CLAUDE.md` e o seu `CODIGO.md` |
+| `/security-review` | Skill do produto: revisa as mudanças pendentes da branch | Seu agente `security-reviewer`, que faz triagem entre dez módulos (OWASP, LGPD, secrets, supply chain) e devolve princípios para a constituição |
+
+Os nomes diferem por uma letra (`review` contra `review**er**`), e os dois mundos não se
+atropelam: os seus são invocados pelo fluxo, pela ferramenta de agentes; os do produto, só quando
+você digita a barra. O risco não é técnico, é de dedo: digitar `/security-review` esperando a
+auditoria completa e receber uma revisão de diff.
+
+Nada impede usar as duas de propósito. A do produto é uma boa segunda opinião antes de um PR
+grande, justamente porque aplica critérios diferentes dos seus.
 
 ---
 
@@ -304,7 +324,9 @@ de teste; se um título anotado ou um nome `test_ac_001` mudar, a prova daquele 
 audit devolve isso na hora, em vez de você descobrir depois.
 
 Achado de segurança que você aceitar vira **princípio na constituição**. É assim que o mesmo erro
-não volta: da próxima vez, o audit acusa sozinho.
+não volta: da próxima vez, o audit acusa sozinho. O agente não escreve nada — ele devolve o bloco
+do princípio pronto no relatório, e quem cola em `.spec/constituicao.md` é o Claude principal,
+depois da sua aprovação.
 
 ### Passo 7 — Portão 3: entrega
 
@@ -458,10 +480,13 @@ instalação de uma status line chegou a sobrescrever o `settings.json` global, 
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são cinco ajustes no motor, incluindo o suporte a Python. A
-suíte que os protege roda assim:
+**patches locais** no `README.md`: são dois conjuntos de ajustes no motor — o suporte a Python e o
+audit com escopo de feature. As duas suítes que os protegem rodam assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
-node --test test/ponte-python.test.mjs
+node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs
 ```
+
+São 18 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+qual e onde.
