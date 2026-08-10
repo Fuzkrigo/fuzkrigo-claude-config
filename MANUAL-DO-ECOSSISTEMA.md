@@ -294,6 +294,15 @@ Com o audit em zero, entram os especialistas, nesta ordem:
 2. `docstrings-manager` — documenta o que ficou público, sem tocar em lógica.
 3. `security-reviewer` — só se a feature toca autenticação, permissão, dinheiro ou dado pessoal.
 
+O portão é dimensionado ao tamanho da feature: em feature pequena (até três arquivos, sem lógica
+de negócio nova) o `code-reviewer` é opcional e o `docstrings-manager` só entra se nasceu algo
+público. O `security-reviewer` não segue essa regra — o gatilho dele é o que a feature toca, não
+o tamanho dela.
+
+**Depois do `docstrings-manager`, rode o audit de novo.** Esse agente edita arquivos, inclusive os
+de teste; se um título anotado ou um nome `test_ac_001` mudar, a prova daquele critério some. O
+audit devolve isso na hora, em vez de você descobrir depois.
+
 Achado de segurança que você aceitar vira **princípio na constituição**. É assim que o mesmo erro
 não volta: da próxima vez, o audit acusa sozinho.
 

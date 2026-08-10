@@ -16,9 +16,9 @@
 | 5 | Baixo | Hook de planejamento não cobre `.mjs` / `.cjs` | Trivial | Baixo | **Resolvido (parcial)** |
 | 6 | Baixo | `DOC_EXEMPT` é código morto no hook | Trivial | Nenhum | **Resolvido** |
 | 7 | Baixo | Não está escrito quem aplica o princípio devolvido pelo security-reviewer | Trivial | Nenhum | **Resolvido** |
-| 8 | Observação | Portão 2 gasta 2-3 subagentes mesmo em feature minúscula | Baixo | Baixo |
-| 9 | Observação | Proteção das etiquetas de rastreio é textual, não mecânica | Médio | Médio |
-| 10 | Observação | `dataviz` e `DESIGN.md` podem definir paletas conflitantes | Baixo | Nenhum |
+| 8 | Observação | Portão 2 gasta 2-3 subagentes mesmo em feature minúscula | Baixo | Baixo | **Resolvido** |
+| 9 | Observação | Proteção das etiquetas de rastreio é textual, não mecânica | Médio | Médio | **Resolvido (opção C)** |
+| 10 | Observação | `dataviz` e `DESIGN.md` podem definir paletas conflitantes | Baixo | Nenhum | **Diagnóstico incorreto — ver nota** |
 
 Ordem sugerida de execução: 2, 3, 4 (texto puro, destravam o entendimento do fluxo) → 5, 6, 7
 (higiene) → 1 (o único que mexe em código de verdade) → 8, 9, 10 (conforme decisão).
@@ -323,6 +323,11 @@ Claude principal o aplica em `.spec/constituicao.md` após sua aprovação.
 
 ## 8. OBSERVAÇÃO — Portão 2 gasta 2 a 3 subagentes mesmo em feature minúscula
 
+> **RESOLVIDO em 03/08/2026.** O Portão 2 ganhou tabela de dimensionamento: em feature pequena
+> (até 3 arquivos, sem lógica de negócio nova) o `code-reviewer` é opcional e o
+> `docstrings-manager` só entra se nasceu função, classe ou módulo público. O `security-reviewer`
+> ficou fora da tabela de propósito — o gatilho dele é o que a feature toca, não o tamanho.
+
 ### O problema
 
 O Portão 2 invoca `code-reviewer`, depois `docstrings-manager`, e às vezes `security-reviewer`.
@@ -349,6 +354,10 @@ Critério de dispensa por tamanho, espelhando a tabela de auto-dimensionamento:
 ---
 
 ## 9. OBSERVAÇÃO — Proteção das etiquetas de rastreio é textual, não mecânica
+
+> **RESOLVIDO em 03/08/2026 pela opção C.** O Portão 2 passa a fechar rodando
+> `audit --ci --feature <feature>` mais uma vez, depois do `docstrings-manager` e antes do PR.
+> Custa segundos e transforma um estrago silencioso em falha imediata, sem engenharia nova.
 
 ### O problema
 
