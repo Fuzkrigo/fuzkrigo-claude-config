@@ -390,6 +390,22 @@ zero, detecção imediata, sem código novo.
 
 ## 10. OBSERVAÇÃO — `dataviz` e `DESIGN.md` podem definir paletas conflitantes
 
+> **DIAGNÓSTICO CORRIGIDO em 03/08/2026, item em stand by.**
+>
+> O caminho citado abaixo (`~/.claude/skills/dataviz/references/palette.md`) **não existe**. Foi
+> deduzido do padrão das outras skills em vez de verificado — erro de quem escreveu este plano.
+> Verificado depois: `dataviz` não está em `~/.claude/skills/`, nem como arquivo no pacote npm do
+> Claude Code. Ela é uma skill **embutida no produto**, disponível por gatilho mas não editável
+> pelo usuário. Editar o arquivo dela, como sugerido abaixo, é inviável — e seria desfeito na
+> próxima atualização do produto.
+>
+> O risco em si continua real (uma skill do produto traz paleta de exemplo e não conhece o
+> `DESIGN.md`), mas a solução tem de vir do lado do usuário: precedência declarada no próprio
+> `DESIGN.md`, ou uma regra no `CLAUDE.md` mandando consultá-lo antes de gerar qualquer gráfico.
+>
+> **Em stand by por decisão do usuário:** o `DESIGN.md` ainda está em construção e não é carregado
+> por nada. Sem um lugar definido para ele no ecossistema, não há onde ancorar a regra.
+
 ### O problema
 
 A skill `dataviz` (instalada, ativa por gatilho) traz a própria paleta em `references/palette.md`,
