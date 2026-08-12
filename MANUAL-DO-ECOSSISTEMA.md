@@ -1,6 +1,6 @@
 # Manual do ecossistema de desenvolvimento
 
-> Para quem nunca usou. Ensina o que é cada peça, quando ela entra e o que digitar.
+> O que é cada peça, quando ela entra e o que digitar.
 > Se você só quer os comandos, pule para "Cheat sheet".
 
 ---
@@ -60,7 +60,7 @@ Nada aqui impede você de trabalhar rápido. O que ele impede é você **achar**
 | `CLAUDE.md` | As regras que valem em toda sessão: persona, idioma, TDD, anti-alucinação, proibições | Carregado automaticamente, sempre |
 | `references/` | Padrões consultáveis: convenções de Git, templates de issue e PR, workflow de CI | Lido quando o assunto aparece; o `github/` é copiado para o projeto em A3 |
 | `skills/` | Fluxos completos: abertura de projeto, desenvolvimento de feature, ambiente corporativo | Você chama (`/iniciar-projeto`) ou o gatilho da descrição dispara |
-| `agents/` | Especialistas que rodam isolados e devolvem um relatório: revisão de código, segurança, documentação, board, docstrings | Chamados em pontos fixos do fluxo, ou quando você pede |
+| `agents/` | Especialistas que rodam isolados e devolvem um relatório: revisão de código, segurança, documentação, gestão de projeto, docstrings | Chamados em pontos fixos do fluxo, ou quando você pede |
 | `hooks/` | Dois scripts que o harness executa antes de cada escrita de arquivo | Automático, você não controla |
 
 Sobre os agentes: eles rodam em uma janela de contexto separada e **não veem a conversa**. Por
@@ -117,7 +117,7 @@ BLOCO C - fechamento de milestone
    C3 Release: CHANGELOG, tag, milestone fechada
 ```
 
-Uma **Etapa** do CHECKLIST equivale a uma issue no board, a uma feature em `.spec/features/` e a
+Uma **Etapa** do CHECKLIST equivale a uma issue no GitHub, a uma feature em `.spec/features/` e a
 uma branch. Esse é o elo que amarra tudo: se você entender só uma coisa deste manual, entenda essa.
 
 ---
@@ -129,7 +129,7 @@ uma branch. Esse é o elo que amarra tudo: se você entender só uma coisa deste
 ```bash
 node --version     # o motor de auditoria roda nele
 git --version
-gh auth status     # so se voce for usar board no GitHub
+gh auth status     # so se voce for criar repositorio, labels e issues no GitHub
 ```
 
 ### O que é o `fspec` deste manual
@@ -227,7 +227,9 @@ Assim fica uma etapa no CHECKLIST:
 ```
 
 **A3 — Provisionamento e constituição.** O agente `project-manager` cria repositório, labels,
-board, milestones e as issues (uma por etapa). E o projeto ganha sua constituição:
+milestones e as issues (uma por etapa) no GitHub, e monta a gestão no Linear — Project, Milestones
+e as issues já sincronizadas, com prioridade nativa. O GitHub Projects não entra: o board é o do
+Linear. E o projeto ganha sua constituição:
 
 **[terminal]** (na prática, quem roda sou eu, durante A3)
 

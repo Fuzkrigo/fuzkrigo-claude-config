@@ -1,6 +1,6 @@
 ---
 name: iniciar-projeto
-description: Abertura, documentação e gestão de projeto — briefing investigativo, geração de ROADMAP.md, CHECKLIST.md e ARCHITECTURE.md, integração com GitHub Projects e Linear (padrão "Fuzkrigo Projects"), ritual de release e padrão de commits. Use esta skill SEMPRE que o usuário mencionar projeto novo, iniciar desenvolvimento, planejar funcionalidade, criar roadmap, briefing de projeto, ou qualquer pedido que envolva começar a construir algo do zero. Também ativar quando o usuário pedir para gerar documentos de planejamento, checklist, diagramas de arquitetura, configurar labels/board/issues no GitHub ou no Linear, definir padrão de commits ou releases, ou fechar uma milestone. O desenvolvimento de cada feature (especificação, testes, implementação e auditoria) NÃO é conduzido aqui — é da skill `fuzkrigo-spec-driven`. Se o usuário tentar implementar código de um projeto que vai para o portfólio, tem usuário final ou vai ganhar release sem ter passado pela abertura (Bloco A), BLOQUEIE e carregue esta skill. Experimento descartável, script de uso próprio e correção pequena são exceção declarada — critério completo na seção 4.1 da skill.
+description: Abertura, documentação e gestão de projeto — briefing investigativo, geração de ROADMAP.md, CHECKLIST.md e ARCHITECTURE.md, integração com GitHub e Linear (padrão "Fuzkrigo Projects"), ritual de release e padrão de commits. Use esta skill SEMPRE que o usuário mencionar projeto novo, iniciar desenvolvimento, planejar funcionalidade, criar roadmap, briefing de projeto, ou qualquer pedido que envolva começar a construir algo do zero. Também ativar quando o usuário pedir para gerar documentos de planejamento, checklist, diagramas de arquitetura, configurar labels/board/issues no GitHub ou no Linear, definir padrão de commits ou releases, ou fechar uma milestone. O desenvolvimento de cada feature (especificação, testes, implementação e auditoria) NÃO é conduzido aqui — é da skill `fuzkrigo-spec-driven`. Se o usuário tentar implementar código de um projeto que vai para o portfólio, tem usuário final ou vai ganhar release sem ter passado pela abertura (Bloco A), BLOQUEIE e carregue esta skill. Experimento descartável, script de uso próprio e correção pequena são exceção declarada — critério completo na seção 4.1 da skill.
 ---
 
 # Abertura, Documentação e Gestão de Projeto
@@ -14,7 +14,7 @@ O trabalho se divide em duas camadas, com dono único para cada artefato. Nada �
 | Escopo | O projeto, e a gestão contínua | Cada feature |
 | Responde | O que construir, por quê, em que ordem, como se comunica e se entrega | O que exatamente esta feature faz, e como isso é provado |
 | Autoridade | Escopo, prioridade, documentação, board, release, padrão de estilo e de Git | O "pronto" técnico: `audit --ci` com saída 0 |
-| Território | `docs/`, `.github/`, `CHANGELOG.md`, board do GitHub e Linear | `.spec/` |
+| Território | `docs/`, `.github/`, `CHANGELOG.md`, issues do GitHub e o board do Linear | `.spec/` |
 
 Regra prática: quando esta skill precisa saber **se uma feature está pronta**, ela não julga — consulta o resultado do audit. Quando a outra skill precisa saber **qual feature construir agora**, ela não decide — consulta o `CHECKLIST.md`.
 
@@ -38,7 +38,7 @@ Três blocos. O Bloco A roda uma vez, na abertura. O Bloco B roda a cada feature
 - Invocar o agente `project-documentation` (ferramenta Agent) para gerar a versão inicial de `docs/ARCHITECTURE.md`, a partir do ROADMAP.md recém-criado — muda com menos frequência que ROADMAP/CHECKLIST, por isso fica com o agente
 
 #### A3 — Provisionamento e Constituição
-- Invocar o agente `project-manager` (ferramenta Agent) para provisionar GitHub e espelhar no Linear (seção 6). O board nasce aqui, e não em A2, porque depende do repositório já provisionado e das etapas já revisadas no CHECKLIST — cada issue nasce de uma etapa que já existe
+- Invocar o agente `project-manager` (ferramenta Agent) para provisionar o GitHub e montar a gestão no Linear (seção 6). O board nasce aqui, e não em A2, porque depende do repositório já provisionado e das etapas já revisadas no CHECKLIST — cada issue nasce de uma etapa que já existe
 - Inicializar a camada de desenvolvimento: **`fuzkrigo-spec init --agents claude`** (ver a skill `fuzkrigo-spec-driven`), e escrever a constituição do projeto a partir das restrições levantadas em A1. Princípio `[DEVE]` sem verificação executável é acusado pelo próprio audit — a constituição nasce com dente ou não nasce
 - O `--agents claude` não é opcional: ele copia o motor para `.claude/skills/` **dentro do projeto**, e é assim que o CI consegue auditar. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina. Sem isso, o CI roda testes e cobertura, mas pula a auditoria
 - Definir o par `testCommand` e `reporter` em `onpspec.config.json` antes de sair de A3 (tabela por stack na skill `fuzkrigo-spec-driven`). O CI lê o comando desse mesmo arquivo — configuração em um lugar só
@@ -98,7 +98,7 @@ Todo projeto organiza o *que* será construído em quatro níveis:
 | Nível         | É um conjunto de… | Onde vive                                                        |
 | ------------- | ----------------- | ---------------------------------------------------------------- |
 | **Milestone** | Fases             | Milestone no GitHub + vira um Release (SemVer)                    |
-| **Fase**      | Etapas            | Agrupamento lógico (label ou campo no board)                      |
+| **Fase**      | Etapas            | Agrupamento lógico (label `area:*`, e um Cycle no Linear quando couber) |
 | **Etapa**     | Tarefas           | **Uma issue** no GitHub + **uma feature** em `.spec/features/`    |
 | **Tarefa**    | (unidade atômica) | Uma tarefa `T-xxx` no `tasks.md` da feature                       |
 
@@ -195,7 +195,9 @@ Detalhes de geração de cada um: `~/.claude/agents/project-documentation.md`.
 
 ## 6. Integração GitHub e Linear (padrão "Fuzkrigo Projects")
 
-Provisionamento de GitHub (board, labels, views, issues, milestones) e o espelho no Linear são feitos pelo agente `project-manager` (ferramenta Agent) — invocar em A3, com roadmap e milestones já definidos. O agente decide sozinho a ordem (GitHub primeiro, Linear só completa lacunas) e o guardrail de duplicidade — não preciso orquestrar isso manualmente.
+O provisionamento do GitHub (labels, milestones, issues) e a montagem da gestão no Linear são feitos pelo agente `project-manager` (ferramenta Agent) — invocar em A3, com roadmap e milestones já definidos. O agente decide sozinho a ordem (GitHub primeiro, porque a sincronização nativa parte dele; Linear depois, completando o que ela não trouxe) e o guardrail de duplicidade — não preciso orquestrar isso manualmente.
+
+**A divisão de papéis é fixa: o GitHub guarda código, labels, milestones e issues; o Linear é a central de gestão** — board, prioridade, estimativa, ciclos e acompanhamento. O GitHub Projects não faz parte do padrão: não criar, não provisionar, não cobrar.
 
 Cada issue de etapa nasce apontando para a pasta da feature correspondente em `.spec/features/`, e é fechada pelo PR do Portão 3.
 
@@ -282,7 +284,7 @@ Estas regras valem para **todo** artefato do projeto — código, documentação
 > Um hook `PreToolUse` (`~/.claude/hooks/check_style_prohibitions.py`) bloqueia automaticamente emoji decorativo e os trailers ou frases típicas de commit que atribuem a autoria do trabalho a uma ferramenta automatizada (a lista exata de padrões está no código-fonte do hook). Por design, o hook não bloqueia o nome do assistente isolado — banir isso quebraria documentação legítima sobre a própria configuração, este repositório incluído. Julgamento sobre menções indiretas que o hook não cobre continua comigo.
 
 1. **Zero emojis** em qualquer arquivo, documentação, mensagem de commit, PR ou release. Emoji dá cara de texto de máquina; o objetivo é o oposto — linguagem humana e sóbria.
-   - **Única exceção**: os pontos de cor das labels no GitHub Projects e no Linear, que são identificação visual funcional do board (ver `~/.claude/agents/project-manager.md`).
+   - **Única exceção**: os pontos de cor das labels no GitHub e no Linear, que são identificação visual funcional na lista de issues e no board (ver `~/.claude/agents/project-manager.md`).
 2. **Nunca mencionar** ferramenta de IA, Claude, assistente, coautoria ou autoria de máquina — em nenhum lugar: nem em commits (`Co-authored-by`), nem em documentação, nem em comentários de código, nem em releases. Todo o trabalho é apresentado como autoria própria do usuário.
 3. Escrever com voz humana e direta, evitando construções que soem automáticas ou genéricas.
 
