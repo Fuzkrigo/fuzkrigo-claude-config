@@ -14,6 +14,19 @@
     "command": "C:/Users/bruno.krieger/.claude/statusline.sh"
   },
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"C:/Users/bruno.krieger/AppData/Local/Programs/Python/Python312/python.exe\" \"C:/Users/bruno.krieger/.claude/hooks/arm_modo_tarefa.py\"",
+            "shell": "bash",
+            "timeout": 5,
+            "statusMessage": "Armando marcador de Modo Tarefa..."
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Write|Edit",
