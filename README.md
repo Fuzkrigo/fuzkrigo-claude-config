@@ -30,7 +30,7 @@ Backup e documentação da configuração pessoal do Claude Code (Fuzkrigo) — 
     ├── arm_modo_tarefa.py           # UserPromptSubmit — cria/apaga o marcador do Modo Tarefa (CLAUDE.md §7)
     ├── check_planning_docs.py       # PreToolUse (Write|Edit) — iniciar-projeto §4, Regra de Bloqueio
     ├── check_style_prohibitions.py  # PreToolUse (Write|Edit) — iniciar-projeto §8, Proibições de Estilo
-    └── tests/                       # testes dos hooks (unittest): py -3 -m unittest discover -s hooks/tests
+    └── tests/                       # testes dos hooks e da status line (unittest): py -3 -m unittest discover -s hooks/tests
 ```
 
 Cada skill segue o formato padrão do Claude Code: `SKILL.md` (entrada principal) + `references/` (documentação detalhada carregada sob demanda). A `fuzkrigo-spec-driven` traz também `scripts/`, com o motor de auditoria embarcado (Node, sem dependências externas).
@@ -78,7 +78,7 @@ Hooks são comandos que o harness executa automaticamente em eventos do ciclo de
 
 ## Instalação no `~/.claude/` (Windows)
 
-Este repositório é o backup versionado; o que o Claude Code carrega é o `~/.claude/`. O procedimento abaixo instala a configuração em qualquer usuário do Windows, porque nenhum caminho depende do nome do usuário. Ele é o da F5, ainda não executado: valide cada passo ao fazê-lo.
+Este repositório é o backup versionado; o que o Claude Code carrega é o `~/.claude/`. O procedimento abaixo instala a configuração em qualquer usuário do Windows, porque nenhum caminho depende do nome do usuário. Ele foi validado numa instalação simulada, com uma `HOME` temporária, em 08/11/2026, mas ainda não foi executado no `~/.claude/` real: valide cada passo ao fazê-lo.
 
 **Pré-requisitos** — confira no Git Bash:
 
