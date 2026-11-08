@@ -597,6 +597,9 @@ A configuração vive em dois lugares que precisam andar juntos:
 - `~/.claude/` — o que o Claude Code realmente carrega.
 - Este repositório — o backup versionado.
 
+Para instalar numa máquina nova, siga a seção "Instalação no `~/.claude/`" do `README.md`: o que
+vai para onde, os comandos e como validar.
+
 Mudou um, espelhe no outro. Isso não é burocracia: os dois já saíram de sincronia uma vez, e a
 instalação de uma status line chegou a sobrescrever o `settings.json` global, deixando os dois
 hooks desligados por dias sem ninguém notar.

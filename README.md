@@ -75,3 +75,54 @@ Hooks são comandos que o harness executa automaticamente em eventos do ciclo de
 - `statusline.sh` corresponde a `~/.claude/statusline.sh`. É o script que o bloco `statusLine` do `settings.json` executa a cada render.
 - **`~/.claude/settings.local.json` não é versionado**, de propósito (está no `.gitignore`). Ele é reescrito pelo Claude Code toda vez que uma permissão é aprovada, então versioná-lo produziria ruído permanente de diff. A regra é: permissão que vale sempre vai para o bloco `permissions` do `settings.json`, que é versionado; o `settings.local.json` fica como rascunho descartável, específico da máquina. Se ele se perder, nada de importante vai junto.
 - `DESIGN.md` é referência de design system (duas camadas de token, componentes, contraste WCAG). Corresponde a `~/.claude/DESIGN.md` e é lido sob demanda: a tabela do §4 do `CLAUDE.md` manda consultá-lo em trabalho que produz interface ou gráfico — decisão de 08/11/2026, que também resolveu o conflito com a paleta de exemplo da skill dataviz (item 10 do `PLANO-CORRECOES.md`). Não é importado, então não ocupa contexto fixo. As pendências 1 a 7 da seção 10 do próprio arquivo seguem abertas, para uma sessão de design.
+
+## Instalação no `~/.claude/` (Windows)
+
+Este repositório é o backup versionado; o que o Claude Code carrega é o `~/.claude/`. O procedimento abaixo instala a configuração em qualquer usuário do Windows, porque nenhum caminho depende do nome do usuário. Ele é o da F5, ainda não executado: valide cada passo ao fazê-lo.
+
+**Pré-requisitos** — confira no Git Bash:
+
+```bash
+git --version      # Git for Windows: traz o Git Bash, que roda os hooks (shell: bash)
+py -3 --version    # lancador do Python: os tres hooks rodam com ele
+node --version     # Node LTS: o motor da fuzkrigo-spec-driven
+gh auth status     # GitHub CLI autenticado: o agente project-manager usa em A3 e C3
+jq --version       # opcional: a status line usa o jq e, sem ele, o python3/python do PATH
+```
+
+**O que vai para onde:**
+
+| Do repositório | Para | Observação |
+| --- | --- | --- |
+| `CLAUDE.md`, `CODIGO.md`, `PATTERNS.md`, `DESIGN.md`, `statusline.sh` | `~/.claude/` | O `CLAUDE.md` importa o `CODIGO.md`; `PATTERNS.md` e `DESIGN.md` são lidos sob demanda |
+| `settings.json` | `~/.claude/settings.json` | **Mesclar, não sobrescrever** (ver abaixo) |
+| `hooks/*.py` | `~/.claude/hooks/` | A pasta `hooks/tests/` fica só neste repositório |
+| `agents/` | `~/.claude/agents/` | Inclui `security-reviewer/references/` |
+| `skills/iniciar-projeto/`, `skills/fuzkrigo-spec-driven/` | `~/.claude/skills/` | |
+| `skills/pipeline-corporativo/` | `~/.claude/skills/` | Só na máquina corporativa |
+| `references/` | `~/.claude/references/` | |
+
+Não vão para o `~/.claude/`: `README.md`, `MANUAL-DO-ECOSSISTEMA.md` e `PLANO-CORRECOES.md`, que documentam este repositório, e o `CLAUDE_PASTA PROFFISIONAL.md`, cujo local de instalação está em aberto (etapa corporativa).
+
+**Comandos** — no Git Bash, na raiz deste repositório:
+
+```bash
+cp ~/.claude/settings.json ~/.claude/settings.json.bak-$(date +%Y%m%d) 2>/dev/null
+mkdir -p ~/.claude/hooks ~/.claude/agents ~/.claude/skills ~/.claude/references
+cp CLAUDE.md CODIGO.md PATTERNS.md DESIGN.md statusline.sh ~/.claude/
+cp hooks/*.py ~/.claude/hooks/
+cp -r agents/. ~/.claude/agents/
+cp -r skills/iniciar-projeto skills/fuzkrigo-spec-driven ~/.claude/skills/
+cp -r references/. ~/.claude/references/
+```
+
+Para atualizar uma instalação antiga, apague antes a pasta de cada skill em `~/.claude/skills/`: o `cp -r` sobrescreve, mas não remove arquivos que saíram do repositório.
+
+**`settings.json`:** o Claude Code grava no arquivo da máquina preferências próprias, como o modelo escolhido em `/model` e o canal de atualização. Leve deste repositório os blocos `attribution`, `permissions`, `statusLine` e `hooks`, mais as preferências que quiser, sem apagar as chaves que só existem na máquina. O backup do primeiro comando é a volta, se algo der errado — instalador que sobrescreve o `settings.json` já custou os hooks uma vez.
+
+**Validar:**
+
+1. Testes: `py -3 -m unittest discover -s hooks/tests` (neste repositório) e as suítes do motor a partir de `~/.claude/skills/fuzkrigo-spec-driven/scripts` (comando na seção 13 do `MANUAL-DO-ECOSSISTEMA.md`).
+2. Numa sessão nova, `/context all` lista o `~/.claude/CLAUDE.md` e o `CODIGO.md` importado em **Memory files**.
+3. Hooks: uma mensagem que começa com `#tarefa` cria `claude-modo-tarefa/<session_id>.flag` na pasta temporária do Windows; pedir a gravação de um arquivo com emoji, fora deste repositório, é negado pelo hook de estilo.
+4. A status line aparece no rodapé da sessão.
