@@ -37,6 +37,7 @@ export const FINDING_LABELS = {
   CONSTITUICAO_AUSENTE: 'constituição ausente',
   PRINCIPIO_SEM_VERIFICACAO: 'princípio sem verificação',
   PRINCIPIO_VIOLADO: 'princípio violado',
+  PRINCIPIO_SEM_PROVA: 'princípio sem prova',
   GLOB_SEM_ARQUIVOS: 'verificação não olha nenhum arquivo',
   NIVEL_INVALIDO: 'nível de princípio inválido',
   VERIFICACAO_MALFORMADA: 'verificação malformada',

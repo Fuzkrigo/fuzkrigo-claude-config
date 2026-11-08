@@ -406,6 +406,7 @@ conversar com o usuário, use o nome legível.
 | suposição em aberto (ASM_ABERTA) | suposição aberta numa feature "pronta" | confirme/invalide com o usuário |
 | seção obrigatória ausente (SECAO_AUSENTE) | spec sem seção Suposições/Perguntas | registre-as ou escreva "Nenhuma." |
 | princípio violado (PRINCIPIO_VIOLADO) | quebrou a constituição | conserte o código, não o princípio |
+| princípio sem prova (PRINCIPIO_SEM_PROVA) | o teste do princípio falhou, foi PULADO ou nunca rodou num verify | rode `verify`; conserte o código até o teste passar |
 | verificação não olha nenhum arquivo (GLOB_SEM_ARQUIVOS) | glob da constituição não casa nada | corrija o glob |
 | nível de princípio inválido (NIVEL_INVALIDO) | nível desconhecido | use [DEVE]/[RECOMENDADO]/[PODE] |
 | código órfão (ARQUIVO_ORFAO) | código que nenhuma tarefa mapeia | mapeie na tarefa ou questione o código |

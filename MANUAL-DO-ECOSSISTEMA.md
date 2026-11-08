@@ -567,6 +567,7 @@ Os mais comuns:
 | tarefa concluída sem prova | Você marcou `[concluida]` sem o critério provado | Verifique de novo, ou reabra a tarefa |
 | suposição em aberto | A feature quer fechar com um palpite não confirmado | Confirme com quem decide, ou invalide |
 | princípio violado | O código quebrou a constituição | Conserte o código. Nunca o princípio |
+| princípio sem prova | O teste do princípio falhou, foi pulado ou nunca rodou num verify | Rode `verify` e conserte o código até o teste passar |
 | verificação não olha nenhum arquivo | O glob do princípio não casa nada | Corrija o glob: a regra estava inerte |
 | código órfão | Existe código que nenhuma tarefa mapeia | Mapeie na tarefa, ou questione por que ele existe |
 | prova fraca | A prova veio só do código de saída global | Configure um reporter com granularidade |
@@ -626,17 +627,18 @@ instalação de uma status line chegou a sobrescrever o `settings.json` global, 
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são oito conjuntos de ajustes no motor — o suporte a Python, o
+**patches locais** no `README.md`: são nove conjuntos de ajustes no motor — o suporte a Python, o
 audit com escopo de feature, os nomes próprios, o modelo padrão por alias, o preset LGPD para
-Python e JavaScript, as mensagens e a saída do motor, a spec rastreável e a numeração contínua no
-`new`. As oito suítes que os protegem rodam assim:
+Python e JavaScript, as mensagens e a saída do motor, a spec rastreável, a numeração contínua no
+`new`, e a prova do princípio com a unicidade das tarefas. As dez suítes que os protegem rodam
+assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
-node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs test/spec-rastreavel.test.mjs test/numeracao-continua.test.mjs
+node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs test/spec-rastreavel.test.mjs test/numeracao-continua.test.mjs test/prova-de-principio.test.mjs test/unicidade-tarefas.test.mjs
 ```
 
-São 40 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+São 48 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:
