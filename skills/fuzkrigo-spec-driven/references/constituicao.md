@@ -43,7 +43,7 @@ com arquivo e linha exatos (rastreabilidade princípio → arquivo → linha).
 
 ## Preset LGPD + educação
 
-`fuzkrigo-spec init --preset lgpd-educacao` já vem com princípios reais para produtos
+`fuzkrigo-spec init --preset lgpd-educacao --agents claude` já vem com princípios reais para produtos
 que guardam dados de alunos (inclusive menores):
 
 - **P-001** nota nunca exposta a outro aluno (teste)

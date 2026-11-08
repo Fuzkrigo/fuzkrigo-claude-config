@@ -114,12 +114,16 @@ Todos os comandos rodam **a partir da raiz do projeto do usuário**:
 node <dir-desta-skill>/scripts/fuzkrigo-spec.mjs <comando>
 ```
 
-Comandos: `init [--preset base|lgpd-educacao]` · `new <feature>` ·
+Comandos: `init [--preset base|lgpd-educacao] [--agents claude]` · `new <feature>` ·
 `plano <feature> [--agents claude]` · `painel <feature> [--porta N] [--sem-abrir]` ·
 `tarefa <feature> <T-xxx> <status>` ·
 `scaffold <feature> [--force]` · `verify <feature>` ·
-`audit [--ci] [--json] [--md <arquivo>]` · `status` · `assumptions` ·
+`audit [--ci] [--json] [--md <arquivo>] [--feature <feature>]` · `status` · `assumptions` ·
 `licoes <add|list|sugerir|penalizar|status>`.
+
+No `init`, o `--agents claude` copia o motor para `.claude/skills/` dentro do projeto — sem essa
+cópia commitada, o CI do projeto pula a auditoria. No `audit`, o `--feature` é o gate de cada
+feature; sem ele, o veredito é do projeto inteiro.
 
 Abaixo, `fuzkrigo-spec <comando>` é abreviação dessa invocação.
 
