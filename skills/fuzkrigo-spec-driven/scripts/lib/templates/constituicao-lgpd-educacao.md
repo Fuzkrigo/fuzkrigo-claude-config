@@ -40,9 +40,12 @@ marketing.
 
 ## P-004 [DEVE] Dados pessoais nunca aparecem em logs
 
-CPF, e-mail, telefone e nota nunca vão para console/log em texto puro.
+CPF, e-mail, telefone e nota nunca vão para console, print ou log em texto puro.
+A verificação cobre JavaScript (`console.*`) e Python (`print`, `logging.*`,
+`logger.*`, `log.*`); só os métodos de registro contam, então criar o logger
+(`logging.getLogger("notas")`) não é violação.
 
-- verificação(proibido): `console\.(log|error|warn)\(.*(cpf|nota|email|telefone)` em `src/**/*.js`
+- verificação(proibido): `(console\.(log|info|warn|error|debug)|\bprint|\b(logging|logger|log)\.(debug|info|warning|warn|error|exception|critical|log))\(.*(cpf|nota|email|telefone)` em `src/**`
 
 ## P-005 [RECOMENDADO] Minimização: só coletar o que a pedagogia exige
 

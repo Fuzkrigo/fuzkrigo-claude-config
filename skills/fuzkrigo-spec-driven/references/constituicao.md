@@ -49,7 +49,8 @@ que guardam dados de alunos (inclusive menores):
 - **P-001** nota nunca exposta a outro aluno (teste)
 - **P-002** acesso a nota é registrado — trilha de auditoria (teste)
 - **P-003** dados de menores só com base legal explícita (teste)
-- **P-004** dados pessoais nunca em log (proibido, grep)
+- **P-004** dados pessoais nunca em log (proibido, grep; cobre `console.*` do JavaScript e
+  `print`/`logging`/`logger` do Python)
 - **P-005** minimização de coleta (recomendado)
 - **P-006** erro pedagógico não é dado punitivo (recomendado)
 - **P-007** exclusão a pedido do titular (pode)
