@@ -141,6 +141,20 @@ class PlanningHookTest(unittest.TestCase):
         self.assertEqual(decision(output), "ask")
         self.assertIn("`src/b.py`", reason(output))
 
+    def test_spec_dir_from_config_is_honored(self):
+        # Como o motor: specDir do fuzkrigo.config.json troca a pasta .spec.
+        # Like the engine: specDir in fuzkrigo.config.json replaces .spec.
+        write_file(self.project, "fuzkrigo.config.json", json.dumps({"specDir": "especificacao"}))
+        write_file(self.project, "especificacao/features/alfa/spec.md", SPEC_MD)
+        write_file(self.project, "especificacao/features/alfa/tasks.md", TASKS_MD.format(files="src/a.py"))
+        with self.subTest(arquivo="src/a.py"):
+            self.assertEqual(decision(self.run_write("src/a.py")), "allow")
+        with self.subTest(arquivo="src/b.py"):
+            output = self.run_write("src/b.py")
+            self.assertEqual(decision(output), "ask")
+            self.assertIn("`src/b.py`", reason(output))
+            self.assertIn("`especificacao/features/*/tasks.md`", reason(output))
+
     def test_non_ascii_project_path_without_utf8_mode(self):
         # O caminho do arquivo chega pelo stdin em UTF-8 cru, e a raiz chega
         # pelo ambiente: o hook nao pode depender do UTF-8 mode do Python.
@@ -198,9 +212,10 @@ const [configJs, textJs] = process.argv.slice(2);
 const { DEFAULT_CONFIG } = await import(pathToFileURL(configJs).href);
 const { globToRegExp } = await import(pathToFileURL(textJs).href);
 const cases = JSON.parse(readFileSync(0, 'utf-8'));
-const { srcGlobs, testGlobs, ignoreGlobs } = DEFAULT_CONFIG;
+const { srcGlobs, testGlobs, ignoreGlobs, specDir } = DEFAULT_CONFIG;
 console.log(JSON.stringify({
   defaults: { srcGlobs, testGlobs, ignoreGlobs },
+  specDir,
   matches: cases.map(([glob, file]) => globToRegExp(glob).test(file)),
 }));
 """
@@ -243,6 +258,9 @@ class EngineParityTest(unittest.TestCase):
 
     def test_default_globs_match_engine_defaults(self):
         self.assertEqual(self.hook.DEFAULT_GLOBS, self.engine["defaults"])
+
+    def test_default_spec_dir_matches_engine_default(self):
+        self.assertEqual(self.hook.DEFAULT_SPEC_DIR, self.engine["specDir"])
 
     def test_glob_semantics_match_engine(self):
         self.assertEqual(len(self.engine["matches"]), len(GLOB_MATRIX))

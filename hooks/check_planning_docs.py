@@ -28,10 +28,13 @@ Decision order: (1) Task Mode marker, created by arm_modo_tarefa.py: allow;
 original behavior; (4) with tasks: the audit's orphan-code check at write
 time; (5) anything else: as in 3.
 
-Raiz do projeto: CLAUDE_PROJECT_DIR, ou o diretorio atual sem ela. Os
-documentos de planejamento ficam em docs/ (SKILL.md secao 5); a raiz e aceita
-como fallback para projetos anteriores a essa convencao.
-Project root: CLAUDE_PROJECT_DIR, else the current directory.
+Raiz do projeto: CLAUDE_PROJECT_DIR, ou o diretorio atual sem ela. A pasta
+das especificacoes e o specDir do fuzkrigo.config.json (padrao .spec), como no
+motor; com o arquivo invalido, vale .spec. Os documentos de planejamento ficam
+em docs/ (SKILL.md secao 5); a raiz e aceita como fallback para projetos
+anteriores a essa convencao.
+Project root: CLAUDE_PROJECT_DIR, else the current directory. The spec folder
+is specDir from fuzkrigo.config.json (default .spec), as in the engine.
 
 Paridade com o motor da skill fuzkrigo-spec-driven (scripts/lib/src): os
 padroes padrao saem de DEFAULT_CONFIG (config.js), glob_to_regex porta
@@ -58,6 +61,8 @@ CODE_EXTENSIONS = {
 }
 
 CONFIG_FILE = "fuzkrigo.config.json"
+# Padrao de specDir em DEFAULT_CONFIG (config.js do motor). / Engine default.
+DEFAULT_SPEC_DIR = ".spec"
 
 # Copia dos padroes de DEFAULT_CONFIG (config.js do motor), usados quando o
 # projeto nao tem fuzkrigo.config.json ou nao define a chave.
@@ -91,7 +96,7 @@ PLANNING_REASON = (
 )
 ORPHAN_REASON = (
     "O arquivo `{path}` não está no campo Arquivos de nenhuma tarefa em "
-    "`.spec/features/*/tasks.md`, e o audit vai acusá-lo como código órfão. "
+    "`{spec_dir}/features/*/tasks.md`, e o audit vai acusá-lo como código órfão. "
     "Quer adicioná-lo a uma tarefa antes, ou é um ajuste fora do fluxo?"
 )
 INVALID_CONFIG_REASON = (
@@ -101,7 +106,7 @@ INVALID_CONFIG_REASON = (
     "ou é um ajuste fora do fluxo?"
 )
 UNREADABLE_TASKS_REASON = (
-    "Não consegui ler as tarefas em `.spec/features/*/tasks.md` ({error}), "
+    "Não consegui ler as tarefas em `{spec_dir}/features/*/tasks.md` ({error}), "
     "então não dá para saber se este arquivo está mapeado em alguma tarefa. "
     "Quer seguir mesmo assim?"
 )
@@ -151,21 +156,22 @@ def doc_exists(root, name):
     return os.path.isfile(os.path.join(root, "docs", name)) or os.path.isfile(os.path.join(root, name))
 
 
-def feature_dirs(root):
-    """Pastas de .spec/features/, como o loadProject do motor.
-    Folders under .spec/features/, like the engine's loadProject."""
-    features = os.path.join(root, ".spec", "features")
+def feature_dirs(root, spec_dir):
+    """Pastas de <specDir>/features/, como o loadProject do motor.
+    Folders under <specDir>/features/, like the engine's loadProject."""
+    features = os.path.join(root, spec_dir, "features")
     if not os.path.isdir(features):
         return []
     paths = [os.path.join(features, name) for name in sorted(os.listdir(features))]
     return [path for path in paths if os.path.isdir(path)]
 
 
-def planning_rule(root):
+def planning_rule(root, spec_dir):
     """Comportamento original: None libera, ou o motivo da pergunta.
     Original behavior: None allows, else the reason to ask."""
     has_docs = doc_exists(root, "ROADMAP.md") and doc_exists(root, "CHECKLIST.md")
-    has_spec = any(os.path.isfile(os.path.join(path, "spec.md")) for path in feature_dirs(root))
+    specs = (os.path.join(path, "spec.md") for path in feature_dirs(root, spec_dir))
+    has_spec = any(os.path.isfile(path) for path in specs)
     return None if has_docs or has_spec else PLANNING_REASON
 
 
@@ -209,18 +215,39 @@ def is_source_file(rel_path, globs):
     return matches_any(rel_path, globs["srcGlobs"]) and not matches_any(rel_path, excluded)
 
 
+def read_config(root):
+    """O fuzkrigo.config.json como dict, None se nao existe, ValueError se
+    invalido. / The config as a dict, None if missing, ValueError if invalid."""
+    path = os.path.join(root, CONFIG_FILE)
+    if not os.path.isfile(path):
+        return None
+    with open(path, encoding="utf-8") as handle:
+        raw = json.load(handle)
+    if not isinstance(raw, dict):
+        raise ValueError("o conteudo nao e um objeto JSON")
+    return raw
+
+
+def spec_dir_of(root):
+    """specDir da configuracao, tolerante: sem arquivo ou com arquivo invalido,
+    vale o padrao (quem acusa a configuracao invalida e o load_globs).
+    Lenient specDir: missing or invalid config falls back to the default."""
+    try:
+        raw = read_config(root)
+    except (OSError, ValueError):
+        return DEFAULT_SPEC_DIR
+    value = raw.get("specDir") if raw else None
+    return value if isinstance(value, str) and value.strip() else DEFAULT_SPEC_DIR
+
+
 def load_globs(root):
     """Padroes do projeto como o loadConfig do motor: chave presente no
     fuzkrigo.config.json substitui o padrao. ValueError se invalido.
     Project patterns like the engine's loadConfig. ValueError if invalid."""
     globs = {key: list(value) for key, value in DEFAULT_GLOBS.items()}
-    path = os.path.join(root, CONFIG_FILE)
-    if not os.path.isfile(path):
+    raw = read_config(root)
+    if raw is None:
         return globs
-    with open(path, encoding="utf-8") as handle:
-        raw = json.load(handle)
-    if not isinstance(raw, dict):
-        raise ValueError("o conteudo nao e um objeto JSON")
     for key in globs:
         if key not in raw:
             continue
@@ -259,12 +286,12 @@ def parse_task_files(content):
     return has_tasks, files
 
 
-def read_tasks(root):
+def read_tasks(root, spec_dir):
     """(alguma tarefa no projeto?, arquivos mapeados em todas as tarefas).
     (any task in the project?, files mapped by all tasks)."""
     has_tasks = False
     claimed = set()
-    for folder in feature_dirs(root):
+    for folder in feature_dirs(root, spec_dir):
         path = os.path.join(folder, "tasks.md")
         if not os.path.isfile(path):
             continue
@@ -298,20 +325,23 @@ def decide(data):
     if not isinstance(file_path, str) or not file_path or not is_code_file(file_path):
         return None
     root = project_root()
+    spec_dir = spec_dir_of(root)
     try:
-        has_tasks, claimed = read_tasks(root)
+        has_tasks, claimed = read_tasks(root, spec_dir)
     except OSError as exc:
-        return UNREADABLE_TASKS_REASON.format(error=exc)
+        return UNREADABLE_TASKS_REASON.format(error=exc, spec_dir=spec_dir)
     if not has_tasks:
-        return planning_rule(root)
+        return planning_rule(root, spec_dir)
     try:
         globs = load_globs(root)
     except (OSError, ValueError) as exc:
         return INVALID_CONFIG_REASON.format(error=exc)
     rel_path = relative_to_root(file_path, root)
     if rel_path is None or not is_source_file(rel_path, globs):
-        return planning_rule(root)
-    return None if rel_path in claimed else ORPHAN_REASON.format(path=rel_path)
+        return planning_rule(root, spec_dir)
+    if rel_path in claimed:
+        return None
+    return ORPHAN_REASON.format(path=rel_path, spec_dir=spec_dir)
 
 
 def main():

@@ -620,5 +620,5 @@ Os hooks têm testes próprios, que rodam a partir da raiz deste repositório:
 py -3 -m unittest discover -s hooks/tests -v
 ```
 
-São 34 casos. Dois deles comparam o hook de planejamento com o próprio motor e precisam do `node`
+São 36 casos. Três deles comparam o hook de planejamento com o próprio motor e precisam do `node`
 no PATH; sem ele, ficam pulados (skip), não reprovados.
