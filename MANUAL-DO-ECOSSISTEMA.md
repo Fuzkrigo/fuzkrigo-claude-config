@@ -617,11 +617,12 @@ node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nome
 São 28 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
-Os hooks têm testes próprios, que rodam a partir da raiz deste repositório:
+Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:
 
 ```bash
 py -3 -m unittest discover -s hooks/tests -v
 ```
 
-São 36 casos. Três deles comparam o hook de planejamento com o próprio motor e precisam do `node`
-no PATH; sem ele, ficam pulados (skip), não reprovados.
+São 39 casos. Três deles comparam o hook de planejamento com o próprio motor e precisam do `node`
+no PATH, e os três da status line precisam do `bash`; sem eles, ficam pulados (skip), não
+reprovados.

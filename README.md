@@ -30,7 +30,7 @@ Backup e documentação da configuração pessoal do Claude Code (Fuzkrigo) — 
     ├── arm_modo_tarefa.py           # UserPromptSubmit — cria/apaga o marcador do Modo Tarefa (CLAUDE.md §7)
     ├── check_planning_docs.py       # PreToolUse (Write|Edit) — iniciar-projeto §4, Regra de Bloqueio
     ├── check_style_prohibitions.py  # PreToolUse (Write|Edit) — iniciar-projeto §8, Proibições de Estilo
-    └── tests/                       # testes dos hooks (unittest): py -3 -m unittest discover -s hooks/tests
+    └── tests/                       # testes dos hooks e da status line (unittest): py -3 -m unittest discover -s hooks/tests
 ```
 
 Cada skill segue o formato padrão do Claude Code: `SKILL.md` (entrada principal) + `references/` (documentação detalhada carregada sob demanda). A `fuzkrigo-spec-driven` traz também `scripts/`, com o motor de auditoria embarcado (Node, sem dependências externas).

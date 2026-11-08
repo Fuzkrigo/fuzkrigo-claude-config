@@ -101,7 +101,9 @@ __truncate() {
   if [ "$n" -le 1 ]; then printf '%s' "${s:0:$n}"; return; fi
   printf '%s…' "${s:0:$((n-1))}"
 }
-__cost_fmt() { printf '$%.*f' "$2" "$1"; }
+# LC_NUMERIC=C: o custo chega como "0.5"; em localidade de virgula decimal
+# (pt_BR) o printf recusaria e imprimiria 0,00. / Force a decimal point.
+__cost_fmt() { LC_NUMERIC=C printf '$%.*f' "$2" "$1"; }
 __dur_hms() {
   local ms="$1" total h m s
   total=$((ms/1000)); h=$((total/3600)); m=$(((total%3600)/60)); s=$((total%60))
@@ -240,9 +242,14 @@ __rel_time() {
 __emit '1;38;2;231;119;79;49' '- '
 __v="$(__field 'model.display_name')"
 __emit '1;38;2;231;119;79;49' "$__v"
-__emit '' ' | '
+# Esforco so aparece com thinking ligado e valor presente; sem ele, nada de
+# segmento vazio entre separadores. / No empty segment without effort.
+__v=""
 if [ "$(__field 'thinking.enabled')" = 'true' ]; then
   __v="$(__field 'effort.level')"
+fi
+if [ -n "$__v" ]; then
+  __emit '' ' | '
   __emit '1;38;2;173;0;255;49' "$__v"
 fi
 __emit '' ' | '
