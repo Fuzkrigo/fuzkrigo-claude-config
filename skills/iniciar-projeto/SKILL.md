@@ -41,7 +41,7 @@ Três blocos. O Bloco A roda uma vez, na abertura. O Bloco B roda a cada feature
 - Invocar o agente `project-manager` (ferramenta Agent) para provisionar o GitHub e montar a gestão no Linear (seção 6). O board nasce aqui, e não em A2, porque depende do repositório já provisionado e das etapas já revisadas no CHECKLIST — cada issue nasce de uma etapa que já existe
 - Inicializar a camada de desenvolvimento: **`fuzkrigo-spec init --agents claude`** (ver a skill `fuzkrigo-spec-driven`), e escrever a constituição do projeto a partir das restrições levantadas em A1. Princípio `[DEVE]` sem verificação executável é acusado pelo próprio audit — a constituição nasce com dente ou não nasce
 - O `--agents claude` não é opcional: ele copia o motor para `.claude/skills/` **dentro do projeto**, e é assim que o CI consegue auditar. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina. Sem isso, o CI roda testes e cobertura, mas pula a auditoria
-- Definir o par `testCommand` e `reporter` em `onpspec.config.json` antes de sair de A3 (tabela por stack na skill `fuzkrigo-spec-driven`). O CI lê o comando desse mesmo arquivo — configuração em um lugar só
+- Definir o par `testCommand` e `reporter` em `fuzkrigo.config.json` antes de sair de A3 (tabela por stack na skill `fuzkrigo-spec-driven`). O CI lê o comando desse mesmo arquivo — configuração em um lugar só
 - **Fechar o ciclo do ROADMAP:** com a constituição escrita, voltar ao `docs/ROADMAP.md` e anotar o código de cada princípio (`P-xxx`) ao lado da restrição correspondente. É a segunda passada do documento — em A2 a restrição é texto, aqui ela ganha o código que a verifica (seção 7.1, item 4)
 
 ### BLOCO B — Ciclo de feature

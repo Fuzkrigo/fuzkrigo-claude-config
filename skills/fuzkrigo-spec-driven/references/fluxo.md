@@ -137,8 +137,7 @@ agora; 1 suposição e 1 pergunta ainda abertas. A feature **não pode** ir para
 
 No seu pipeline (GitHub Actions, GitLab CI):
 
-No CI você pode usar o mesmo motor embarcado (commitado junto com a skill) ou
-o pacote npm `@onovoprogramador/onp-spec` (modo CI):
+No CI você usa o mesmo motor embarcado, commitado junto com a skill:
 
 ```yaml
 - run: node .claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs verify entrega-dever-casa

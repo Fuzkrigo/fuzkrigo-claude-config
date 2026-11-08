@@ -123,7 +123,7 @@ export function montarPlano(project, featureName, opts = {}) {
   faixas.forEach((fx, i) => {
     fx.id = `faixa-${i + 1}`;
     fx.branch = `spec/${featureName}-faixa-${i + 1}`;
-    fx.worktree = `../onp-worktrees/${repoName}-${featureName}-faixa-${i + 1}`;
+    fx.worktree = `../fuzkrigo-worktrees/${repoName}-${featureName}-faixa-${i + 1}`;
   });
 
   // ondas: no máximo maxParalelas faixas simultâneas
@@ -237,7 +237,7 @@ export function renderPlanoJson(plan) {
       baseDir: plan.baseDir,
       specDir: plan.specDir,
       repoName: plan.repoName,
-      logsDir: `../onp-worktrees/${plan.repoName}-${plan.feature}-logs`,
+      logsDir: `../fuzkrigo-worktrees/${plan.repoName}-${plan.feature}-logs`,
       ondas: plan.ondas.map((onda) => onda.map((fx) => fx.id)),
       faixas: plan.faixas.map((fx) => ({
         id: fx.id,
@@ -332,7 +332,7 @@ export function renderPlanoMd(plan) {
     L.push('Cada faixa roda `claude -p` com **janela de contexto limpa**, `--model` e `--effort` já');
     L.push(`definidos por tarefa, permissões \`${plan.cfg.permissionMode}\`. Os prompts exatos estão`);
     L.push('embutidos no script — quer rodar uma faixa na mão, é só copiá-los de lá.');
-    L.push(`Logs: \`../onp-worktrees/${plan.repoName}-${plan.feature}-logs/\`.`);
+    L.push(`Logs: \`../fuzkrigo-worktrees/${plan.repoName}-${plan.feature}-logs/\`.`);
     L.push('');
     L.push('### 👀 Acompanhe ao vivo, sem digitar comandos');
     L.push('');
@@ -480,7 +480,7 @@ export function renderPlanoSh(plan) {
   L.push('  info "branch de trabalho: $BASE_BRANCH (a partir de $ATUAL)"');
   L.push('fi');
   L.push('git worktree prune');
-  L.push(`LOG_DIR="$(dirname "$TOPLEVEL")/onp-worktrees/${plan.repoName}-${plan.feature}-logs"`);
+  L.push(`LOG_DIR="$(dirname "$TOPLEVEL")/fuzkrigo-worktrees/${plan.repoName}-${plan.feature}-logs"`);
   L.push('mkdir -p "$LOG_DIR"');
   L.push('EVENTOS="$LOG_DIR/plano-eventos.log"');
   L.push(': > "$EVENTOS"');
@@ -514,7 +514,7 @@ export function renderPlanoSh(plan) {
     L.push(`info "onda ${oi + 1}: ${onda.map((fx) => fx.id).join(' ∥ ')} — janelas limpas em paralelo"`);
     for (const fx of onda) {
       const wt = `WT_${fx.id.replace('-', '_').toUpperCase()}`;
-      L.push(`${wt}="$(dirname "$TOPLEVEL")/onp-worktrees/${plan.repoName}-${plan.feature}-${fx.id}"`);
+      L.push(`${wt}="$(dirname "$TOPLEVEL")/fuzkrigo-worktrees/${plan.repoName}-${plan.feature}-${fx.id}"`);
       L.push(`git worktree add "$${wt}" -b ${shq(fx.branch)} >/dev/null || falhar "worktree da ${fx.id} (sobrou de uma execução anterior? git worktree prune + apague ${fx.worktree})"`);
       L.push(`evento "faixa|${fx.id}|executando"`);
       L.push('(');

@@ -126,7 +126,7 @@ Abaixo, `fuzkrigo-spec <comando>` é abreviação dessa invocação.
 ## Configurar a prova por stack (faça isso no `init`)
 
 O `verify` lê a saída do SEU test runner. Sem o par certo de `testCommand` e
-`reporter` em `onpspec.config.json`, ele lê zero testes e todo critério fica
+`reporter` em `fuzkrigo.config.json`, ele lê zero testes e todo critério fica
 sem prova — mesmo com os testes passando:
 
 | Stack | `testCommand` | `reporter` |
@@ -282,7 +282,7 @@ produto).
   cada janela rolando, as provas e o gate; o botão **"Executar todas as
   tarefas em janelas limpas e paralelas"** de lá dispara o script DE VERDADE.
   É assim que o usuário acompanha sem digitar comando nenhum.
-- Mudou tasks.md ou a config (`paralelo` no onpspec.config.json)? **Regenere
+- Mudou tasks.md ou a config (`paralelo` no fuzkrigo.config.json)? **Regenere
   o plano** — nunca edite os artefatos à mão.
 
 ### 5. Executar
@@ -402,8 +402,9 @@ MIT, que se mantém aqui. A adaptação (renomeação, integração com o fluxo 
 skill `iniciar-projeto` e ajustes locais do motor) é de Bruno Krieger
 [Fuzkrigo].
 
-Por herança do projeto original, alguns nomes internos ainda usam o prefixo
-antigo: o arquivo de configuração lido pelo motor é `onpspec.config.json` e os
-worktrees do plano paralelo nascem em `../onp-worktrees/`. São nomes
-funcionais — mudá-los exige alterar o motor e renomear o arquivo em todo
-projeto já iniciado.
+Os nomes funcionais herdados do projeto original foram trocados pelos
+próprios: o arquivo de configuração lido pelo motor é `fuzkrigo.config.json`,
+os worktrees do plano paralelo nascem em `../fuzkrigo-worktrees/` e o painel
+autentica o botão de executar com o cabeçalho `x-fuzkrigo-token`. A troca foi
+feita de uma vez, sem compatibilidade com os nomes antigos, porque nenhum
+projeto os usava.

@@ -263,7 +263,7 @@ Duas coisas fazem o CI funcionar, e as duas acontecem em A3:
 - `fspec init --agents claude` — o `--agents claude` copia o motor para `.claude/skills/` dentro do
   projeto. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina; sem essa cópia
   commitada, o CI roda testes e cobertura mas pula a auditoria.
-- O `onpspec.config.json` preenchido: o workflow lê o `testCommand` de lá, então a configuração
+- O `fuzkrigo.config.json` preenchido: o workflow lê o `testCommand` de lá, então a configuração
   vive num lugar só e o CI acompanha se você trocar de runner.
 
 No pull request a auditoria é informativa, e na `main` ela bloqueia. O motivo é o mesmo do
@@ -280,7 +280,7 @@ ainda em rascunho, o que não é problema daquele PR.
 | Jest | `npx jest --json` | `jest-json` |
 
 Reporters que gravam arquivo exigem também `reporterOutputFile` no mesmo caminho. Tudo isso fica
-em `onpspec.config.json`, na raiz.
+em `fuzkrigo.config.json`, na raiz.
 
 ---
 
@@ -586,13 +586,13 @@ instalação de uma status line chegou a sobrescrever o `settings.json` global, 
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são dois conjuntos de ajustes no motor — o suporte a Python e o
-audit com escopo de feature. As duas suítes que os protegem rodam assim:
+**patches locais** no `README.md`: são três conjuntos de ajustes no motor — o suporte a Python, o
+audit com escopo de feature e os nomes próprios. As três suítes que os protegem rodam assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
-node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs
+node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs
 ```
 
-São 18 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+São 20 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.

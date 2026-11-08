@@ -1,4 +1,4 @@
-// Configuração do projeto — fuzkrigo-spec.config.json na raiz (opcional).
+// Configuração do projeto — fuzkrigo.config.json na raiz (opcional).
 // Tudo tem default sensato: `npx fuzkrigo-spec audit` funciona sem config.
 
 import { existsSync, readFileSync } from 'fs';
@@ -60,7 +60,7 @@ export const DEFAULT_CONFIG = {
 };
 
 export function loadConfig(rootDir) {
-  const configPath = path.join(rootDir, 'onpspec.config.json');
+  const configPath = path.join(rootDir, 'fuzkrigo.config.json');
   if (!existsSync(configPath)) {
     return { ...DEFAULT_CONFIG, rootDir, configPath: null };
   }
@@ -68,7 +68,7 @@ export function loadConfig(rootDir) {
   try {
     raw = JSON.parse(readFileSync(configPath, 'utf-8'));
   } catch (err) {
-    throw new Error(`onpspec.config.json inválido: ${err.message}`);
+    throw new Error(`fuzkrigo.config.json inválido: ${err.message}`);
   }
   return {
     ...DEFAULT_CONFIG,

@@ -166,9 +166,9 @@ function cmdInit(rootDir, flags) {
     console.log(`✔ .spec/constituicao.md criado (preset: ${preset})`);
   }
 
-  const configPath = path.join(rootDir, 'onpspec.config.json');
+  const configPath = path.join(rootDir, 'fuzkrigo.config.json');
   if (existsSync(configPath)) {
-    console.log('· onpspec.config.json já existe — mantido');
+    console.log('· fuzkrigo.config.json já existe — mantido');
   } else {
     // --test-reporter=tap e obrigatorio: do Node 20 em diante o reporter
     // padrao e o "spec", que o parser TAP nao entende — sem a flag, o
@@ -180,7 +180,7 @@ function cmdInit(rootDir, flags) {
       srcGlobs: DEFAULT_CONFIG.srcGlobs,
     };
     writeFileSync(configPath, `${JSON.stringify(cfg, null, 2)}\n`);
-    console.log('✔ onpspec.config.json criado (testCommand: "node --test --test-reporter=tap" — ajuste à sua stack)');
+    console.log('✔ fuzkrigo.config.json criado (testCommand: "node --test --test-reporter=tap" — ajuste à sua stack)');
     console.log('  Python: "pytest --junitxml=.spec/verification/raw.xml" com reporter "junit-xml" e reporterOutputFile no mesmo caminho');
   }
 
@@ -199,7 +199,7 @@ function cmdInit(rootDir, flags) {
     const skillDir = resolveSkillDir(agent);
     if (!skillDir) {
       console.log(
-        `· skill para ${rotulo} não encontrada junto a este motor — instale com: npx @onovoprogramador/fuzkrigo-spec init --agents ${agent}`
+        `· skill para ${rotulo} não encontrada junto a este motor — copie a pasta fuzkrigo-spec-driven para ~/.claude/skills/ e rode o init a partir dela: node ~/.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs init --agents ${agent}`
       );
     } else if (path.resolve(dest) === path.resolve(skillDir)) {
       console.log(`· skill já instalada em ${destRel} — mantida`);

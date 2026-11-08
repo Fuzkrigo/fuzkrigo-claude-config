@@ -148,7 +148,7 @@ export function runVerify(project, featureName) {
   }
   if (!config.testCommand) {
     throw new Error(
-      'defina "testCommand" em onpspec.config.json (ex.: "node --test --test-reporter=tap", "pytest --junitxml=.spec/verification/raw.xml" ou "npx vitest run --reporter=json --outputFile=.spec/verification/raw.json")'
+      'defina "testCommand" em fuzkrigo.config.json (ex.: "node --test --test-reporter=tap", "pytest --junitxml=.spec/verification/raw.xml" ou "npx vitest run --reporter=json --outputFile=.spec/verification/raw.json")'
     );
   }
 
@@ -198,7 +198,7 @@ export function runVerify(project, featureName) {
     }
     if (xmlText === null) {
       throw new Error(
-        'reporter junit-xml: não achei o XML — defina "reporterOutputFile" em onpspec.config.json e gere o arquivo no testCommand (ex.: "pytest --junitxml=.spec/verification/raw.xml")'
+        'reporter junit-xml: não achei o XML — defina "reporterOutputFile" em fuzkrigo.config.json e gere o arquivo no testCommand (ex.: "pytest --junitxml=.spec/verification/raw.xml")'
       );
     }
     tests = parseJUnitXml(xmlText);
