@@ -507,6 +507,7 @@ o Modo Tarefa não liga. Ficou de fora porque esta rodada não o altera.
 | E21 | Hook de planejamento ignorava o `specDir` | `specDir` respeitado | `3298ac5` |
 | E21 | Mensagem do `init` por agente, emoji no motor | Orientação por agente; motor sem emoji bloqueado | `73f15cc`, `dd2fefc` |
 | E21 | `Claude outputs/` podia entrar num commit | `.gitignore` | `41a126e` |
+| E20 | `gh` ausente nesta máquina | GitHub CLI 2.103.3 instalado e autenticado (conta `Fuzkrigo`) | — |
 
 Pendentes: local de instalação do `CLAUDE_PASTA PROFFISIONAL.md` (etapa corporativa); pendências
-1-7 do `DESIGN.md` (sessão de design); `gh auth login` nesta máquina; instalação e validação (F5).
+1-7 do `DESIGN.md` (sessão de design); instalação e validação no `~/.claude/` (F5).
