@@ -17,4 +17,4 @@ Skill de referência para os procedimentos técnicos do ambiente corporativo. Co
 | Compilando com PyInstaller, configurando .spec, ou fazendo deploy em rede | `references/build-deploy.md` |
 | Backup de artefatos fora do Git (.exe em rede), export .bas para o repositório, robocopy | `references/backup.md` |
 
-Na maioria das sessões, apenas 1-2 referências serão necessárias. Carregue com `view` apenas as relevantes.
+Na maioria das sessões, apenas 1-2 referências serão necessárias. Carregue com a ferramenta Read apenas as relevantes.
