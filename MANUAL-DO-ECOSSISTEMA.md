@@ -78,7 +78,8 @@ Sobre os hooks, que são a parte que ninguém pode desligar sem querer:
   ferramenta. Esse **bloqueia mesmo**, e é intencional. Tem uma exceção por caminho: dentro de
   `~/.claude/` e de qualquer pasta chamada `fuzkrigo-claude-config` (este repositório, onde quer que
   esteja clonado), citar as frases proibidas é permitido, porque é onde a regra precisa ser
-  documentada. Emoji continua bloqueado em todo lugar.
+  documentada. Emoji continua bloqueado em todo lugar — exceto os marcadores funcionais de status
+  (ok, atenção, falha) dos relatórios dos agentes e da saída do motor, que não são decoração.
 - `arm_modo_tarefa.py` — roda a cada mensagem sua, não antes de escrita. Mensagem que começa com
   `#tarefa` cria o marcador do Modo Tarefa da sessão; "modo normal" ou "sair do modo tarefa" o
   apagam. É por esse marcador que o hook de planejamento sabe que deve ficar quieto: você não
@@ -619,5 +620,5 @@ Os hooks têm testes próprios, que rodam a partir da raiz deste repositório:
 py -3 -m unittest discover -s hooks/tests -v
 ```
 
-São 27 casos. Dois deles comparam o hook de planejamento com o próprio motor e precisam do `node`
+São 30 casos. Dois deles comparam o hook de planejamento com o próprio motor e precisam do `node`
 no PATH; sem ele, ficam pulados (skip), não reprovados.
