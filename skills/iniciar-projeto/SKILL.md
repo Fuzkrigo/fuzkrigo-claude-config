@@ -182,7 +182,7 @@ Estrutura detalhada dos dois: ver seção 7.
 
 Outros **cinco** são gerados e mantidos pelo agente `project-documentation` (ferramenta Agent) — baixa frequência de edição, por isso não ficam com o Claude principal:
 
-3. **`docs/ARCHITECTURE.md`** — diagramas Mermaid da arquitetura (estrutura, fluxo, dados). Vivo e oficial: gerado em A2, atualizado no Portão 3 do Bloco B quando a estrutura muda, consolidado em C2. Estrutura e templates: `references/architecture-md.md`
+3. **`docs/ARCHITECTURE.md`** — diagramas Mermaid da arquitetura (estrutura, fluxo, dados e, quando houver modelo de domínio, classes). Vivo e oficial: gerado em A2, atualizado no Portão 3 do Bloco B quando a estrutura muda, consolidado em C2. Estrutura e templates: `references/architecture-md.md`
 4. **`docs/DOCUMENTACAO-TECNICA.md`** — decisões técnicas, API, configuração (C2)
 5. **`docs/RESUMO-EXECUTIVO.md`** — resumo executivo e retrospecto por milestone (C2)
 6. **`docs/MANUAL.md`** — manual do usuário final (C2)
