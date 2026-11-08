@@ -6,7 +6,7 @@ import os, logging
 from pathlib import Path
 
 PROJETO_NOME = "[projeto]"
-DEV_USER = "bruno.krieger"
+DEV_USER = "seu.usuario"  # USERNAME do Windows de quem desenvolve / developer's Windows login
 LOG_ROOT_REDE = r"S:\CONTROL\FISCAL_REPORTS\10_INTELIGENCIA DE DADOS\1 - Desenvolvimento\0 - Claude\2 - Logs"
 
 usuario_atual = os.getenv("USERNAME", "desconhecido")

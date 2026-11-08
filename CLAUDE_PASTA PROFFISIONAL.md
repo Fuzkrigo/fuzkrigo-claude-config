@@ -11,7 +11,7 @@
 - **Usuários finais:** sem Python, sem permissão administrativa.
 - **Desenvolvedor:** Python 3.10+, Git Bash, Google Antigravity.
 - **Sem nuvem externa** (sem OneDrive, sem Docker, sem containers).
-- **Versionamento e organização:** Git + GitHub são o hub central do projeto (repositório, board, issues, releases, GitHub Actions para CI). Abertura, documentação e gestão pela skill `iniciar-projeto`; o desenvolvimento de cada feature pela skill `fuzkrigo-spec-driven`.
+- **Versionamento e organização:** Git + GitHub guardam o projeto (repositório, issues, releases, GitHub Actions para CI); a gestão — board, prioridade, ciclos — vive no Linear, como no padrão "Fuzkrigo Projects". Abertura, documentação e gestão pela skill `iniciar-projeto`; o desenvolvimento de cada feature pela skill `fuzkrigo-spec-driven`.
 - **Distribuição de executáveis:** pasta de rede `S:\CONTROL\FISCAL_REPORTS\10_INTELIGENCIA DE DADOS\1 - Desenvolvimento\0 - Claude\0 - Executáveis\`.
 - Não sugerir containers ou soluções em nuvem externa. Alternativas de execução/distribuição sempre locais ou em drive de rede.
 
@@ -35,7 +35,7 @@ Se eu não especificar arquitetura, **apresente as duas com prós/contras antes 
 
 - **Separação .xlsx/.xlsm:** `.xlsx` = dados (Python lê/escreve). `.xlsm` = macros (Python NUNCA abre). `openpyxl` destrói macros ao salvar .xlsm.
 - **IPC via CLI apenas:** comunicação Excel ↔ Python sempre por linha de comando (argparse). Nunca `xlwings`, COM ou `win32com`.
-- **Fail Fast (especialização corporativa):** aplica o princípio geral do `@.claude/CODIGO.md` ao contexto VBA+Python. Validar entrada antes de processar; cada projeto declara `REQUIRED_COLUMNS` no `reader.py`; mensagens de erro acionáveis para o usuário final.
+- **Fail Fast (especialização corporativa):** aplica o princípio geral do `CODIGO.md` (carregado sempre pelo `CLAUDE.md` global) ao contexto VBA+Python. Validar entrada antes de processar; cada projeto declara `REQUIRED_COLUMNS` no `reader.py`; mensagens de erro acionáveis para o usuário final.
 - **Nunca engolir erros:** proibido `except: pass`.
 - **console=False** no PyInstaller em produção (janela preta = bug para o usuário).
 
@@ -44,7 +44,7 @@ Se eu não especificar arquitetura, **apresente as duas com prós/contras antes 
 ## 4. Testes — Overrides do Global
 
 - **Cobertura:** 80% geral e **95% em `processor.py`** (a lógica fiscal crítica concentra-se aqui).
-- `reader.py`/`writer.py`: cobertura menor (I/O, testados com mocks leves ou manualmente). Estratégia de camadas e mocks: `@.claude/CODIGO.md` (seção 8).
+- `reader.py`/`writer.py`: cobertura menor (I/O, testados com mocks leves ou manualmente). Estratégia de camadas e mocks: `CODIGO.md` (seção 8).
 - **VBA:** sem testes automatizados. Validação manual antes do deploy.
 - **Fixtures:** `tests/fixtures/` com dados sintéticos. Nunca planilhas reais.
 
@@ -52,7 +52,7 @@ Se eu não especificar arquitetura, **apresente as duas com prós/contras antes 
 
 ## 5. Versionamento e Backup
 
-- **Git + GitHub é o versionamento oficial** de todo projeto. Histórico, branches, PRs e board seguem `~/.claude/references/git-conventions.md`; o ritual de release é conduzido pelo agente `project-manager` (C3 do fluxo `iniciar-projeto`).
+- **Git + GitHub é o versionamento oficial** de todo projeto. Histórico, branches e PRs seguem `~/.claude/references/git-conventions.md`, e o board é o do Linear; o ritual de release é conduzido pelo agente `project-manager` (C3 do fluxo `iniciar-projeto`).
 - **Backup em rede é complemento, não versionamento.** O mirror/snapshots no drive `S:` cobrem o que não vai para o repositório: o `.exe` compilado, artefatos grandes e cópia de segurança do ambiente local. Procedimentos na skill `pipeline-corporativo`.
 - **Nunca commitar:** `.env`, credenciais, planilhas reais, binários grandes. `.gitignore` configurado antes do primeiro commit.
 

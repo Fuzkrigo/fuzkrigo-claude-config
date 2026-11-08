@@ -26,6 +26,13 @@ FUNCTIONAL_MARKERS = (
     + chr(0x274C) + " falha"
 )
 FORBIDDEN_PHRASE = "Co-" + "Authored-By: " + "Claude"
+# Marcas tipograficas de status (U+2714, U+2718, U+2713, U+2717): o motor e a
+# status line as usam como ok/falha. / Typographic status marks.
+TYPOGRAPHIC_MARKERS = (
+    chr(0x2714) + " passou, " + chr(0x2718) + " falhou, "
+    + chr(0x2713) + " limpo, " + chr(0x2717) + " sujo"
+)
+DECORATIVE_DINGBAT = chr(0x2605)
 
 
 class StyleHookTest(unittest.TestCase):
@@ -76,6 +83,21 @@ class StyleHookTest(unittest.TestCase):
 
     def test_malformed_json_fails_open(self):
         self.assertEqual(decision(run_hook(HOOK, "{isto nao e json", env=self.env)), "allow")
+
+    def test_typographic_status_markers_are_allowed(self):
+        result = self.check("outro-projeto", "saida.md", content=TYPOGRAPHIC_MARKERS)
+        self.assertEqual(result, "allow")
+
+    def test_decorative_dingbat_is_still_denied(self):
+        # A faixa U+2600-U+27BF continua bloqueada fora dos marcadores.
+        # The U+2600-U+27BF range stays blocked outside the markers.
+        result = self.check("outro-projeto", "nota.md", content="destaque " + DECORATIVE_DINGBAT)
+        self.assertEqual(result, "deny")
+
+    def test_valid_json_that_is_not_an_event_object_fails_open(self):
+        for stdin_text in ("[]", '"texto"', "42", '{"tool_input": []}'):
+            with self.subTest(stdin_text=stdin_text):
+                self.assertEqual(decision(run_hook(HOOK, stdin_text, env=self.env)), "allow")
 
     def test_emoji_is_denied_without_utf8_mode(self):
         # O harness manda UTF-8 cru; o hook nao pode depender do UTF-8 mode.

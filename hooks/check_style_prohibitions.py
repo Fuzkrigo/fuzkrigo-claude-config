@@ -61,11 +61,16 @@ EMOJI_RANGES = [
     (0x2600, 0x27BF),
     (0x1F1E6, 0x1F1FF),
 ]
-# Excecao deliberada: estes sao marcadores de status funcionais usados pelo
-# proprio agente security-reviewer e por convencoes do usuario, nao emoji
-# decorativo. / Deliberate exception: functional status markers, not
-# decorative emoji.
-ALLOWED_EMOJI_CODEPOINTS = {0x2705, 0x26A0, 0x274C, 0xFE0F}
+# Excecao deliberada: marcadores de status funcionais, nao emoji decorativo.
+# U+2705, U+26A0 e U+274C sao usados pelo agente security-reviewer e por
+# convencoes do usuario; U+2713, U+2714, U+2717 e U+2718 sao as marcas
+# tipograficas de ok/falha que o motor da fuzkrigo-spec-driven e a status line
+# imprimem. O resto da faixa U+2600-U+27BF (como U+2605) continua bloqueado.
+# Deliberate exception: functional status markers, not decorative emoji.
+ALLOWED_EMOJI_CODEPOINTS = {
+    0x2705, 0x26A0, 0x274C, 0xFE0F,
+    0x2713, 0x2714, 0x2717, 0x2718,
+}
 
 
 def allow():
@@ -113,7 +118,9 @@ def is_rule_documentation(file_path):
     return os.path.normcase(REPO_DIR_NAME) in ancestors
 
 
-def main():
+def read_tool_input():
+    """O tool_input do evento, ou None quando a entrada nao e um evento.
+    The event's tool_input, or None when the input is not an event."""
     # Bytes, nao texto: o json decodifica sozinho o UTF-8 que o harness manda,
     # em qualquer versao do Python. Ler sys.stdin como texto usaria cp1252 no
     # Windows ate o Python 3.14 (sem UTF-8 mode), e o emoji passaria.
@@ -122,15 +129,26 @@ def main():
     try:
         data = json.load(sys.stdin.buffer)
     except (json.JSONDecodeError, ValueError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    tool_input = data.get("tool_input", {})
+    return tool_input if isinstance(tool_input, dict) else None
+
+
+def main():
+    # Falha aberta: entrada que nao e um evento valido nao bloqueia nada.
+    # Fail open: input that is not a valid event blocks nothing.
+    tool_input = read_tool_input()
+    if tool_input is None:
         allow()
         return
 
-    tool_input = data.get("tool_input", {})
     content = tool_input.get("content")
     if content is None:
         content = tool_input.get("new_string", "")
 
-    if not content:
+    if not isinstance(content, str) or not content:
         allow()
         return
 

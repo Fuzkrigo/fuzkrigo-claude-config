@@ -43,13 +43,14 @@ com arquivo e linha exatos (rastreabilidade princípio → arquivo → linha).
 
 ## Preset LGPD + educação
 
-`fuzkrigo-spec init --preset lgpd-educacao` já vem com princípios reais para produtos
+`fuzkrigo-spec init --preset lgpd-educacao --agents claude` já vem com princípios reais para produtos
 que guardam dados de alunos (inclusive menores):
 
 - **P-001** nota nunca exposta a outro aluno (teste)
 - **P-002** acesso a nota é registrado — trilha de auditoria (teste)
 - **P-003** dados de menores só com base legal explícita (teste)
-- **P-004** dados pessoais nunca em log (proibido, grep)
+- **P-004** dados pessoais nunca em log (proibido, grep; cobre `console.*` do JavaScript e
+  `print`/`logging`/`logger` do Python)
 - **P-005** minimização de coleta (recomendado)
 - **P-006** erro pedagógico não é dado punitivo (recomendado)
 - **P-007** exclusão a pedido do titular (pode)
@@ -70,7 +71,16 @@ precisam apontar pros seus arquivos. Guard-rails do motor:
 
 ## Rastreabilidade que dá diferencial de segurança
 
-Um estudo de caso de microsserviços bancários relatou 73% menos defeitos de
-segurança quando os princípios eram rastreados até arquivo e linha. É exatamente
-o que `verificação(proibido)` e `verificação(obrigatório)` fazem: cada violação
-sai com `arquivo:linha`, não com "reveja o código".
+Um estudo de caso em microsserviços bancários relatou 73% menos defeitos de
+segurança com uma constituição de princípios de segurança embutida na
+especificação, em comparação com geração de código por IA sem essas restrições;
+no mesmo trabalho, cada princípio é rastreado até o artefato de código que o
+cumpre. Fonte: Srinivas Rao Marri, *Constitutional Spec-Driven Development:
+Enforcing Security by Construction in AI-Assisted Code Generation*, arXiv
+2602.02584, v1, 31/01/2026 — <https://arxiv.org/abs/2602.02584>. É um preprint de
+um único autor, com um único estudo de caso e sem revisão por pares: vale como
+indício, não como prova.
+
+O rastreio até o código é o que `verificação(proibido)` e
+`verificação(obrigatório)` fazem: cada violação sai com `arquivo:linha`, não com
+"reveja o código".

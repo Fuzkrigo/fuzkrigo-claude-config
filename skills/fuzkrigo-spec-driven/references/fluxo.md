@@ -6,8 +6,8 @@
 > sempre a partir da RAIZ do projeto (motor embarcado — nada a instalar).
 
 ```bash
-# 1. inicializa o projeto (uma vez)
-fuzkrigo-spec init --preset lgpd-educacao
+# 1. inicializa o projeto (uma vez); --agents claude copia o motor para o projeto (o CI precisa)
+fuzkrigo-spec init --preset lgpd-educacao --agents claude
 
 # 2. nova feature
 fuzkrigo-spec new entrega-dever-casa
@@ -65,7 +65,7 @@ etiqueta na docstring. Configuração por stack e a convenção dupla do Python
 (nome da função mais docstring): ver a seção "Configurar a prova por stack"
 na SKILL.md.
 
-Projeto Python, config mínima:
+Projeto Python, config mínima em `fuzkrigo.config.json`, na raiz do projeto:
 
 ```json
 {

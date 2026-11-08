@@ -10,3 +10,7 @@ settings.json.bak*
 
 # Bytecode que o Python grava ao rodar hooks/tests (importa os hooks).
 __pycache__/
+
+# Saidas do Claude trocadas com outros projetos (briefings, relatorios). Nao
+# fazem parte da configuracao versionada.
+Claude outputs/

@@ -57,7 +57,7 @@ Nada aqui impede você de trabalhar rápido. O que ele impede é você **achar**
 
 | Peça | O que é | Quem dispara |
 | ---- | ------- | ------------ |
-| `CLAUDE.md` | As regras que valem em toda sessão: persona, idioma, TDD, anti-alucinação, proibições | Carregado automaticamente, sempre |
+| `CLAUDE.md` | As regras que valem em toda sessão: persona, idioma, TDD, anti-alucinação, proibições. Importa o `CODIGO.md` (padrões de código), que entra junto em toda sessão | Carregado automaticamente, sempre |
 | `references/` | Padrões consultáveis: convenções de Git, templates de issue e PR, workflow de CI | Lido quando o assunto aparece; o `github/` é copiado para o projeto em A3 |
 | `skills/` | Fluxos completos: abertura de projeto, desenvolvimento de feature, ambiente corporativo | Você chama (`/iniciar-projeto`) ou o gatilho da descrição dispara |
 | `agents/` | Especialistas que rodam isolados e devolvem um relatório: revisão de código, segurança, documentação, gestão de projeto, docstrings | Chamados em pontos fixos do fluxo, ou quando você pede |
@@ -78,7 +78,8 @@ Sobre os hooks, que são a parte que ninguém pode desligar sem querer:
   ferramenta. Esse **bloqueia mesmo**, e é intencional. Tem uma exceção por caminho: dentro de
   `~/.claude/` e de qualquer pasta chamada `fuzkrigo-claude-config` (este repositório, onde quer que
   esteja clonado), citar as frases proibidas é permitido, porque é onde a regra precisa ser
-  documentada. Emoji continua bloqueado em todo lugar.
+  documentada. Emoji continua bloqueado em todo lugar — exceto os marcadores funcionais de status
+  (ok, atenção, falha) dos relatórios dos agentes e da saída do motor, que não são decoração.
 - `arm_modo_tarefa.py` — roda a cada mensagem sua, não antes de escrita. Mensagem que começa com
   `#tarefa` cria o marcador do Modo Tarefa da sessão; "modo normal" ou "sair do modo tarefa" o
   apagam. É por esse marcador que o hook de planejamento sabe que deve ficar quieto: você não
@@ -135,6 +136,7 @@ uma branch. Esse é o elo que amarra tudo: se você entender só uma coisa deste
 
 ```bash
 node --version     # o motor de auditoria roda nele
+py -3 --version    # os tres hooks rodam com o lancador do Python
 git --version
 gh auth status     # so se voce for criar repositorio, labels e issues no GitHub
 ```
@@ -233,10 +235,11 @@ Assim fica uma etapa no CHECKLIST:
 - [ ] E3: Editar perfil — spec ainda não criada
 ```
 
-**A3 — Provisionamento e constituição.** O agente `project-manager` cria repositório, labels,
-milestones e as issues (uma por etapa) no GitHub, e monta a gestão no Linear — Project, Milestones
-e as issues já sincronizadas, com prioridade nativa. O GitHub Projects não entra: o board é o do
-Linear. E o projeto ganha sua constituição:
+**A3 — Provisionamento e constituição.** O agente `project-manager` cria labels, milestones e as
+issues (uma por etapa) no GitHub, e monta a gestão no Linear — Project, Milestones e as issues já
+sincronizadas, com prioridade nativa. Se o repositório ainda não existe, ele não o cria: devolve o
+comando `gh repo create` montado, eu te pergunto, e ele é invocado de novo com o repositório
+pronto. O GitHub Projects não entra: o board é o do Linear. E o projeto ganha sua constituição:
 
 **[terminal]** (na prática, quem roda sou eu, durante A3)
 
@@ -345,6 +348,10 @@ No `tasks.md`, quebre em tarefas com os arquivos que cada uma toca:
 ```
 
 O campo `Arquivos` decide o que pode rodar em paralelo. Capriche nele.
+
+Toda feature tem `tasks.md`, mesmo a pequena: no mínimo uma tarefa com o campo `Arquivos`. Cada
+arquivo de `src/` precisa estar no `Arquivos` de alguma tarefa — o audit acusa como código órfão o
+que não estiver, e o hook de planejamento pergunta antes de eu escrever um arquivo assim.
 
 ### Passo 3 — O teste nasce falhando
 
@@ -480,7 +487,7 @@ descartável.
 Continua valendo, sempre: não inventar API, não expor segredo, não engolir erro, alertar risco de
 segurança, PT-BR na conversa e inglês no código.
 
-Para sair: comece uma conversa nova, ou diga "modo normal".
+Para sair: comece uma conversa nova, ou diga "modo normal" ou "sair do modo tarefa".
 
 **Não confunda com projeto dispensável** (seção 5). São dois níveis diferentes de desligamento:
 
@@ -590,19 +597,31 @@ A configuração vive em dois lugares que precisam andar juntos:
 - `~/.claude/` — o que o Claude Code realmente carrega.
 - Este repositório — o backup versionado.
 
+Para instalar numa máquina nova, siga a seção "Instalação no `~/.claude/`" do `README.md`: o que
+vai para onde, os comandos e como validar.
+
 Mudou um, espelhe no outro. Isso não é burocracia: os dois já saíram de sincronia uma vez, e a
 instalação de uma status line chegou a sobrescrever o `settings.json` global, deixando os dois
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são quatro conjuntos de ajustes no motor — o suporte a Python,
-o audit com escopo de feature, os nomes próprios e o modelo padrão por alias. As quatro suítes que
-os protegem rodam assim:
+**patches locais** no `README.md`: são seis conjuntos de ajustes no motor — o suporte a Python, o
+audit com escopo de feature, os nomes próprios, o modelo padrão por alias, o preset LGPD para
+Python e JavaScript, e as mensagens e a saída do motor. As seis suítes que os protegem rodam assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
-node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs
+node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs
 ```
 
-São 22 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+São 28 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
+
+Os hooks têm testes próprios, que rodam a partir da raiz deste repositório:
+
+```bash
+py -3 -m unittest discover -s hooks/tests -v
+```
+
+São 36 casos. Três deles comparam o hook de planejamento com o próprio motor e precisam do `node`
+no PATH; sem ele, ficam pulados (skip), não reprovados.

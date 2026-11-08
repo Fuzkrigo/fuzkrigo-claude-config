@@ -37,8 +37,11 @@ def marker_path(session_id):
 def main():
     # Falha aberta: qualquer problema aqui nao pode travar o prompt do
     # usuario. / Fail open: never block the prompt because of this hook.
+    # Bytes, nao texto: em cp1252 (Windows ate o Python 3.14) um travessao
+    # colado em "#tarefa" vira letras e o \b da regex deixa de casar.
+    # Bytes, not text: json decodes the harness UTF-8 itself on any Python.
     try:
-        data = json.load(sys.stdin)
+        data = json.load(sys.stdin.buffer)
         session_id = data.get("session_id")
         prompt = data.get("prompt") or ""
 

@@ -25,7 +25,7 @@ Antes de iniciar a revisão, avalie o projeto respondendo mentalmente estas perg
 | O código foi gerado ou assistido por IA? (dica: se estamos aqui, provavelmente sim) | `references/ia-seguranca.md` |
 | Estamos desenhando uma feature sensível (auth, dinheiro, dados sensíveis, permissões)? | `references/threat-modeling.md` |
 | Falta clareza sobre o "porquê" de um controle, ou o projeto está sendo concebido? | `references/fundamentos.md` |
-| Estamos planejando o projeto e queremos integrar segurança ao fluxo de fases? | `references/sdl.md` |
+| Estamos planejando o projeto e queremos integrar segurança aos blocos do fluxo (A, B, C)? | `references/sdl.md` |
 
 **Na grande maioria dos projetos, `owasp.md` e `ia-seguranca.md` serão sempre necessários.** Os demais dependem do contexto. Em projetos novos, `fundamentos.md`, `threat-modeling.md` e `sdl.md` orientam o design seguro desde o início; nas revisões de código, o foco recai sobre `owasp.md`, `api-seguranca.md`, `secrets.md` e `supply-chain.md`.
 

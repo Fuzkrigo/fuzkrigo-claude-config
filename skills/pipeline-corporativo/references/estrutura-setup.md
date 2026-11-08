@@ -41,8 +41,8 @@ nome_do_projeto/
 
 ## Setup do Zero (Arquitetura B — Git Bash)
 ```bash
-mkdir -p "/c/Users/bruno.krieger/Desktop/FERTIPAR/0 - Claude/0 - Apps"
-cd "/c/Users/bruno.krieger/Desktop/FERTIPAR/0 - Claude/0 - Apps"
+mkdir -p "$HOME/Desktop/FERTIPAR/0 - Claude/0 - Apps"
+cd "$HOME/Desktop/FERTIPAR/0 - Claude/0 - Apps"
 mkdir nome_do_projeto && cd nome_do_projeto
 python -m venv .venv
 source .venv/Scripts/activate
@@ -52,7 +52,7 @@ pip install pandas openpyxl pyinstaller
 pip freeze > requirements.txt
 ```
 
-O repositório Git, o `.gitignore` e o board são provisionados pelo fluxo da skill `iniciar-projeto` (A2 para o repo local, A3 para o board). Garantir que `.gitignore` cubra `.venv/`, `dist/`, `__pycache__/`, `.env`, `*.xlsm` e `*.log` antes do primeiro commit.
+O repositório no GitHub e o board do Linear são provisionados em A3 do fluxo da skill `iniciar-projeto`, pelo agente `project-manager`. Garantir que `.gitignore` cubra `.venv/`, `dist/`, `__pycache__/`, `.env`, `*.xlsm` e `*.log` antes do primeiro commit.
 
 ## Retomada de Sessão
 ```bash

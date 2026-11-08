@@ -18,7 +18,7 @@ Design system não é sobre estética. É sobre **eliminar decisão arbitrária 
 
 Projeto novo com marca própria: copiar o documento inteiro e trocar **apenas a seção 3**. Nada mais precisa mudar.
 
-**Quando a IA deve consultar este arquivo:** qualquer trabalho que produza interface — web, desktop, formulário Excel, slide, documento. Antes de escolher uma cor, um espaçamento ou um tamanho de fonte, consultar aqui. Se o valor necessário não existir no sistema, **perguntar** em vez de inventar.
+**Quando a IA deve consultar este arquivo:** qualquer trabalho que produza interface ou gráfico — web, desktop, formulário Excel, slide, documento, gráfico de dados (inclusive quando uma skill do produto, como a dataviz, trouxer paleta de exemplo própria). Antes de escolher uma cor, um espaçamento ou um tamanho de fonte, consultar aqui. Se o valor necessário não existir no sistema, **perguntar** em vez de inventar.
 
 ---
 
@@ -229,7 +229,7 @@ Todo o vocabulário de **produto** está ausente: tabela de dados, formulário l
 
 **Caixa:** título e momento de marca em CAIXA ALTA com tracking. Subtítulo em Title Case. Corpo em sentence case. Botão e nav em caixa alta.
 
-**Emoji: nunca em conteúdo externo.** Glifos unicode utilitários (`→ ← ↑ ↓ · — §`) são permitidos; decorativos (`✨ ★`) não.
+**Emoji: nunca em conteúdo externo.** Glifos unicode utilitários (`→ ← ↑ ↓ · — §`) são permitidos; decorativos (como U+2728 e U+2605) não.
 
 ---
 
@@ -314,4 +314,6 @@ Aberto e não resolvido. Nada aqui deve ser inventado pela IA — são decisões
 | 5 | **Breakpoints e z-index como token** | Hoje existem só em prosa (1200/1440px, grid 12col). Sem variável, cada projeto reinventa. |
 | 6 | **Escopo por projeto** | Definir a regra: qual projeto herda a identidade Blacksmith e qual só herda a estrutura (seção 1). |
 | 7 | **Fontes locais** | Decidir se vale baixar Montserrat/Oswald para o repositório, dado o contexto corporativo com CDN bloqueado. |
-| 8 | **Distribuição** | O archive traz um `SKILL.md` — avaliar se o sistema vira skill invocável, referência em `CLAUDE.md`, ou os dois. |
+| 8 | **Distribuição** — decidido em 08/11/2026 | Referência sob demanda: instalado em `~/.claude/DESIGN.md` e citado na tabela do §4 do `CLAUDE.md` para trabalho que produz interface ou gráfico. Não vira skill nem é importado, então não ocupa contexto fixo. |
+
+Em 08/11/2026, as pendências 1 a 7 ficaram para uma sessão de design dedicada, por decisão do usuário.
