@@ -377,6 +377,12 @@ fspec plano recuperacao-senha     # agrupa tarefas de arquivos disjuntos em faix
 fspec painel recuperacao-senha    # painel ao vivo no navegador, com botao de executar
 ```
 
+Cada tarefa recebe `Modelo:` e `Esforço:` pelo critério da skill: tarefa simples usa `sonnet`,
+tarefa complexa usa `opus`, e na dúvida ela é complexa (tarefa sem `Modelo:` também fica com o
+`opus`). O resumo do plano mostra essa classificação para você revisar antes de executar. Isso só
+vale na execução paralela: quando eu implemento tarefa por tarefa na conversa, quem trabalha é o
+modelo da sessão.
+
 Cada faixa roda em um worktree próprio, com contexto limpo.
 
 ### Passo 5 — Portão 1: a máquina decide
@@ -589,13 +595,14 @@ instalação de uma status line chegou a sobrescrever o `settings.json` global, 
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são três conjuntos de ajustes no motor — o suporte a Python, o
-audit com escopo de feature e os nomes próprios. As três suítes que os protegem rodam assim:
+**patches locais** no `README.md`: são quatro conjuntos de ajustes no motor — o suporte a Python,
+o audit com escopo de feature, os nomes próprios e o modelo padrão por alias. As quatro suítes que
+os protegem rodam assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
-node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs
+node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs
 ```
 
-São 20 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+São 22 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.

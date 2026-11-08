@@ -253,6 +253,22 @@ produto).
   critério de outra feature) e `Arquivos:` (separados por VÍRGULA; espaços em
   caminhos são permitidos). Campos opcionais por tarefa: `Modelo:` e
   `Esforço:` (baixo|medio|alto|xalto|max) — o plano de execução usa os dois.
+- **Classifique cada tarefa pela complexidade** ao escrever o `tasks.md`; é
+  esse critério que preenche `Modelo:` e `Esforço:`:
+  - **Simples: `Modelo: sonnet`, `Esforço: baixo` ou `medio`.** Até 2
+    arquivos, sem regra de negócio nova, mudança mecânica: renomear,
+    configuração, texto, fixture de teste, ajuste que segue um padrão já
+    existente no código.
+  - **Complexa: `Modelo: opus`, `Esforço: alto`.** Qualquer um destes: 3 ou
+    mais arquivos ou mudança que atravessa camadas; regra de negócio ou
+    cálculo novo; toca autenticação, permissão, dinheiro ou dado pessoal;
+    decisão de design não registrada; migração de dados ou integração
+    externa.
+  - **Na dúvida: complexa.** Errar para o Opus custa cota; errar para o
+    Sonnet custa qualidade.
+  - Tarefa sem `Modelo:` usa o padrão `opus`.
+  - O critério só vale na execução paralela. Quando o Claude da sessão
+    implementa tarefa por tarefa, quem trabalha é o modelo da sessão.
 - Status entre colchetes: `[pendente]`, `[em-andamento]`, `[concluida]`
   (acentos e maiúsculas são tolerados; token desconhecido é erro).
 - **Fechou o tasks.md? Anuncie o paralelismo.** Rode `fuzkrigo-spec plano <feature>`
@@ -271,8 +287,10 @@ produto).
     as branches de volta, marca as tarefas e fecha com verify + audit;
   - `plano-execucao.html` — visual do plano com o botão **"Executar todas as
     tarefas em janelas limpas e paralelas"** (copia o comando do script).
-- **Apresente o plano ao usuário antes de executar**: resuma as faixas, diga
-  onde estão os arquivos e ofereça as rotas — automática
+- **Apresente o plano ao usuário antes de executar**: resuma as faixas,
+  incluindo o modelo e o esforço de cada tarefa (para o usuário revisar a
+  classificação antes de rodar), diga onde estão os arquivos e ofereça as
+  rotas — automática
   (`bash .spec/features/<feature>/executar-tarefas.sh` ou o botão do html) ou
   manual (você mesmo implementa faixa a faixa, seguindo branches e commits do
   plano).

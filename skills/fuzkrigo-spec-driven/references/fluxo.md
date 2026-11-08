@@ -90,8 +90,11 @@ fuzkrigo-spec plano entrega-dever-casa
   1 git worktree + 1 branch (`spec/<feature>-faixa-N`) + 1 janela de contexto
   limpa. Tarefas que compartilham arquivo caem na mesma faixa, em sequência;
   tarefa sem `Arquivos:` roda sozinha ao final.
-- Campos opcionais por tarefa em tasks.md: `- Modelo: claude-sonnet-5` e
-  `- Esforço: alto` (baixo|medio|alto|xalto|max) — o plano usa nos executores.
+- Campos opcionais por tarefa em tasks.md: `- Modelo: sonnet` (tarefa
+  simples) ou `- Modelo: opus` (tarefa complexa), e `- Esforço: alto`
+  (baixo|medio|alto|xalto|max) — o plano usa nos executores. Sem `Modelo:`,
+  vale o padrão `opus`. Critério de classificação: passo "3. Tarefas" da
+  [SKILL.md](../SKILL.md).
 - Sai sempre `plano-execucao.md` (faixas, ondas, gestão de branches/commits,
   ordem de merge e gate final). Na skill do **Claude Code**, saem também
   `executar-tarefas.sh` (claude headless em paralelo, com `--model`/`--effort`

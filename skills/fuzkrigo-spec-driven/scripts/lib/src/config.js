@@ -47,8 +47,9 @@ export const DEFAULT_CONFIG = {
   paralelo: {
     // máximo de faixas rodando ao mesmo tempo numa onda
     maxParalelas: 3,
-    // modelo default por tarefa (tasks.md pode sobrescrever com `- Modelo:`)
-    model: 'claude-sonnet-5',
+    // modelo default por tarefa (tasks.md pode sobrescrever com `- Modelo:`);
+    // o alias acompanha sempre o Opus mais recente / alias tracks latest Opus
+    model: 'opus',
     // esforço default: baixo|medio|alto|xalto|max (ou low|medium|high|xhigh|max)
     esforco: 'medium',
     // modo de permissão do claude headless; para rodar 100% sem prompts o
