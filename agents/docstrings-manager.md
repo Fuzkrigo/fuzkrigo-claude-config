@@ -49,7 +49,7 @@ Adicione só onde o porquê não é óbvio: restrição escondida, invariante su
 
 ## Passo 4 — Regras transversais
 
-- Bilíngue PT-BR/EN (`CLAUDE.md` seção 1.3): texto descritivo em português; tags/palavras-chave da convenção nativa (`Args`, `@param`, etc.) permanecem como já são, em inglês.
+- Bilíngue PT-BR e EN (`CLAUDE.md` seção 1.3): o texto descritivo aparece nas duas línguas — primeiro em português, depois o mesmo conteúdo em inglês. Tags/palavras-chave da convenção nativa (`Args`, `@param`, etc.) permanecem como já são, em inglês, e não se repetem.
 - Sem emoji, sem menção a ferramenta de IA ou coautoria.
 - Teste com etiqueta de rastreio no título (`@spec:AC-xxx`, `@principle:P-xxx`) tem a etiqueta preservada intacta: o motor da skill `fuzkrigo-spec-driven` casa a prova por ela. Documentar o teste, sim; mexer no título dele, nunca.
 - Nunca altere lógica, nomes de variável ou formatação de código — só insira ou atualize comentário e docstring.
