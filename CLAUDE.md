@@ -108,10 +108,10 @@ Ao iniciar projeto novo ou refatoração grande, carregar `/iniciar-projeto`. Co
 
 - Testes **SEMPRE ANTES** do código de produção.
 - **RECUSE CÓDIGO DE PRODUÇÃO** até os testes estarem definidos e cobrindo os requisitos.
-- **COBERTURA MÍNIMA:** 80% geral / 95% em lógica de negócio. Ratio esperado ~1.5x (mais teste que produção).
+- **COBERTURA MÍNIMA:** 95% geral / 98% em lógica de negócio, medidas com cobertura de ramos (cada lado de cada condição testado, não só a linha executada).
 - **QUEM DECIDE SE PASSOU É O TEST RUNNER, NUNCA EU.** Cada critério de aceite tem um teste anotado e uma prova gravada; `audit --ci --feature <feature>` com saída 0 é o único "pronto" aceito para uma feature, e `audit --ci` sem filtro é o que vale para o projeto, antes de qualquer release. Declarar conclusão sem colar a saída do audit é violação.
 
-Cobertura e prova são coisas diferentes: o audit garante que todo critério tem um teste que passou; os 80%/95% são medidos à parte, pelo CI provisionado em A3 (`.github/workflows/ci.yml`). Um não substitui o outro. O limite que reprova o build é declarado na configuração da própria ferramenta de teste (`--cov-fail-under` no pytest, `coverage.thresholds` no vitest) — o CI publica o número, a ferramenta decide se falha.
+Cobertura e prova são coisas diferentes: o audit garante que todo critério tem um teste que passou; a cobertura mede quanto do código os testes exercitam. Um não substitui o outro. Os números e as pastas de lógica de negócio são declarados no bloco `coverage` do `fuzkrigo.config.json`. O CI provisionado em A3 (`.github/workflows/ci.yml`) os aplica à ferramenta de teste e reprova o build abaixo deles, inclusive quando não consegue medir. Exclusão de cobertura só com justificativa (`CODIGO.md`, seção 8).
 
 Camadas de teste, estratégia de mocks e detalhamento operacional: `CODIGO.md` (carregado sempre, seção 10). O ciclo (teste que falha primeiro, implementação, prova) é conduzido pela skill `fuzkrigo-spec-driven` — `scaffold` gera o teste que falha, `verify` grava a prova, `audit` julga.
 
@@ -165,7 +165,7 @@ Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da ses
 - **"PRONTO" É EXIT CODE 0**, não opinião minha.
 - **SIMPLICIDADE PRIMEIRO**: KISS, YAGNI, só complique quando justificar.
 - **SNIPPETS CIRÚRGICOS**, não arquivos inteiros.
-- **80% COBERTURA GERAL, 95% EM LÓGICA DE NEGÓCIO.**
+- **95% COBERTURA GERAL, 98% EM LÓGICA DE NEGÓCIO, COM RAMOS.**
 - **FUNÇÃO ≤ 50 LINHAS; ARQUIVOS ≤ 500 LINHAS.**
 - **SEGURANÇA É TRANSVERSAL:** invoque o agente `security-reviewer` em C1 e em feature sensível; achado aceito vira princípio verificável da constituição. Alertas de segurança crítica valem sempre, mesmo sem o agente ter sido chamado.
 - **TODA ENTRADA EXTERNA É SUSPEITA. BACKEND VALIDA SEMPRE.**

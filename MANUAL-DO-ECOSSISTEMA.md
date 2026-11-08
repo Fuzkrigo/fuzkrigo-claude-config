@@ -260,17 +260,26 @@ Um princípio `[DEVE]` sem verificação executável é acusado pelo próprio au
 dente não existe.
 
 **O CI nasce aqui também.** Junto com os templates, o projeto ganha `.github/workflows/ci.yml`: a
-cada pull request e a cada push na `main`, o GitHub roda os testes, publica a cobertura e audita a
-especificação — sozinho, sem sessão aberta. É o que garante que nada entre na `main` sem passar
-pelo mesmo crivo, mesmo quando você mescla às pressas de outra máquina.
+cada pull request e a cada push na `main`, o GitHub roda os testes, mede a cobertura e reprova
+abaixo do limite, e audita a especificação — sozinho, sem sessão aberta. É o que garante que nada
+entre na `main` sem passar pelo mesmo crivo, mesmo quando você mescla às pressas de outra máquina.
 
 Duas coisas fazem o CI funcionar, e as duas acontecem em A3:
 
 - `fspec init --agents claude` — o `--agents claude` copia o motor para `.claude/skills/` dentro do
   projeto. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina; sem essa cópia
   commitada, o CI roda testes e cobertura mas pula a auditoria.
-- O `fuzkrigo.config.json` preenchido: o workflow lê o `testCommand` de lá, então a configuração
-  vive num lugar só e o CI acompanha se você trocar de runner.
+- O `fuzkrigo.config.json` preenchido: o workflow lê o `testCommand` e o bloco `coverage` de lá,
+  então a configuração vive num lugar só e o CI acompanha se você trocar de runner.
+
+**A cobertura também tem dente.** O bloco `coverage` do `fuzkrigo.config.json` declara 95% para o
+projeto inteiro e 98% para as pastas de lógica de negócio, listadas em `businessLogicPaths` a
+partir do `docs/ARCHITECTURE.md`. A medição é sempre com ramos: cada lado de cada condição precisa
+de teste, não basta a linha ter rodado. O CI reprova abaixo do limite e também quando não consegue
+medir: sem a ferramenta, sem o bloco ou com a lista de pastas vazia. Em projeto Node, os mesmos
+números ficam também no `vitest.config`. Excluir um trecho da medição só vale com um comentário
+`coverage-justification:` logo acima, e o `code-reviewer` recusa justificativa como "difícil de
+testar". Detalhes em `references/cobertura.md`, na skill `iniciar-projeto`.
 
 No pull request a auditoria é informativa, e na `main` ela bloqueia. O motivo é o mesmo do
 `--feature`: auditar o projeto inteiro num PR reprovaria por causa de uma spec de outra feature

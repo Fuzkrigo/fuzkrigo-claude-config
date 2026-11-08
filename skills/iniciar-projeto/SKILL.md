@@ -42,6 +42,7 @@ Três blocos. O Bloco A roda uma vez, na abertura. O Bloco B roda a cada feature
 - Inicializar a camada de desenvolvimento: **`fuzkrigo-spec init --agents claude`** (ver a skill `fuzkrigo-spec-driven`), e escrever a constituição do projeto a partir das restrições levantadas em A1. Princípio `[DEVE]` sem verificação executável é acusado pelo próprio audit — a constituição nasce com dente ou não nasce
 - O `--agents claude` não é opcional: ele copia o motor para `.claude/skills/` **dentro do projeto**, e é assim que o CI consegue auditar. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina. Sem isso, o CI roda testes e cobertura, mas pula a auditoria
 - Definir o par `testCommand` e `reporter` em `fuzkrigo.config.json` antes de sair de A3 (tabela por stack na skill `fuzkrigo-spec-driven`). O CI lê o comando desse mesmo arquivo — configuração em um lugar só
+- Preencher o bloco `coverage` do `fuzkrigo.config.json` antes de sair de A3, com as pastas de lógica de negócio derivadas do `docs/ARCHITECTURE.md`; detalhes em `references/cobertura.md`. Sem isso, o CI reprova. Em projeto Node, gravar os mesmos números no `vitest.config` e criar o script `coverage` no `package.json`, porque o vitest só aceita limite por pasta no próprio arquivo de configuração
 - **Fechar o ciclo do ROADMAP:** com a constituição escrita, voltar ao `docs/ROADMAP.md` e anotar o código de cada princípio (`P-xxx`) ao lado da restrição correspondente. É a segunda passada do documento — em A2 a restrição é texto, aqui ela ganha o código que a verifica (seção 7.1, item 4)
 
 ### BLOCO B — Ciclo de feature
@@ -63,7 +64,7 @@ O que esta skill exige na saída do Bloco B, em ordem:
    O `security-reviewer` não entra nessa tabela: o gatilho dele é o que a feature **toca**, não o tamanho dela. Feature de um arquivo que mexe em autenticação é feature sensível.
 
    **Fechar com o audit de novo, sempre.** Depois do `docstrings-manager`, rodar `fuzkrigo-spec audit --ci --feature <feature>` mais uma vez, antes do PR. Motivo concreto: esse agente tem permissão de edição e trabalha sobre arquivos de teste — se um título anotado com `@spec:AC-xxx` (ou um nome `test_ac_001`, em Python) for alterado, a prova daquele critério desaparece. A regra que o proíbe está escrita no prompt dele, mas regra escrita não é garantia; o audit é. Custa segundos e transforma um estrago silencioso em falha imediata.
-3. **Portão 3 — entrega.** PR e merge conforme `~/.claude/references/git-conventions.md`, incluindo o squash das faixas de execução paralela. Se a feature introduziu mudança estrutural (novo módulo, integração externa, decisão de arquitetura, modelo de dados), invocar o agente `project-documentation` para atualizar `docs/ARCHITECTURE.md` — critério completo em `references/architecture-md.md`. Marcar a Etapa concluída no CHECKLIST.
+3. **Portão 3 — entrega.** PR e merge conforme `~/.claude/references/git-conventions.md`, incluindo o squash das faixas de execução paralela. Se a feature introduziu mudança estrutural (novo módulo, integração externa, decisão de arquitetura, modelo de dados), invocar o agente `project-documentation` para atualizar `docs/ARCHITECTURE.md` — critério completo em `references/architecture-md.md`. Quando a mudança estrutural criar uma pasta nova de lógica de negócio, atualizar também o `businessLogicPaths` do bloco `coverage` (e, em projeto Node, o `vitest.config`) — ver `references/cobertura.md`. Marcar a Etapa concluída no CHECKLIST.
 
 Momento de avaliar design patterns: consultar `~/.claude/PATTERNS.md` e sugerir um pattern apenas quando resolver dor concreta identificada — nunca na primeira versão, nunca por estética.
 
@@ -204,7 +205,7 @@ Cada issue de etapa nasce apontando para a pasta da feature correspondente em `.
 Quando uma milestone termina, o mesmo agente monta o CHANGELOG.md e o texto do release (C3).
 
 - Commits semânticos, branches, PRs, releases e a política de execução: `~/.claude/references/git-conventions.md`
-- Templates de issue e PR: `~/.claude/references/github/`
+- Templates de issue e PR, workflow de CI e scripts de cobertura: `~/.claude/references/github/`
 - Detalhes de provisionamento GitHub/Linear e do ritual de release: `~/.claude/agents/project-manager.md`
 
 Os padrões do "Fuzkrigo Projects" são **sugestões adaptáveis**, não regras rígidas — ajustar ao contexto de cada projeto quando necessário.

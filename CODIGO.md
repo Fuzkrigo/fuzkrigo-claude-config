@@ -170,7 +170,7 @@ End Sub
 
 ## 8. Camadas de Teste e Mocks
 
-Detalhamento operacional do TDD. O piso (testes antes, cobertura 80%/95%, ratio ~1.5x) está no CLAUDE.md global; o ciclo por feature é conduzido pela skill `fuzkrigo-spec-driven` (`scaffold` cria o teste que falha, `verify` grava a prova, `audit` julga). Aqui ficam as camadas e a estratégia de mock.
+Detalhamento operacional do TDD. O piso (testes antes, cobertura 95%/98% com ramos) está no CLAUDE.md global; o ciclo por feature é conduzido pela skill `fuzkrigo-spec-driven` (`scaffold` cria o teste que falha, `verify` grava a prova, `audit` julga). Aqui ficam as camadas e a estratégia de mock.
 
 O teste que prova um critério de aceite carrega a etiqueta `@spec:AC-xxx` no título; o que prova um princípio da constituição carrega `@principle:P-xxx`. É por essa etiqueta que a prova é casada — nunca alterá-la ao refatorar ou renomear testes.
 
@@ -184,3 +184,23 @@ O teste que prova um critério de aceite carrega a etiqueta `@spec:AC-xxx` no t�
 
 - Chamadas externas (APIs, banco, filesystem) sempre mockadas em unitários.
 - Testes de integração usam fakes/stubs controlados, nunca produção.
+
+**Exclusões de cobertura:**
+
+Toda exclusão de cobertura precisa de justificativa: um comentário na linha imediatamente acima da exclusão, começando com `coverage-justification:`, com o motivo em PT-BR e EN.
+
+- **Python:** a exclusão é `# pragma: no cover`. Na linha que abre uma cláusula (`if`, `else`, `def`), a cláusula inteira sai da medição.
+- **JavaScript (vitest, provider v8):** `/* v8 ignore next -- @preserve */`, `/* v8 ignore if -- @preserve */`, `/* v8 ignore else -- @preserve */` ou o par `/* v8 ignore start -- @preserve */` e `/* v8 ignore stop -- @preserve */`. O `-- @preserve` impede que a transpilação do TypeScript apague o comentário.
+
+```python
+# coverage-justification: só roda no Windows, e o CI é Linux. / Windows only; CI runs on Linux.
+if sys.platform == "win32":  # pragma: no cover
+    configure_console_encoding()
+```
+
+Critério de coerência, aplicado pelo agente `code-reviewer`:
+
+- **Aceitos:** código específico de plataforma que o CI não executa; ramo defensivo inalcançável por construção, com o porquê explicado; ponto de entrada (`if __name__ == "__main__":`).
+- **Não aceitos:** "difícil de testar"; "sem tempo"; qualquer trecho com regra de negócio real; justificativa genérica que serviria para qualquer linha.
+
+Exclusão sem justificativa, ou com justificativa incoerente, é achado crítico do `code-reviewer`.

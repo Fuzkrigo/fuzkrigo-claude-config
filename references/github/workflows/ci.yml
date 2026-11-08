@@ -63,28 +63,35 @@ jobs:
           echo "comando: $CMD"
           eval "$CMD"
 
-      # Cobertura e a parte que nao generaliza: cada stack tem comando e
-      # formato proprios. Os limites (80% geral, 95% em logica de negocio)
-      # sao impostos pela config da propria ferramenta — pytest-cov com
-      # --cov-fail-under, vitest com coverage.thresholds. Aqui so publicamos
-      # o numero; quem reprova e a ferramenta, onde o limite esta declarado.
+      # Os limites e as pastas de logica de negocio vem do bloco "coverage" do
+      # fuzkrigo.config.json. O CI os aplica e reprova o build abaixo deles, e
+      # tambem quando nao consegue medir: ferramenta ausente, bloco ausente ou
+      # incompleto. A cobertura e sempre medida com ramos. Os dois passos leem
+      # o bloco com .github/scripts/coverage-config.sh. No Node, o vitest so
+      # aceita limite por pasta no proprio vitest.config: a A3 grava la os
+      # mesmos numeros do bloco, e o CI confere o bloco antes de rodar.
+      # Limits and business logic folders come from the "coverage" block of
+      # fuzkrigo.config.json. CI applies them and fails the build below them,
+      # and also when it cannot measure: missing tool, missing or incomplete
+      # block. Coverage is always measured with branches. Both steps read the
+      # block through .github/scripts/coverage-config.sh. On Node, vitest only
+      # takes per-folder limits in vitest.config itself: A3 writes the block's
+      # numbers there, and CI checks the block before running.
       - name: Cobertura (Node)
         if: hashFiles('package.json') != ''
         run: |
-          if node -p "Object.keys(require('./package.json').scripts||{})" | grep -q coverage; then
-            npm run coverage
-          else
-            echo "sem script 'coverage' no package.json — passo ignorado"
+          source .github/scripts/coverage-config.sh
+          skip_without_config
+          if [ "$(node -p "Object.keys(require('./package.json').scripts || {}).includes('coverage')")" != true ]; then
+            echo "script 'coverage' ausente no package.json — ele e obrigatorio (ex.: vitest run --coverage); configure-o na etapa A3" >&2
+            exit 1
           fi
+          read_coverage_config
+          npm run coverage
 
       - name: Cobertura (Python)
         if: hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
-        run: |
-          if python -c "import pytest_cov" 2>/dev/null; then
-            pytest --cov --cov-report=term-missing
-          else
-            echo "pytest-cov nao instalado — passo ignorado (adicione ao requirements para medir cobertura)"
-          fi
+        run: bash .github/scripts/coverage-python.sh
 
       # No pull request o audit e informativo: auditar o projeto inteiro
       # reprovaria por causa de spec de OUTRA feature ainda em rascunho, e
