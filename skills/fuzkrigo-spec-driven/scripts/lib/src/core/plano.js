@@ -334,7 +334,7 @@ export function renderPlanoMd(plan) {
     L.push('embutidos no script — quer rodar uma faixa na mão, é só copiá-los de lá.');
     L.push(`Logs: \`../fuzkrigo-worktrees/${plan.repoName}-${plan.feature}-logs/\`.`);
     L.push('');
-    L.push('### 👀 Acompanhe ao vivo, sem digitar comandos');
+    L.push('### Acompanhe ao vivo, sem digitar comandos');
     L.push('');
     L.push('```bash');
     L.push(`fuzkrigo-spec painel ${plan.feature}`);

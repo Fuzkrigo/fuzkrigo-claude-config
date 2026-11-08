@@ -1,5 +1,6 @@
 // Configuração do projeto — fuzkrigo.config.json na raiz (opcional).
-// Tudo tem default sensato: `npx fuzkrigo-spec audit` funciona sem config.
+// Tudo tem default sensato: `fuzkrigo-spec audit` funciona sem config.
+// Every key has a sensible default: `fuzkrigo-spec audit` runs without config.
 
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';

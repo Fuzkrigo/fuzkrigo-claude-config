@@ -188,28 +188,45 @@ function cmdInit(rootDir, flags) {
   if (!existsSync(gitignorePath)) writeFileSync(gitignorePath, '');
 
   if (flags.agents !== undefined) {
-    const agent = flags.agents === true ? 'claude' : flags.agents;
-    if (agent !== 'claude' && agent !== 'antigravity') {
-      console.error(`--agents desconhecido: "${flags.agents}" (use: claude, antigravity)`);
-      return 2;
-    }
-    const rotulo = agent === 'claude' ? 'Claude Code' : 'Antigravity';
-    const destRel = path.join(agent === 'claude' ? '.claude' : '.agents', 'skills', 'fuzkrigo-spec-driven');
-    const dest = path.join(rootDir, destRel);
-    const skillDir = resolveSkillDir(agent);
-    if (!skillDir) {
-      console.log(
-        `· skill para ${rotulo} não encontrada junto a este motor — copie a pasta fuzkrigo-spec-driven para ~/.claude/skills/ e rode o init a partir dela: node ~/.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs init --agents ${agent}`
-      );
-    } else if (path.resolve(dest) === path.resolve(skillDir)) {
-      console.log(`· skill já instalada em ${destRel} — mantida`);
-    } else {
-      copyDirIfExists(skillDir, dest);
-      console.log(`✔ skill instalada em ${destRel} (${rotulo})`);
-    }
+    const code = installAgentSkill(rootDir, flags.agents);
+    if (code !== 0) return code;
   }
 
   console.log('\npróximo passo: fuzkrigo-spec new <nome-da-feature>');
+  return 0;
+}
+
+// Como instalar a skill quando ela não veio junto do motor. Esta distribuição
+// só traz a variante do Claude Code. / How to get the skill when it did not
+// ship with the engine; this distribution only ships the Claude Code variant.
+function skillInstallHint(agent) {
+  if (agent === 'claude') {
+    return 'copie a pasta fuzkrigo-spec-driven para ~/.claude/skills/ e rode o init a partir dela: node ~/.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs init --agents claude';
+  }
+  return 'esta distribuição traz só a variante do Claude Code; a do Antigravity não está incluída';
+}
+
+// `init --agents`: copia a skill do agente para dentro do projeto (o CI usa a
+// cópia). Devolve o código de saída. / Copies the agent's skill into the
+// project (CI uses the copy). Returns the exit code.
+function installAgentSkill(rootDir, agentFlag) {
+  const agent = agentFlag === true ? 'claude' : agentFlag;
+  if (agent !== 'claude' && agent !== 'antigravity') {
+    console.error(`--agents desconhecido: "${agentFlag}" (use: claude, antigravity)`);
+    return 2;
+  }
+  const rotulo = agent === 'claude' ? 'Claude Code' : 'Antigravity';
+  const destRel = path.join(agent === 'claude' ? '.claude' : '.agents', 'skills', 'fuzkrigo-spec-driven');
+  const dest = path.join(rootDir, destRel);
+  const skillDir = resolveSkillDir(agent);
+  if (!skillDir) {
+    console.log(`· skill para ${rotulo} não encontrada junto a este motor — ${skillInstallHint(agent)}`);
+  } else if (path.resolve(dest) === path.resolve(skillDir)) {
+    console.log(`· skill já instalada em ${destRel} — mantida`);
+  } else {
+    copyDirIfExists(skillDir, dest);
+    console.log(`✔ skill instalada em ${destRel} (${rotulo})`);
+  }
   return 0;
 }
 
