@@ -440,3 +440,41 @@ mandato dele; e o comportamento dos dois hooks, testado em nove cenários.
 
 A espinha do fluxo está correta e as responsabilidades não se sobrepõem. O item 1 é o único que
 impede o fluxo de rodar exatamente como está escrito.
+
+---
+
+## Rodada 2 — 07/11/2026
+
+> Data das decisões: 07/11/2026. Estado auditado: commit `ac873f0` (commit 5 desta rodada,
+> `feat(spec-driven): escolher o modelo de cada tarefa pela complexidade`).
+
+| Item | Problema | Decisão | Commit |
+| --- | --- | --- | --- |
+| 1 | `CLAUDE.md` mandava criar à mão o marcador do Modo Tarefa | Texto aponta para o hook `arm_modo_tarefa.py` | 1 |
+| 2 | Manual e README falavam em dois hooks | Três hooks documentados | 1 |
+| 4 | Ponteiros `@.claude/` entre crases, caminho ambíguo | `CODIGO.md` importado sempre; `PATTERNS.md` sob demanda | 1 |
+| 7 | `project-manager` mandava confirmar com o usuário sem ter canal | Devolve a proposta no relatório | 1 |
+| 9 | Item 5 da rodada 1 desatualizado | CSS e SCSS fora do hook, por decisão | 1 |
+| 12 | Agentes com modelo fixo | `model: opus` | 1 |
+| 13 | Tarefas "implícitas" reprovavam no audit | Toda feature tem `tasks.md` mapeado | 1 |
+| 6 | Caminhos absolutos do usuário | `$HOME`, `~/.claude/` e `py -3` | 2 |
+| CI | Versões fixas de Node e Python | `lts/*` e `3.x` | 2 |
+| Herança | Nomes do projeto de origem no motor | `fuzkrigo.config.json`, `../fuzkrigo-worktrees/`, `x-fuzkrigo-token` | 3 |
+| 5 | Exceção do hook de estilo na pasta antiga | Exceção por nome de pasta `fuzkrigo-claude-config` | 4 |
+| 10 | Hook de planejamento parava de perguntar após a primeira spec | Confere o mapeamento do arquivo, como o audit | 4 |
+| Modelo | Modelo fixo nas faixas paralelas | `opus` padrão e critério de complexidade na skill | 5 |
+| 3 e 11 | Arquivos corporativos | Adiados para a etapa corporativa | — |
+| 8 | Skills antigas na conta claude.ai | Remoção a cargo do usuário, fora do repositório | — |
+
+O registro completo das opções e dos motivos de cada decisão está no log de decisões do projeto
+de desenho do ecossistema (`log-de-decisoes.md`, projeto "Ecosistema de Desenvolvimento").
+
+**Decidido durante a execução, fora da tabela acima:** os hooks `check_planning_docs.py` e
+`check_style_prohibitions.py` liam o JSON do harness como texto. No Windows, com Python 3.14 ou
+anterior (sem UTF-8 mode), isso decodificava em cp1252: emoji passava pelo hook de estilo e
+caminho com acento corrompia a checagem de mapeamento. Os dois passaram a ler bytes
+(`sys.stdin.buffer`), com testes que rodam o hook com `-X utf8=0` (commit 4). O
+`arm_modo_tarefa.py` lê a entrada do mesmo jeito, mas o efeito nele é estreito: como só procura
+textos ASCII (`#tarefa`, "modo normal", "sair do modo tarefa"), continua funcionando, exceto
+quando `#tarefa` vem colado a um caractere não ASCII (por exemplo `#tarefa—ajuste`), caso em que
+o Modo Tarefa não liga. Ficou de fora porque esta rodada não o altera.
