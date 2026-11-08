@@ -13,7 +13,7 @@
 | 2 | Alto | Contradição: Bloco A é obrigatório ou opcional? | Baixo | Baixo | **Resolvido (opção A)** |
 | 3 | Médio | Dependência circular entre A2 e A3 (códigos `P-xxx` no ROADMAP) | Baixo | Nenhum | **Resolvido** |
 | 4 | Médio | Frase residual do fluxo antigo sobre onde as etapas nascem | Trivial | Nenhum | **Resolvido** |
-| 5 | Baixo | Hook de planejamento não cobre `.mjs` / `.cjs` | Trivial | Baixo | **Resolvido (parcial)** |
+| 5 | Baixo | Hook de planejamento não cobre `.mjs` / `.cjs` | Trivial | Baixo | **Resolvido** |
 | 6 | Baixo | `DOC_EXEMPT` é código morto no hook | Trivial | Nenhum | **Resolvido** |
 | 7 | Baixo | Não está escrito quem aplica o princípio devolvido pelo security-reviewer | Trivial | Nenhum | **Resolvido** |
 | 8 | Observação | Portão 2 gasta 2-3 subagentes mesmo em feature minúscula | Baixo | Baixo | **Resolvido** |
@@ -246,12 +246,13 @@ e das etapas já revisadas em A2 — não porque as etapas não existiriam antes
 
 ## 5. BAIXO — Hook de planejamento não cobre `.mjs` e `.cjs`
 
-> **RESOLVIDO EM PARTE em 03/08/2026.** `mjs` e `cjs` entraram em `CODE_EXTENSIONS`, testados em
-> projeto vazio (pergunta) e com spec (libera). **Continua em aberto** a pergunta que este item
-> deixou para você: `vue`, `svelte`, `scss` e `css` entram também? Argumentos: `.vue` e `.svelte`
-> carregam lógica de aplicação, então o caso a favor é forte; `.scss` e `.css` são estilo, e
-> tratá-los como código de produção faria o hook perguntar ao ajustar uma cor. Enquanto não
-> decidir, os quatro seguem fora.
+> **RESOLVIDO.** Em 03/08/2026, `mjs` e `cjs` entraram em `CODE_EXTENSIONS`, testados em projeto
+> vazio (pergunta) e com spec (libera). A pergunta que este item deixou em aberto — `vue`,
+> `svelte`, `scss` e `css` entram também? — está decidida: `vue`, `svelte` e `astro` entram em
+> `CODE_EXTENSIONS`, porque carregam lógica de aplicação junto do template (no código desde o
+> commit `adcfd2a`, de 10/08/2026); `css` e `scss` ficam fora, por decisão do usuário registrada
+> em 07/11/2026, porque ajuste visual não é implementação de feature, e um hook que pergunta a
+> cada retoque de cor é um hook que se aprende a ignorar.
 
 ### O problema
 

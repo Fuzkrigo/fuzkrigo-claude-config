@@ -65,7 +65,7 @@ O que esta skill exige na saída do Bloco B, em ordem:
    **Fechar com o audit de novo, sempre.** Depois do `docstrings-manager`, rodar `fuzkrigo-spec audit --ci --feature <feature>` mais uma vez, antes do PR. Motivo concreto: esse agente tem permissão de edição e trabalha sobre arquivos de teste — se um título anotado com `@spec:AC-xxx` (ou um nome `test_ac_001`, em Python) for alterado, a prova daquele critério desaparece. A regra que o proíbe está escrita no prompt dele, mas regra escrita não é garantia; o audit é. Custa segundos e transforma um estrago silencioso em falha imediata.
 3. **Portão 3 — entrega.** PR e merge conforme `~/.claude/references/git-conventions.md`, incluindo o squash das faixas de execução paralela. Se a feature introduziu mudança estrutural (novo módulo, integração externa, decisão de arquitetura, modelo de dados), invocar o agente `project-documentation` para atualizar `docs/ARCHITECTURE.md` — critério completo em `references/architecture-md.md`. Marcar a Etapa concluída no CHECKLIST.
 
-Momento de avaliar design patterns: consultar `@.claude/PATTERNS.md` (se disponível) e sugerir um pattern apenas quando resolver dor concreta identificada — nunca na primeira versão, nunca por estética.
+Momento de avaliar design patterns: consultar `~/.claude/PATTERNS.md` e sugerir um pattern apenas quando resolver dor concreta identificada — nunca na primeira versão, nunca por estética.
 
 ### BLOCO C — Fechamento de milestone
 

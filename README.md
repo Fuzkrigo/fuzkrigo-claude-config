@@ -27,6 +27,7 @@ Backup e documentação da configuração pessoal do Claude Code (Fuzkrigo) — 
 │   ├── project-documentation.md     # Gera ARCHITECTURE.md (A2), RESUMO-EXECUTIVO.md, DOCUMENTACAO-TECNICA.md, MANUAL.md e APRESENTACAO.md (C2) — não cobre ROADMAP/CHECKLIST, que ficam com o Claude principal
 │   └── docstrings-manager.md        # Gera docstrings e comentários inline em qualquer linguagem (Portão 2, após o code-reviewer) — nunca altera lógica
 └── hooks/                           # Scripts Python invocados pelos hooks do settings.json
+    ├── arm_modo_tarefa.py           # UserPromptSubmit — cria/apaga o marcador do Modo Tarefa (CLAUDE.md §7)
     ├── check_planning_docs.py       # PreToolUse (Write|Edit) — iniciar-projeto §4, Regra de Bloqueio
     └── check_style_prohibitions.py  # PreToolUse (Write|Edit) — iniciar-projeto §8, Proibições de Estilo
 ```
@@ -37,16 +38,18 @@ As duas skills principais são complementares, não alternativas: `iniciar-proje
 
 Cada agente é um arquivo `.md` com frontmatter (`name`, `description`, `tools`, `model`) + prompt de sistema. `description` funciona como o gatilho — é o que o Claude principal lê para decidir quando invocar o agente via ferramenta `Agent`. `security-reviewer/references/` guarda o conteúdo de referência que o agente lê sob demanda (mesmo padrão de carregamento seletivo que as skills usam, mas aplicado manualmente — agentes não têm esse mecanismo embutido).
 
-Hooks são comandos que o harness executa automaticamente em eventos do ciclo de vida (aqui, `PreToolUse` em `Write`/`Edit`) — não dependem de eu lembrar de aplicar uma regra.
+Hooks são comandos que o harness executa automaticamente em eventos do ciclo de vida (aqui, `UserPromptSubmit` a cada mensagem e `PreToolUse` em `Write`/`Edit`) — não dependem de eu lembrar de aplicar uma regra.
 
 `check_planning_docs.py` pergunta (`permissionDecision: ask`) antes de escrever código de produção sem evidência de planejamento. Duas evidências são aceitas, uma por camada do fluxo: `ROADMAP.md` mais `CHECKLIST.md` (abertura do projeto) **ou** qualquer `.spec/features/<feature>/spec.md` (feature especificada). Basta uma — projeto pequeno que roda só com spec é caso legítimo e não deve ser interrogado a cada arquivo. Hooks não veem histórico de conversa, então não sabem se é `#tarefa`: por isso pergunta em vez de bloquear direto, e quem decide é o usuário. Procura os documentos em `docs/` (local canônico) e aceita a raiz como fallback, para não disparar falso positivo em projeto anterior a essa convenção.
 
 `check_style_prohibitions.py` bloqueia (`permissionDecision: deny`) emoji decorativo e frases de reivindicação de coautoria de máquina — restrito a essas frases especificamente (não à palavra "Claude"/"Anthropic" isolada). Tem uma exceção por caminho: dentro de `~/.claude/` e deste repositório, citar as frases proibidas é necessário para documentar a própria regra. Sem ela o hook impedia editar o texto que o define, incluindo o próprio código-fonte do hook. A exceção vale só para as frases; emoji continua bloqueado em todo lugar.
 
+`arm_modo_tarefa.py` roda a cada mensagem (`UserPromptSubmit`) e cuida do marcador do Modo Tarefa (`CLAUDE.md` §7): mensagem que começa com `#tarefa` cria `<temp>/claude-modo-tarefa/<session_id>.flag`, e "sair do modo tarefa" ou "modo normal" o apagam. É por esse arquivo que o `check_planning_docs.py`, que não vê a conversa, sabe que a Regra de Bloqueio foi desligada na sessão. Antes, o marcador dependia de o Claude lembrar de criá-lo, o que quase nunca acontecia. Falha aberta: um erro no hook nunca trava a mensagem.
+
 ## Como isso é usado
 
 - `CLAUDE.md` fica em `~/.claude/CLAUDE.md` e se aplica a todas as sessões.
-- `CLAUDE_PASTA PROFFISIONAL.md`, `CODIGO.md` e `PATTERNS.md` são carregados por referência (`@arquivo.md`) a partir do `CLAUDE.md`, conforme o contexto da sessão.
+- `CODIGO.md` é importado pelo `CLAUDE.md` (seção 10, linha `@CODIGO.md` fora de crase) e entra em toda sessão. `PATTERNS.md` não é importado: é lido sob demanda, em `~/.claude/PATTERNS.md`, nas discussões de arquitetura. O local de instalação de `CLAUDE_PASTA PROFFISIONAL.md` está em aberto, adiado para a etapa corporativa.
 - As pastas em `skills/` correspondem a skills instaladas em `~/.claude/skills/` — aqui mantidas como texto para versionamento e documentação.
 - `references/` corresponde a `~/.claude/references/`. `git-conventions.md` e os templates de `.github/` viviam dentro da skill `iniciar-projeto`, mas o agente `project-manager` os lia por caminho físico — o que o quebraria em qualquer troca de skill. Saíram para cá justamente para que o agente não dependa de nenhuma skill específica.
 - `skills/fuzkrigo-spec-driven/` é uma adaptação de [onp-spec-driven](https://github.com/onovoprogramador/onp-spec-driven), de onovoprogramador, sob licença MIT — preservada aqui. A adaptação (renomeação, integração com o fluxo da `iniciar-projeto` e ajustes locais do motor) é própria. Por herança do projeto original, alguns nomes internos mantêm o prefixo antigo: o arquivo de configuração lido pelo motor é `onpspec.config.json` e os worktrees do plano paralelo nascem em `../onp-worktrees/`. O motor é Node puro, sem dependências, e roda com o `node` do ambiente — não há instalação.

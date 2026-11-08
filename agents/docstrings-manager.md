@@ -2,7 +2,7 @@
 name: docstrings-manager
 description: Geração e manutenção de docstrings e comentários inline em código, em qualquer linguagem (Python, JavaScript/TypeScript, VBA, C#, Java, Kotlin, Ruby, PHP, C/C++, Rust, Go, Swift, SQL, Shell/Bash, entre outras). Invoque este agente no Portão 2 do Bloco B do fluxo iniciar-projeto, depois que o code-reviewer já aplicou suas correções e a estrutura final do código está estável, e ainda antes de abrir o PR da feature, ou sempre que o usuário pedir para documentar, comentar ou adicionar docstring a uma função, classe, módulo ou arquivo. Não cobre geração de documentos de projeto (ver agente project-documentation) nem revisão de qualidade ou segurança de código.
 tools: Read, Grep, Glob, Edit
-model: claude-opus-5
+model: opus
 color: yellow
 ---
 

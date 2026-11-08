@@ -20,7 +20,7 @@ confia que o agente obedeceu — **a máquina prova, via exit code**.
 ┌───────────┐  ┌────────┐  ┌───────┐  ┌───────┐  ┌────────┐  ┌───────┐
 │ESPECIFICAR│→ │PROJETAR│→ │TAREFAS│→ │ PLANO │→ │EXECUTAR│→ │AUDITAR│
 └───────────┘  └────────┘  └───────┘  └───────┘  └────────┘  └───────┘
-   sempre      se preciso   se grande  2+ tarefas   sempre    SEMPRE (gate)
+   sempre      se preciso    sempre    2+ tarefas   sempre    SEMPRE (gate)
 ```
 
 ## De onde vem a feature — fronteira com a `iniciar-projeto`
@@ -196,14 +196,19 @@ fosse o gate mecânico.
 
 | Escopo | Especificar | Projetar | Tarefas | Plano | Executar |
 |---|---|---|---|---|---|
-| Pequeno (≤3 arquivos) | spec enxuta | pular | implícito | pular | implementar + verify + audit |
-| Médio (<10 tarefas) | spec completa | inline | inline | se 2+ tarefas | implementar + verify + audit |
+| Pequeno (≤3 arquivos) | spec enxuta | pular | `tasks.md` mínimo (1 tarefa com `Arquivos:`) | pular | implementar + verify + audit |
+| Médio (<10 tarefas) | spec completa | inline | `tasks.md` enxuto | se 2+ tarefas | implementar + verify + audit |
 | Grande (multi-componente) | spec + design | design.md | tasks.md | sempre | por faixa + verify + audit |
 
-**Sempre obrigatórios:** Especificar e Auditar.
-**Válvula de segurança:** mesmo pulando Tarefas, comece o Executar listando os
-passos atômicos. Se aparecerem >5 passos ou dependências entre eles, PARE e
-crie `tasks.md` — a fase foi pulada por engano.
+Toda feature, de qualquer tamanho, mapeia seus arquivos de `src/` no `Arquivos:` de alguma
+tarefa: `audit --ci` trata código órfão como erro, e o hook de planejamento pergunta antes de
+escrever arquivo não mapeado.
+
+**Sempre obrigatórios:** Especificar, Tarefas e Auditar.
+**Válvula de segurança:** na feature pequena, comece o Executar listando os passos
+atômicos e confira-os contra o `tasks.md` mínimo. Se aparecerem >5 passos ou
+dependências entre eles, PARE e quebre o `tasks.md` em mais tarefas — a feature
+foi subdimensionada.
 
 ## Passo a passo
 

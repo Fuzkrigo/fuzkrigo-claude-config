@@ -61,7 +61,7 @@ Nada aqui impede você de trabalhar rápido. O que ele impede é você **achar**
 | `references/` | Padrões consultáveis: convenções de Git, templates de issue e PR, workflow de CI | Lido quando o assunto aparece; o `github/` é copiado para o projeto em A3 |
 | `skills/` | Fluxos completos: abertura de projeto, desenvolvimento de feature, ambiente corporativo | Você chama (`/iniciar-projeto`) ou o gatilho da descrição dispara |
 | `agents/` | Especialistas que rodam isolados e devolvem um relatório: revisão de código, segurança, documentação, gestão de projeto, docstrings | Chamados em pontos fixos do fluxo, ou quando você pede |
-| `hooks/` | Dois scripts que o harness executa antes de cada escrita de arquivo | Automático, você não controla |
+| `hooks/` | Três scripts: um a cada mensagem sua, dois antes de cada escrita de arquivo | Automático, você não controla |
 
 Sobre os agentes: eles rodam em uma janela de contexto separada e **não veem a conversa**. Por
 isso devolvem relatórios completos em vez de conversar. Dois deles não têm permissão de escrita
@@ -76,6 +76,10 @@ Sobre os hooks, que são a parte que ninguém pode desligar sem querer:
   ferramenta. Esse **bloqueia mesmo**, e é intencional. Tem uma exceção por caminho: dentro de
   `~/.claude/` e do repositório de backup, citar as frases proibidas é permitido, porque é onde a
   regra precisa ser documentada. Emoji continua bloqueado em todo lugar.
+- `arm_modo_tarefa.py` — roda a cada mensagem sua, não antes de escrita. Mensagem que começa com
+  `#tarefa` cria o marcador do Modo Tarefa da sessão; "modo normal" ou "sair do modo tarefa" o
+  apagam. É por esse marcador que o hook de planejamento sabe que deve ficar quieto: você não
+  precisa fazer nada além de escrever o `#tarefa`.
 
 ### Não confunda com as ferramentas que já vêm no Claude Code
 

@@ -31,7 +31,7 @@ Corolário: **deny by default**. Começar negando tudo e liberar explicitamente 
 
 Estes dois princípios parecem se contradizer, mas atuam em momentos diferentes e são complementares:
 
-- **Fail Fast** (validação de entrada) — erre cedo e barulhento. Ao receber input inválido ou pré-condição não satisfeita, parar imediatamente com erro explícito, em vez de propagar estado inválido adiante. Definido em `@.claude/CODIGO.md`.
+- **Fail Fast** (validação de entrada) — erre cedo e barulhento. Ao receber input inválido ou pré-condição não satisfeita, parar imediatamente com erro explícito, em vez de propagar estado inválido adiante. Definido em `~/.claude/CODIGO.md`.
 - **Fail-Safe / Fail-Closed** (comportamento sob erro) — quando algo dá errado no meio da operação, o sistema deve cair para o estado **mais seguro**, não o mais permissivo. Em dúvida sobre autorização por causa de um erro, negar (nunca liberar por falha). É o A10 do OWASP.
 
 Regra combinada: **validar rápido e barulhento na entrada; falhar fechado e silencioso para o atacante na saída.** Um não anula o outro — Fail Fast evita processar lixo; Fail-Safe garante que, se algo escapar, a falha não vira brecha.
