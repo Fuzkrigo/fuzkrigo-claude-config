@@ -18,7 +18,7 @@
 | 7 | Baixo | Não está escrito quem aplica o princípio devolvido pelo security-reviewer | Trivial | Nenhum | **Resolvido** |
 | 8 | Observação | Portão 2 gasta 2-3 subagentes mesmo em feature minúscula | Baixo | Baixo | **Resolvido** |
 | 9 | Observação | Proteção das etiquetas de rastreio é textual, não mecânica | Médio | Médio | **Resolvido (opção C)** |
-| 10 | Observação | `dataviz` e `DESIGN.md` podem definir paletas conflitantes | Baixo | Nenhum | **Diagnóstico incorreto — ver nota** |
+| 10 | Observação | `dataviz` e `DESIGN.md` podem definir paletas conflitantes | Baixo | Nenhum | **Resolvido (08/11/2026) — ver nota** |
 
 Ordem sugerida de execução: 2, 3, 4 (texto puro, destravam o entendimento do fluxo) → 5, 6, 7
 (higiene) → 1 (o único que mexe em código de verdade) → 8, 9, 10 (conforme decisão).
@@ -391,6 +391,12 @@ zero, detecção imediata, sem código novo.
 
 ## 10. OBSERVAÇÃO — `dataviz` e `DESIGN.md` podem definir paletas conflitantes
 
+> **RESOLVIDO em 08/11/2026.** O `DESIGN.md` passou a ser referência sob demanda: instalado em
+> `~/.claude/DESIGN.md` e citado na tabela do §4 do `CLAUDE.md` para trabalho que produz interface
+> ou gráfico — a regra no `CLAUDE.md` que a nota abaixo pedia. Antes de gerar um gráfico, o Claude
+> consulta o `DESIGN.md` em vez de seguir a paleta de exemplo da dataviz. Qual projeto herda a
+> identidade visual (pendência 6 do `DESIGN.md`) continua em aberto, para a sessão de design.
+>
 > **DIAGNÓSTICO CORRIGIDO em 03/08/2026, item em stand by.**
 >
 > O caminho citado abaixo (`~/.claude/skills/dataviz/references/palette.md`) **não existe**. Foi

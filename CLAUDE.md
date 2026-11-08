@@ -86,6 +86,7 @@ Ao iniciar projeto novo ou refatoração grande, carregar `/iniciar-projeto`. Co
 | Agente - `project-documentation` | A2 (Arquitetura), Portão 3 do Bloco B (Arquitetura, se a estrutura mudou) e C2 (demais documentos) — invocar via tool Agent |
 | Agente - `docstrings-manager`  | Portão 2 do Bloco B, após o code-reviewer, ou pedido pontual — invocar via tool Agent    |
 | `~/.claude/PATTERNS.md`        | Discussões de arquitetura ou refatoração de módulos                                     |
+| `~/.claude/DESIGN.md`          | Trabalho que produz interface ou gráfico: consultar antes de escolher cor, espaçamento ou tipografia |
 | `~/.claude/CODIGO.md`          | Carregado sempre via import (seção 10)                                                  |
 | `~/.claude/references/git-conventions.md` | Qualquer commit, branch, PR ou release                                       |
 
