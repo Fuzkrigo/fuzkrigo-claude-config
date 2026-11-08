@@ -57,7 +57,7 @@ Nada aqui impede você de trabalhar rápido. O que ele impede é você **achar**
 
 | Peça | O que é | Quem dispara |
 | ---- | ------- | ------------ |
-| `CLAUDE.md` | As regras que valem em toda sessão: persona, idioma, TDD, anti-alucinação, proibições | Carregado automaticamente, sempre |
+| `CLAUDE.md` | As regras que valem em toda sessão: persona, idioma, TDD, anti-alucinação, proibições. Importa o `CODIGO.md` (padrões de código), que entra junto em toda sessão | Carregado automaticamente, sempre |
 | `references/` | Padrões consultáveis: convenções de Git, templates de issue e PR, workflow de CI | Lido quando o assunto aparece; o `github/` é copiado para o projeto em A3 |
 | `skills/` | Fluxos completos: abertura de projeto, desenvolvimento de feature, ambiente corporativo | Você chama (`/iniciar-projeto`) ou o gatilho da descrição dispara |
 | `agents/` | Especialistas que rodam isolados e devolvem um relatório: revisão de código, segurança, documentação, gestão de projeto, docstrings | Chamados em pontos fixos do fluxo, ou quando você pede |
@@ -135,6 +135,7 @@ uma branch. Esse é o elo que amarra tudo: se você entender só uma coisa deste
 
 ```bash
 node --version     # o motor de auditoria roda nele
+py -3 --version    # os tres hooks rodam com o lancador do Python
 git --version
 gh auth status     # so se voce for criar repositorio, labels e issues no GitHub
 ```
@@ -233,10 +234,11 @@ Assim fica uma etapa no CHECKLIST:
 - [ ] E3: Editar perfil — spec ainda não criada
 ```
 
-**A3 — Provisionamento e constituição.** O agente `project-manager` cria repositório, labels,
-milestones e as issues (uma por etapa) no GitHub, e monta a gestão no Linear — Project, Milestones
-e as issues já sincronizadas, com prioridade nativa. O GitHub Projects não entra: o board é o do
-Linear. E o projeto ganha sua constituição:
+**A3 — Provisionamento e constituição.** O agente `project-manager` cria labels, milestones e as
+issues (uma por etapa) no GitHub, e monta a gestão no Linear — Project, Milestones e as issues já
+sincronizadas, com prioridade nativa. Se o repositório ainda não existe, ele não o cria: devolve o
+comando `gh repo create` montado, eu te pergunto, e ele é invocado de novo com o repositório
+pronto. O GitHub Projects não entra: o board é o do Linear. E o projeto ganha sua constituição:
 
 **[terminal]** (na prática, quem roda sou eu, durante A3)
 
@@ -345,6 +347,10 @@ No `tasks.md`, quebre em tarefas com os arquivos que cada uma toca:
 ```
 
 O campo `Arquivos` decide o que pode rodar em paralelo. Capriche nele.
+
+Toda feature tem `tasks.md`, mesmo a pequena: no mínimo uma tarefa com o campo `Arquivos`. Cada
+arquivo de `src/` precisa estar no `Arquivos` de alguma tarefa — o audit acusa como código órfão o
+que não estiver, e o hook de planejamento pergunta antes de eu escrever um arquivo assim.
 
 ### Passo 3 — O teste nasce falhando
 
@@ -480,7 +486,7 @@ descartável.
 Continua valendo, sempre: não inventar API, não expor segredo, não engolir erro, alertar risco de
 segurança, PT-BR na conversa e inglês no código.
 
-Para sair: comece uma conversa nova, ou diga "modo normal".
+Para sair: comece uma conversa nova, ou diga "modo normal" ou "sair do modo tarefa".
 
 **Não confunda com projeto dispensável** (seção 5). São dois níveis diferentes de desligamento:
 
@@ -606,3 +612,12 @@ node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nome
 
 São 22 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
+
+Os hooks têm testes próprios, que rodam a partir da raiz deste repositório:
+
+```bash
+py -3 -m unittest discover -s hooks/tests -v
+```
+
+São 27 casos. Dois deles comparam o hook de planejamento com o próprio motor e precisam do `node`
+no PATH; sem ele, ficam pulados (skip), não reprovados.
