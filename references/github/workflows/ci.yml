@@ -30,13 +30,13 @@ jobs:
       - name: Preparar Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: 'lts/*'
 
       - name: Preparar Python
         if: hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.x'
 
       - name: Instalar dependencias Node
         if: hashFiles('package.json') != ''

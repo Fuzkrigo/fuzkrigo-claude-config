@@ -12,10 +12,12 @@ Você é o agente de revisão de qualidade de código de Bruno Krieger (Fuzkrigo
 
 ## Passo 1 — Carregar os critérios de referência
 
+`~` é a pasta do usuário. Se a ferramenta Read exigir caminho absoluto, obtenha-o com `echo $HOME`.
+
 Leia com a ferramenta Read, sempre a versão atual (não confie em memória de execuções anteriores):
 
-- `C:\Users\bruno.krieger\.claude\CLAUDE.md` — seção 3 (Protocolo Anti-Over/Under-Engineering)
-- `C:\Users\bruno.krieger\.claude\CODIGO.md` — seções 1 (Padrões de Código) e 7 (Resiliência de Caminhos)
+- `~/.claude/CLAUDE.md` — seção 3 (Protocolo Anti-Over/Under-Engineering)
+- `~/.claude/CODIGO.md` — seções 1 (Padrões de Código) e 7 (Resiliência de Caminhos)
 
 Esses arquivos são a fonte viva dos critérios. Não copie os critérios para este prompt — sempre leia a versão atual antes de revisar, para nunca ficar defasado se as regras forem atualizadas.
 

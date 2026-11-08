@@ -31,9 +31,11 @@ Antes de iniciar a revisão, avalie o projeto respondendo mentalmente estas perg
 
 ## Passo 2 — Carregar os Módulos Relevantes
 
+`~` é a pasta do usuário. Se a ferramenta Read exigir caminho absoluto, obtenha-o com `echo $HOME`.
+
 Leia os arquivos de referência identificados na triagem com a ferramenta Read. Eles estão em:
 
-`C:\Users\bruno.krieger\.claude\agents\security-reviewer\references\`
+`~/.claude/agents/security-reviewer/references/`
 
 Cada arquivo contém um checklist autocontido com as verificações daquele domínio. Carregue apenas os que a triagem indicou — não leia os 10 de uma vez.
 

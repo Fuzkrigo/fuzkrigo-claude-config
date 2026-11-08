@@ -38,14 +38,16 @@ Interpretação:
 
 ## Passo 1 — Carregar as referências vivas
 
+`~` é a pasta do usuário. Se a ferramenta Read exigir caminho absoluto, obtenha-o com `echo $HOME`.
+
 Leia com a ferramenta Read, sempre a versão atual (não confie em memória de execuções anteriores). Estes arquivos são a fonte dos padrões — não os reproduza de cabeça:
 
-- `C:\Users\bruno.krieger\.claude\references\git-conventions.md` — commits semânticos, nomenclatura de branch, formato de PR, fluxo completo de comandos. **Todo bloco Git que você montar (Passo 5) e todo título de PR/issue precisa seguir isto.** É a causa mais comum de saída fora do padrão: montar comandos sem ter lido este arquivo.
-- `C:\Users\bruno.krieger\.claude\CLAUDE.md` — seção 1.3 (idioma) e seção 8 (proibições).
+- `~/.claude/references/git-conventions.md` — commits semânticos, nomenclatura de branch, formato de PR, fluxo completo de comandos. **Todo bloco Git que você montar (Passo 5) e todo título de PR/issue precisa seguir isto.** É a causa mais comum de saída fora do padrão: montar comandos sem ter lido este arquivo.
+- `~/.claude/CLAUDE.md` — seção 1.3 (idioma) e seção 8 (proibições).
 
 Templates de issue e PR ficam em:
 
-`C:\Users\bruno.krieger\.claude\references\github\`
+`~/.claude/references/github/`
 
 Contém `PULL_REQUEST_TEMPLATE.md`, `ISSUE_TEMPLATE/` (`feature.md`, `bug.md`, `tech-debt.md`) e `workflows/ci.yml` (o pipeline: testes, cobertura e auditoria da especificação). Copie a pasta `.github/` inteira para a **raiz** do projeto quando ela ainda não existir lá — o GitHub só reconhece esses templates nesse caminho exato, então ela não vai para `docs/`. O `feature.md` é o template da issue de etapa: título no padrão `[M<n>] Etapa E<n>: ` (ver "Padrão de título das issues" no Passo 3), contexto curto, tarefas como checklist.
 
@@ -305,8 +307,8 @@ Cada Milestone concluída vira um Release. Texto sempre em português BR, sem em
 Issue fechada não é prova de que a feature funciona. Em projeto que usa a skill `fuzkrigo-spec-driven` (existe `.spec/` na raiz), verifique antes de montar qualquer coisa:
 
 ```bash
-node "C:/Users/bruno.krieger/.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs" status
-node "C:/Users/bruno.krieger/.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs" audit --ci
+node ~/.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs status
+node ~/.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs audit --ci
 ```
 
 Critério: **toda feature da milestone precisa estar `auditada`**, e o `audit --ci` precisa sair com código 0. Rode-o **sem** `--feature`: o filtro por feature existe para o portão de desenvolvimento, e usá-lo aqui esconderia justamente o que um release não pode ignorar. Se alguma não estiver, ou se o audit sair 1, não monte o release como se estivesse pronto: reporte quais features não passaram e o que o audit acusou, no topo do seu relatório. Lançar assim mesmo é decisão do usuário, tomada com a informação na mão — não sua.
