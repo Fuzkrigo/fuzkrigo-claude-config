@@ -93,7 +93,7 @@ rascunho → pronta → em-implementacao → implementada → auditada
   campo que decide o que o plano de execução roda EM PARALELO (arquivos
   disjuntos) e o que roda em sequência (arquivo compartilhado).
 - `Modelo:` e `Esforço:` (opcionais) — usados por `fuzkrigo-spec plano` para o
-  executor da tarefa: `- Modelo: claude-opus-5` · `- Esforço: alto`
+  executor da tarefa: `- Modelo: opus` · `- Esforço: alto`
   (baixo|medio|alto|xalto|max). Sem eles, valem os defaults da config
   (`paralelo.model`, `paralelo.esforco`).
 - Status: `[pendente]` / `[em-andamento]` / `[concluida]` — acentos e

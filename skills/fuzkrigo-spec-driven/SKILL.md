@@ -20,7 +20,7 @@ confia que o agente obedeceu — **a máquina prova, via exit code**.
 ┌───────────┐  ┌────────┐  ┌───────┐  ┌───────┐  ┌────────┐  ┌───────┐
 │ESPECIFICAR│→ │PROJETAR│→ │TAREFAS│→ │ PLANO │→ │EXECUTAR│→ │AUDITAR│
 └───────────┘  └────────┘  └───────┘  └───────┘  └────────┘  └───────┘
-   sempre      se preciso   se grande  2+ tarefas   sempre    SEMPRE (gate)
+   sempre      se preciso    sempre    2+ tarefas   sempre    SEMPRE (gate)
 ```
 
 ## De onde vem a feature — fronteira com a `iniciar-projeto`
@@ -126,7 +126,7 @@ Abaixo, `fuzkrigo-spec <comando>` é abreviação dessa invocação.
 ## Configurar a prova por stack (faça isso no `init`)
 
 O `verify` lê a saída do SEU test runner. Sem o par certo de `testCommand` e
-`reporter` em `onpspec.config.json`, ele lê zero testes e todo critério fica
+`reporter` em `fuzkrigo.config.json`, ele lê zero testes e todo critério fica
 sem prova — mesmo com os testes passando:
 
 | Stack | `testCommand` | `reporter` |
@@ -196,14 +196,19 @@ fosse o gate mecânico.
 
 | Escopo | Especificar | Projetar | Tarefas | Plano | Executar |
 |---|---|---|---|---|---|
-| Pequeno (≤3 arquivos) | spec enxuta | pular | implícito | pular | implementar + verify + audit |
-| Médio (<10 tarefas) | spec completa | inline | inline | se 2+ tarefas | implementar + verify + audit |
+| Pequeno (≤3 arquivos) | spec enxuta | pular | `tasks.md` mínimo (1 tarefa com `Arquivos:`) | pular | implementar + verify + audit |
+| Médio (<10 tarefas) | spec completa | inline | `tasks.md` enxuto | se 2+ tarefas | implementar + verify + audit |
 | Grande (multi-componente) | spec + design | design.md | tasks.md | sempre | por faixa + verify + audit |
 
-**Sempre obrigatórios:** Especificar e Auditar.
-**Válvula de segurança:** mesmo pulando Tarefas, comece o Executar listando os
-passos atômicos. Se aparecerem >5 passos ou dependências entre eles, PARE e
-crie `tasks.md` — a fase foi pulada por engano.
+Toda feature, de qualquer tamanho, mapeia seus arquivos de `src/` no `Arquivos:` de alguma
+tarefa: `audit --ci` trata código órfão como erro, e o hook de planejamento pergunta antes de
+escrever arquivo não mapeado.
+
+**Sempre obrigatórios:** Especificar, Tarefas e Auditar.
+**Válvula de segurança:** na feature pequena, comece o Executar listando os passos
+atômicos e confira-os contra o `tasks.md` mínimo. Se aparecerem >5 passos ou
+dependências entre eles, PARE e quebre o `tasks.md` em mais tarefas — a feature
+foi subdimensionada.
 
 ## Passo a passo
 
@@ -248,6 +253,22 @@ produto).
   critério de outra feature) e `Arquivos:` (separados por VÍRGULA; espaços em
   caminhos são permitidos). Campos opcionais por tarefa: `Modelo:` e
   `Esforço:` (baixo|medio|alto|xalto|max) — o plano de execução usa os dois.
+- **Classifique cada tarefa pela complexidade** ao escrever o `tasks.md`; é
+  esse critério que preenche `Modelo:` e `Esforço:`:
+  - **Simples: `Modelo: sonnet`, `Esforço: baixo` ou `medio`.** Até 2
+    arquivos, sem regra de negócio nova, mudança mecânica: renomear,
+    configuração, texto, fixture de teste, ajuste que segue um padrão já
+    existente no código.
+  - **Complexa: `Modelo: opus`, `Esforço: alto`.** Qualquer um destes: 3 ou
+    mais arquivos ou mudança que atravessa camadas; regra de negócio ou
+    cálculo novo; toca autenticação, permissão, dinheiro ou dado pessoal;
+    decisão de design não registrada; migração de dados ou integração
+    externa.
+  - **Na dúvida: complexa.** Errar para o Opus custa cota; errar para o
+    Sonnet custa qualidade.
+  - Tarefa sem `Modelo:` usa o padrão `opus`.
+  - O critério só vale na execução paralela. Quando o Claude da sessão
+    implementa tarefa por tarefa, quem trabalha é o modelo da sessão.
 - Status entre colchetes: `[pendente]`, `[em-andamento]`, `[concluida]`
   (acentos e maiúsculas são tolerados; token desconhecido é erro).
 - **Fechou o tasks.md? Anuncie o paralelismo.** Rode `fuzkrigo-spec plano <feature>`
@@ -266,8 +287,10 @@ produto).
     as branches de volta, marca as tarefas e fecha com verify + audit;
   - `plano-execucao.html` — visual do plano com o botão **"Executar todas as
     tarefas em janelas limpas e paralelas"** (copia o comando do script).
-- **Apresente o plano ao usuário antes de executar**: resuma as faixas, diga
-  onde estão os arquivos e ofereça as rotas — automática
+- **Apresente o plano ao usuário antes de executar**: resuma as faixas,
+  incluindo o modelo e o esforço de cada tarefa (para o usuário revisar a
+  classificação antes de rodar), diga onde estão os arquivos e ofereça as
+  rotas — automática
   (`bash .spec/features/<feature>/executar-tarefas.sh` ou o botão do html) ou
   manual (você mesmo implementa faixa a faixa, seguindo branches e commits do
   plano).
@@ -277,7 +300,7 @@ produto).
   cada janela rolando, as provas e o gate; o botão **"Executar todas as
   tarefas em janelas limpas e paralelas"** de lá dispara o script DE VERDADE.
   É assim que o usuário acompanha sem digitar comando nenhum.
-- Mudou tasks.md ou a config (`paralelo` no onpspec.config.json)? **Regenere
+- Mudou tasks.md ou a config (`paralelo` no fuzkrigo.config.json)? **Regenere
   o plano** — nunca edite os artefatos à mão.
 
 ### 5. Executar
@@ -397,8 +420,9 @@ MIT, que se mantém aqui. A adaptação (renomeação, integração com o fluxo 
 skill `iniciar-projeto` e ajustes locais do motor) é de Bruno Krieger
 [Fuzkrigo].
 
-Por herança do projeto original, alguns nomes internos ainda usam o prefixo
-antigo: o arquivo de configuração lido pelo motor é `onpspec.config.json` e os
-worktrees do plano paralelo nascem em `../onp-worktrees/`. São nomes
-funcionais — mudá-los exige alterar o motor e renomear o arquivo em todo
-projeto já iniciado.
+Os nomes funcionais herdados do projeto original foram trocados pelos
+próprios: o arquivo de configuração lido pelo motor é `fuzkrigo.config.json`,
+os worktrees do plano paralelo nascem em `../fuzkrigo-worktrees/` e o painel
+autentica o botão de executar com o cabeçalho `x-fuzkrigo-token`. A troca foi
+feita de uma vez, sem compatibilidade com os nomes antigos, porque nenhum
+projeto os usava.

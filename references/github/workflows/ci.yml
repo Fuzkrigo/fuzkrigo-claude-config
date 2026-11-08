@@ -1,7 +1,7 @@
 # CI do padrao Fuzkrigo Projects.
 #
 # Um arquivo so, para qualquer stack: os passos se ligam por deteccao de
-# arquivo, e o comando de teste sai do onpspec.config.json — a mesma fonte
+# arquivo, e o comando de teste sai do fuzkrigo.config.json — a mesma fonte
 # que o motor usa localmente, entao nao ha configuracao duplicada.
 #
 # Para o audit rodar aqui, o motor precisa estar COMMITADO no projeto:
@@ -30,13 +30,13 @@ jobs:
       - name: Preparar Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: 'lts/*'
 
       - name: Preparar Python
         if: hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.x'
 
       - name: Instalar dependencias Node
         if: hashFiles('package.json') != ''
@@ -49,16 +49,16 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f pyproject.toml ] || [ -f setup.py ]; then pip install -e . || true; fi
 
-      # O comando vem do onpspec.config.json. Fonte unica: se voce mudar de
+      # O comando vem do fuzkrigo.config.json. Fonte unica: se voce mudar de
       # runner no projeto, o CI acompanha sozinho.
       - name: Rodar os testes
         run: |
-          if [ ! -f onpspec.config.json ]; then
-            echo "sem onpspec.config.json — nada a rodar"; exit 0
+          if [ ! -f fuzkrigo.config.json ]; then
+            echo "sem fuzkrigo.config.json — nada a rodar"; exit 0
           fi
-          CMD=$(node -p "require('./onpspec.config.json').testCommand || ''")
+          CMD=$(node -p "require('./fuzkrigo.config.json').testCommand || ''")
           if [ -z "$CMD" ]; then
-            echo "testCommand vazio no onpspec.config.json — configure antes de confiar neste CI"; exit 1
+            echo "testCommand vazio no fuzkrigo.config.json — configure antes de confiar neste CI"; exit 1
           fi
           echo "comando: $CMD"
           eval "$CMD"

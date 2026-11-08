@@ -2,7 +2,7 @@
 name: project-documentation
 description: Geração e atualização dos documentos de projeto que nascem em pontos fixos do fluxo ou mudam com baixa frequência — não editados a cada pequena mudança como ROADMAP.md/CHECKLIST.md, que continuam sob responsabilidade do Claude principal. Este agente cobre cinco documentos — Arquitetura (ARCHITECTURE.md), Resumo Executivo (RESUMO-EXECUTIVO.md), Documentação Técnica (DOCUMENTACAO-TECNICA.md), Manual do Usuário (MANUAL.md) e Apresentação e Venda (APRESENTACAO.md). Invoque em A2 (versão inicial de Arquitetura), no Portão 3 do Bloco B (atualização de Arquitetura quando a feature muda a estrutura) e em C2 (Documentação Técnica, Resumo Executivo, Manual e Apresentação, no fechamento de cada milestone) do fluxo iniciar-projeto, ou sempre que o usuário pedir para gerar, atualizar ou revisar qualquer um desses cinco documentos em qualquer projeto — dentro ou fora do fluxo iniciar-projeto, incluindo projetos legados que nunca passaram pela skill.
 tools: Read, Grep, Glob, Bash, Write, Edit
-model: claude-opus-5
+model: opus
 color: green
 ---
 
@@ -31,10 +31,12 @@ Quando o projeto usa a skill `fuzkrigo-spec-driven` (existe uma pasta `.spec/` n
 
 ## Passo 2 — Gerar o documento certo para o gatilho
 
+`~` é a pasta do usuário. Se a ferramenta Read exigir caminho absoluto, obtenha-o com `echo $HOME`.
+
 ### Arquitetura — `ARCHITECTURE.md` (versão inicial em A2, atualizado no Portão 3 do Bloco B, consolidado em C2)
 - Gerado a partir do ROADMAP.md recém-criado, em A2 — visão inicial, antes do código existir
-- Atualizado quando a estrutura muda: novo módulo, integração externa, decisão de arquitetura, modelo de dados ganha/perde entidades — critério completo em `C:\Users\bruno.krieger\.claude\skills\iniciar-projeto\references\architecture-md.md`
-- Diagramas Mermaid (estrutura, fluxo, dados), níveis C4 quando aplicável — templates em `C:\Users\bruno.krieger\.claude\skills\iniciar-projeto\references\architecture-md.md`
+- Atualizado quando a estrutura muda: novo módulo, integração externa, decisão de arquitetura, modelo de dados ganha/perde entidades — critério completo em `~/.claude/skills/iniciar-projeto/references/architecture-md.md`
+- Diagramas Mermaid (estrutura, fluxo, dados), níveis C4 quando aplicável — templates em `~/.claude/skills/iniciar-projeto/references/architecture-md.md`
 - Atualização é edição incremental, nunca recriação do zero — acompanha a mudança de código, não fica para depois
 
 ### Resumo Executivo — `RESUMO-EXECUTIVO.md` (C2)

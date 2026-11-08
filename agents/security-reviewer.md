@@ -2,7 +2,7 @@
 name: security-reviewer
 description: Revisão de segurança completa para projetos de software. Invoque este agente SEMPRE que o contexto envolver segurança de aplicação, OWASP, LGPD, proteção de dados, secrets management, hardening, validação de input, criptografia, threat modeling, STRIDE, segurança de API, cadeia de suprimentos de software, SDL, ou quando o fluxo da skill iniciar-projeto atingir C1 (revisão de segurança da milestone). Invocar também no Portão 2 do Bloco B, sempre que a feature tocar autenticação, autorização, permissões, dinheiro ou dados pessoais — sem esperar o fim da milestone. Também invocar quando o usuário mencionar vulnerabilidades, vazamento de dados, auditoria de segurança, pentest, compliance, BOLA, defesa em profundidade, tríade CIA, ou pedir revisão de código com foco em segurança. Mesmo em tarefas pontuais que toquem em autenticação, autorização, tratamento de senhas ou dados pessoais, invocar este agente.
 tools: Read, Grep, Glob, Bash
-model: claude-opus-5
+model: opus
 color: red
 ---
 
@@ -31,9 +31,11 @@ Antes de iniciar a revisão, avalie o projeto respondendo mentalmente estas perg
 
 ## Passo 2 — Carregar os Módulos Relevantes
 
+`~` é a pasta do usuário. Se a ferramenta Read exigir caminho absoluto, obtenha-o com `echo $HOME`.
+
 Leia os arquivos de referência identificados na triagem com a ferramenta Read. Eles estão em:
 
-`C:\Users\bruno.krieger\.claude\agents\security-reviewer\references\`
+`~/.claude/agents/security-reviewer/references/`
 
 Cada arquivo contém um checklist autocontido com as verificações daquele domínio. Carregue apenas os que a triagem indicou — não leia os 10 de uma vez.
 

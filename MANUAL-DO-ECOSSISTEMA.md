@@ -61,7 +61,7 @@ Nada aqui impede você de trabalhar rápido. O que ele impede é você **achar**
 | `references/` | Padrões consultáveis: convenções de Git, templates de issue e PR, workflow de CI | Lido quando o assunto aparece; o `github/` é copiado para o projeto em A3 |
 | `skills/` | Fluxos completos: abertura de projeto, desenvolvimento de feature, ambiente corporativo | Você chama (`/iniciar-projeto`) ou o gatilho da descrição dispara |
 | `agents/` | Especialistas que rodam isolados e devolvem um relatório: revisão de código, segurança, documentação, gestão de projeto, docstrings | Chamados em pontos fixos do fluxo, ou quando você pede |
-| `hooks/` | Dois scripts que o harness executa antes de cada escrita de arquivo | Automático, você não controla |
+| `hooks/` | Três scripts: um a cada mensagem sua, dois antes de cada escrita de arquivo | Automático, você não controla |
 
 Sobre os agentes: eles rodam em uma janela de contexto separada e **não veem a conversa**. Por
 isso devolvem relatórios completos em vez de conversar. Dois deles não têm permissão de escrita
@@ -69,13 +69,20 @@ de propósito — `code-reviewer` e `security-reviewer` só leem e apontam.
 
 Sobre os hooks, que são a parte que ninguém pode desligar sem querer:
 
-- `check_planning_docs.py` — antes de escrever código de produção, verifica se existe planejamento
-  (`docs/ROADMAP.md` + `docs/CHECKLIST.md`, **ou** uma spec em `.spec/features/`). Se não houver,
-  ele **pergunta** (não bloqueia): quem decide é você.
+- `check_planning_docs.py` — antes de escrever código de produção, confere o planejamento. Sem
+  nenhuma tarefa no projeto, verifica se existe `docs/ROADMAP.md` + `docs/CHECKLIST.md`, **ou** uma
+  spec em `.spec/features/`, como antes. Com tarefas, aplica a regra do "código órfão" do audit:
+  arquivo de `srcGlobs` que não está no `Arquivos:` de nenhuma tarefa. Nos dois casos, quando falta
+  algo, ele **pergunta** (não bloqueia): quem decide é você.
 - `check_style_prohibitions.py` — bloqueia emoji e frases que atribuem autoria do trabalho a uma
   ferramenta. Esse **bloqueia mesmo**, e é intencional. Tem uma exceção por caminho: dentro de
-  `~/.claude/` e do repositório de backup, citar as frases proibidas é permitido, porque é onde a
-  regra precisa ser documentada. Emoji continua bloqueado em todo lugar.
+  `~/.claude/` e de qualquer pasta chamada `fuzkrigo-claude-config` (este repositório, onde quer que
+  esteja clonado), citar as frases proibidas é permitido, porque é onde a regra precisa ser
+  documentada. Emoji continua bloqueado em todo lugar.
+- `arm_modo_tarefa.py` — roda a cada mensagem sua, não antes de escrita. Mensagem que começa com
+  `#tarefa` cria o marcador do Modo Tarefa da sessão; "modo normal" ou "sair do modo tarefa" o
+  apagam. É por esse marcador que o hook de planejamento sabe que deve ficar quieto: você não
+  precisa fazer nada além de escrever o `#tarefa`.
 
 ### Não confunda com as ferramentas que já vêm no Claude Code
 
@@ -259,7 +266,7 @@ Duas coisas fazem o CI funcionar, e as duas acontecem em A3:
 - `fspec init --agents claude` — o `--agents claude` copia o motor para `.claude/skills/` dentro do
   projeto. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina; sem essa cópia
   commitada, o CI roda testes e cobertura mas pula a auditoria.
-- O `onpspec.config.json` preenchido: o workflow lê o `testCommand` de lá, então a configuração
+- O `fuzkrigo.config.json` preenchido: o workflow lê o `testCommand` de lá, então a configuração
   vive num lugar só e o CI acompanha se você trocar de runner.
 
 No pull request a auditoria é informativa, e na `main` ela bloqueia. O motivo é o mesmo do
@@ -276,7 +283,7 @@ ainda em rascunho, o que não é problema daquele PR.
 | Jest | `npx jest --json` | `jest-json` |
 
 Reporters que gravam arquivo exigem também `reporterOutputFile` no mesmo caminho. Tudo isso fica
-em `onpspec.config.json`, na raiz.
+em `fuzkrigo.config.json`, na raiz.
 
 ---
 
@@ -369,6 +376,12 @@ Se houver duas ou mais tarefas pendentes, dá para paralelizar:
 fspec plano recuperacao-senha     # agrupa tarefas de arquivos disjuntos em faixas
 fspec painel recuperacao-senha    # painel ao vivo no navegador, com botao de executar
 ```
+
+Cada tarefa recebe `Modelo:` e `Esforço:` pelo critério da skill: tarefa simples usa `sonnet`,
+tarefa complexa usa `opus`, e na dúvida ela é complexa (tarefa sem `Modelo:` também fica com o
+`opus`). O resumo do plano mostra essa classificação para você revisar antes de executar. Isso só
+vale na execução paralela: quando eu implemento tarefa por tarefa na conversa, quem trabalha é o
+modelo da sessão.
 
 Cada faixa roda em um worktree próprio, com contexto limpo.
 
@@ -582,13 +595,14 @@ instalação de uma status line chegou a sobrescrever o `settings.json` global, 
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são dois conjuntos de ajustes no motor — o suporte a Python e o
-audit com escopo de feature. As duas suítes que os protegem rodam assim:
+**patches locais** no `README.md`: são quatro conjuntos de ajustes no motor — o suporte a Python,
+o audit com escopo de feature, os nomes próprios e o modelo padrão por alias. As quatro suítes que
+os protegem rodam assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
-node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs
+node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs
 ```
 
-São 18 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+São 22 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.

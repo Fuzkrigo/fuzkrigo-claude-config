@@ -1,4 +1,4 @@
-// Configuração do projeto — fuzkrigo-spec.config.json na raiz (opcional).
+// Configuração do projeto — fuzkrigo.config.json na raiz (opcional).
 // Tudo tem default sensato: `npx fuzkrigo-spec audit` funciona sem config.
 
 import { existsSync, readFileSync } from 'fs';
@@ -47,8 +47,9 @@ export const DEFAULT_CONFIG = {
   paralelo: {
     // máximo de faixas rodando ao mesmo tempo numa onda
     maxParalelas: 3,
-    // modelo default por tarefa (tasks.md pode sobrescrever com `- Modelo:`)
-    model: 'claude-sonnet-5',
+    // modelo default por tarefa (tasks.md pode sobrescrever com `- Modelo:`);
+    // o alias acompanha sempre o Opus mais recente / alias tracks latest Opus
+    model: 'opus',
     // esforço default: baixo|medio|alto|xalto|max (ou low|medium|high|xhigh|max)
     esforco: 'medium',
     // modo de permissão do claude headless; para rodar 100% sem prompts o
@@ -60,7 +61,7 @@ export const DEFAULT_CONFIG = {
 };
 
 export function loadConfig(rootDir) {
-  const configPath = path.join(rootDir, 'onpspec.config.json');
+  const configPath = path.join(rootDir, 'fuzkrigo.config.json');
   if (!existsSync(configPath)) {
     return { ...DEFAULT_CONFIG, rootDir, configPath: null };
   }
@@ -68,7 +69,7 @@ export function loadConfig(rootDir) {
   try {
     raw = JSON.parse(readFileSync(configPath, 'utf-8'));
   } catch (err) {
-    throw new Error(`onpspec.config.json inválido: ${err.message}`);
+    throw new Error(`fuzkrigo.config.json inválido: ${err.message}`);
   }
   return {
     ...DEFAULT_CONFIG,

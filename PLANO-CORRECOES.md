@@ -13,7 +13,7 @@
 | 2 | Alto | Contradição: Bloco A é obrigatório ou opcional? | Baixo | Baixo | **Resolvido (opção A)** |
 | 3 | Médio | Dependência circular entre A2 e A3 (códigos `P-xxx` no ROADMAP) | Baixo | Nenhum | **Resolvido** |
 | 4 | Médio | Frase residual do fluxo antigo sobre onde as etapas nascem | Trivial | Nenhum | **Resolvido** |
-| 5 | Baixo | Hook de planejamento não cobre `.mjs` / `.cjs` | Trivial | Baixo | **Resolvido (parcial)** |
+| 5 | Baixo | Hook de planejamento não cobre `.mjs` / `.cjs` | Trivial | Baixo | **Resolvido** |
 | 6 | Baixo | `DOC_EXEMPT` é código morto no hook | Trivial | Nenhum | **Resolvido** |
 | 7 | Baixo | Não está escrito quem aplica o princípio devolvido pelo security-reviewer | Trivial | Nenhum | **Resolvido** |
 | 8 | Observação | Portão 2 gasta 2-3 subagentes mesmo em feature minúscula | Baixo | Baixo | **Resolvido** |
@@ -246,12 +246,13 @@ e das etapas já revisadas em A2 — não porque as etapas não existiriam antes
 
 ## 5. BAIXO — Hook de planejamento não cobre `.mjs` e `.cjs`
 
-> **RESOLVIDO EM PARTE em 03/08/2026.** `mjs` e `cjs` entraram em `CODE_EXTENSIONS`, testados em
-> projeto vazio (pergunta) e com spec (libera). **Continua em aberto** a pergunta que este item
-> deixou para você: `vue`, `svelte`, `scss` e `css` entram também? Argumentos: `.vue` e `.svelte`
-> carregam lógica de aplicação, então o caso a favor é forte; `.scss` e `.css` são estilo, e
-> tratá-los como código de produção faria o hook perguntar ao ajustar uma cor. Enquanto não
-> decidir, os quatro seguem fora.
+> **RESOLVIDO.** Em 03/08/2026, `mjs` e `cjs` entraram em `CODE_EXTENSIONS`, testados em projeto
+> vazio (pergunta) e com spec (libera). A pergunta que este item deixou em aberto — `vue`,
+> `svelte`, `scss` e `css` entram também? — está decidida: `vue`, `svelte` e `astro` entram em
+> `CODE_EXTENSIONS`, porque carregam lógica de aplicação junto do template (no código desde o
+> commit `adcfd2a`, de 10/08/2026); `css` e `scss` ficam fora, por decisão do usuário registrada
+> em 07/11/2026, porque ajuste visual não é implementação de feature, e um hook que pergunta a
+> cada retoque de cor é um hook que se aprende a ignorar.
 
 ### O problema
 
@@ -439,3 +440,41 @@ mandato dele; e o comportamento dos dois hooks, testado em nove cenários.
 
 A espinha do fluxo está correta e as responsabilidades não se sobrepõem. O item 1 é o único que
 impede o fluxo de rodar exatamente como está escrito.
+
+---
+
+## Rodada 2 — 07/11/2026
+
+> Data das decisões: 07/11/2026. Estado auditado: commit `ac873f0` (commit 5 desta rodada,
+> `feat(spec-driven): escolher o modelo de cada tarefa pela complexidade`).
+
+| Item | Problema | Decisão | Commit |
+| --- | --- | --- | --- |
+| 1 | `CLAUDE.md` mandava criar à mão o marcador do Modo Tarefa | Texto aponta para o hook `arm_modo_tarefa.py` | 1 |
+| 2 | Manual e README falavam em dois hooks | Três hooks documentados | 1 |
+| 4 | Ponteiros `@.claude/` entre crases, caminho ambíguo | `CODIGO.md` importado sempre; `PATTERNS.md` sob demanda | 1 |
+| 7 | `project-manager` mandava confirmar com o usuário sem ter canal | Devolve a proposta no relatório | 1 |
+| 9 | Item 5 da rodada 1 desatualizado | CSS e SCSS fora do hook, por decisão | 1 |
+| 12 | Agentes com modelo fixo | `model: opus` | 1 |
+| 13 | Tarefas "implícitas" reprovavam no audit | Toda feature tem `tasks.md` mapeado | 1 |
+| 6 | Caminhos absolutos do usuário | `$HOME`, `~/.claude/` e `py -3` | 2 |
+| CI | Versões fixas de Node e Python | `lts/*` e `3.x` | 2 |
+| Herança | Nomes do projeto de origem no motor | `fuzkrigo.config.json`, `../fuzkrigo-worktrees/`, `x-fuzkrigo-token` | 3 |
+| 5 | Exceção do hook de estilo na pasta antiga | Exceção por nome de pasta `fuzkrigo-claude-config` | 4 |
+| 10 | Hook de planejamento parava de perguntar após a primeira spec | Confere o mapeamento do arquivo, como o audit | 4 |
+| Modelo | Modelo fixo nas faixas paralelas | `opus` padrão e critério de complexidade na skill | 5 |
+| 3 e 11 | Arquivos corporativos | Adiados para a etapa corporativa | — |
+| 8 | Skills antigas na conta claude.ai | Remoção a cargo do usuário, fora do repositório | — |
+
+O registro completo das opções e dos motivos de cada decisão está no log de decisões do projeto
+de desenho do ecossistema (`log-de-decisoes.md`, projeto "Ecosistema de Desenvolvimento").
+
+**Decidido durante a execução, fora da tabela acima:** os hooks `check_planning_docs.py` e
+`check_style_prohibitions.py` liam o JSON do harness como texto. No Windows, com Python 3.14 ou
+anterior (sem UTF-8 mode), isso decodificava em cp1252: emoji passava pelo hook de estilo e
+caminho com acento corrompia a checagem de mapeamento. Os dois passaram a ler bytes
+(`sys.stdin.buffer`), com testes que rodam o hook com `-X utf8=0` (commit 4). O
+`arm_modo_tarefa.py` lê a entrada do mesmo jeito, mas o efeito nele é estreito: como só procura
+textos ASCII (`#tarefa`, "modo normal", "sair do modo tarefa"), continua funcionando, exceto
+quando `#tarefa` vem colado a um caractere não ASCII (por exemplo `#tarefa—ajuste`), caso em que
+o Modo Tarefa não liga. Ficou de fora porque esta rodada não o altera.

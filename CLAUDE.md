@@ -59,7 +59,7 @@ A solução correta é a **MAIS SIMPLES QUE CUMPRA TODOS OS REQUISITOS**. Nem ma
 - Sem under-engineering: regra de negócio fora de Controllers/Handlers, sem god classes, Separation of Concerns inegociável.
 - Limites que forçam refatoração: função ≤ 50 linhas, arquivo ≤ 500 linhas.
 
-Detalhamento (SOLID, Clean Code, teste de complexidade, tratamento de erros): `@.claude/CODIGO.md`.
+Detalhamento (SOLID, Clean Code, teste de complexidade, tratamento de erros): `CODIGO.md` (carregado sempre, seção 10).
 
 ---
 
@@ -85,8 +85,8 @@ Ao iniciar projeto novo ou refatoração grande, carregar `/iniciar-projeto`. Co
 | Agente - `project-manager`     | A3 (provisionar GitHub/Linear) ou C3 (ritual de release) — invocar via tool Agent        |
 | Agente - `project-documentation` | A2 (Arquitetura), Portão 3 do Bloco B (Arquitetura, se a estrutura mudou) e C2 (demais documentos) — invocar via tool Agent |
 | Agente - `docstrings-manager`  | Portão 2 do Bloco B, após o code-reviewer, ou pedido pontual — invocar via tool Agent    |
-| `@.claude/PATTERNS.md`         | Discussões de arquitetura ou refatoração de módulos                                     |
-| `@.claude/CODIGO.md`           | Sessões de implementação, debugging ou quando precisar de referência de stack/padrões   |
+| `~/.claude/PATTERNS.md`        | Discussões de arquitetura ou refatoração de módulos                                     |
+| `~/.claude/CODIGO.md`          | Carregado sempre via import (seção 10)                                                  |
 | `~/.claude/references/git-conventions.md` | Qualquer commit, branch, PR ou release                                       |
 
 ---
@@ -112,7 +112,7 @@ Ao iniciar projeto novo ou refatoração grande, carregar `/iniciar-projeto`. Co
 
 Cobertura e prova são coisas diferentes: o audit garante que todo critério tem um teste que passou; os 80%/95% são medidos à parte, pelo CI provisionado em A3 (`.github/workflows/ci.yml`). Um não substitui o outro. O limite que reprova o build é declarado na configuração da própria ferramenta de teste (`--cov-fail-under` no pytest, `coverage.thresholds` no vitest) — o CI publica o número, a ferramenta decide se falha.
 
-Camadas de teste, estratégia de mocks e detalhamento operacional: `@.claude/CODIGO.md`. O ciclo (teste que falha primeiro, implementação, prova) é conduzido pela skill `fuzkrigo-spec-driven` — `scaffold` gera o teste que falha, `verify` grava a prova, `audit` julga.
+Camadas de teste, estratégia de mocks e detalhamento operacional: `CODIGO.md` (carregado sempre, seção 10). O ciclo (teste que falha primeiro, implementação, prova) é conduzido pela skill `fuzkrigo-spec-driven` — `scaffold` gera o teste que falha, `verify` grava a prova, `audit` julga.
 
 ---
 
@@ -120,7 +120,7 @@ Camadas de teste, estratégia de mocks e detalhamento operacional: `@.claude/COD
 
 Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da sessão.
 
-**Marcador para o hook de bloqueio:** ao ativar, criar o arquivo `<temp>/claude-modo-tarefa/<session_id>.flag` (session id extraído do caminho do diretório scratchpad informado no prompt do sistema — é o penúltimo segmento do caminho). Isso é necessário porque o hook `check_planning_docs.py` (que reforça a Regra de Bloqueio da skill `iniciar-projeto`) roda como processo isolado sem acesso à conversa — sem esse marcador, ele não tem como saber que a regra foi desativada nesta sessão e continuaria perguntando a cada edição de código.
+**Marcador para o hook de bloqueio:** o hook `arm_modo_tarefa.py` (`UserPromptSubmit`) cria e apaga o marcador da sessão sozinho ao ler `#tarefa`, "modo normal" ou "sair do modo tarefa"; o Claude não cria nem apaga nada.
 
 **O QUE DESATIVA:** Chamada da Skill `iniciar-projeto` (Blocos A e C: briefing investigativo, documentos formais, board, release) e da Skill `fuzkrigo-spec-driven` (Bloco B: especificação, tarefas, verify e audit), TDD, invocação do agente `security-reviewer` (checklists OWASP/LGPD), regra de bloqueio.
 
@@ -135,7 +135,7 @@ Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da ses
 
 **TOM EM MODO TAREFA:** enxuto, direto, sem teoria. Código com uma linha de contexto. Explicação linha a linha só se pedido.
 
-**SAIR DO MODO TAREFA:** nova conversa (o marcador da sessão anterior fica órfão, sem efeito — cada sessão tem seu próprio session id), ou declarar "sair do modo tarefa" / "modo normal" (apagar o arquivo-marcador desta sessão).
+**SAIR DO MODO TAREFA:** nova conversa (o marcador da sessão anterior fica órfão, sem efeito — cada sessão tem seu próprio session id), ou declarar "sair do modo tarefa" / "modo normal" (o hook apaga o marcador).
 
 ---
 
@@ -170,3 +170,11 @@ Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da ses
 - **TODA ENTRADA EXTERNA É SUSPEITA. BACKEND VALIDA SEMPRE.**
 - **CÓDIGO DE IA É SUSPEITO POR PADRÃO**: leia, entenda, teste, audite.
 - **STACK ABERTA**: sugira alternativas quando fizer sentido técnico.
+
+---
+
+## 10. Referência de código (carregada sempre)
+
+O import abaixo fica fora de crase de propósito: dentro de crase ou de bloco de código o Claude Code não o avalia. Ele resolve a partir deste arquivo, ou seja, `~/.claude/CODIGO.md` quando instalado.
+
+@CODIGO.md

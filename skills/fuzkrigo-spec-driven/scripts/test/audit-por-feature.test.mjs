@@ -62,7 +62,7 @@ function montarProjeto() {
   writeFileSync(path.join(raiz, '.spec', 'features', 'alfa', 'spec.md'), SPEC('alfa', '001', '001'));
   writeFileSync(path.join(raiz, '.spec', 'features', 'beta', 'spec.md'), SPEC('beta', '002', '002'));
   writeFileSync(
-    path.join(raiz, 'onpspec.config.json'),
+    path.join(raiz, 'fuzkrigo.config.json'),
     JSON.stringify({ testCommand: 'echo', reporter: 'tap' }, null, 2)
   );
   return raiz;

@@ -41,7 +41,7 @@ Três blocos. O Bloco A roda uma vez, na abertura. O Bloco B roda a cada feature
 - Invocar o agente `project-manager` (ferramenta Agent) para provisionar o GitHub e montar a gestão no Linear (seção 6). O board nasce aqui, e não em A2, porque depende do repositório já provisionado e das etapas já revisadas no CHECKLIST — cada issue nasce de uma etapa que já existe
 - Inicializar a camada de desenvolvimento: **`fuzkrigo-spec init --agents claude`** (ver a skill `fuzkrigo-spec-driven`), e escrever a constituição do projeto a partir das restrições levantadas em A1. Princípio `[DEVE]` sem verificação executável é acusado pelo próprio audit — a constituição nasce com dente ou não nasce
 - O `--agents claude` não é opcional: ele copia o motor para `.claude/skills/` **dentro do projeto**, e é assim que o CI consegue auditar. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina. Sem isso, o CI roda testes e cobertura, mas pula a auditoria
-- Definir o par `testCommand` e `reporter` em `onpspec.config.json` antes de sair de A3 (tabela por stack na skill `fuzkrigo-spec-driven`). O CI lê o comando desse mesmo arquivo — configuração em um lugar só
+- Definir o par `testCommand` e `reporter` em `fuzkrigo.config.json` antes de sair de A3 (tabela por stack na skill `fuzkrigo-spec-driven`). O CI lê o comando desse mesmo arquivo — configuração em um lugar só
 - **Fechar o ciclo do ROADMAP:** com a constituição escrita, voltar ao `docs/ROADMAP.md` e anotar o código de cada princípio (`P-xxx`) ao lado da restrição correspondente. É a segunda passada do documento — em A2 a restrição é texto, aqui ela ganha o código que a verifica (seção 7.1, item 4)
 
 ### BLOCO B — Ciclo de feature
@@ -65,7 +65,7 @@ O que esta skill exige na saída do Bloco B, em ordem:
    **Fechar com o audit de novo, sempre.** Depois do `docstrings-manager`, rodar `fuzkrigo-spec audit --ci --feature <feature>` mais uma vez, antes do PR. Motivo concreto: esse agente tem permissão de edição e trabalha sobre arquivos de teste — se um título anotado com `@spec:AC-xxx` (ou um nome `test_ac_001`, em Python) for alterado, a prova daquele critério desaparece. A regra que o proíbe está escrita no prompt dele, mas regra escrita não é garantia; o audit é. Custa segundos e transforma um estrago silencioso em falha imediata.
 3. **Portão 3 — entrega.** PR e merge conforme `~/.claude/references/git-conventions.md`, incluindo o squash das faixas de execução paralela. Se a feature introduziu mudança estrutural (novo módulo, integração externa, decisão de arquitetura, modelo de dados), invocar o agente `project-documentation` para atualizar `docs/ARCHITECTURE.md` — critério completo em `references/architecture-md.md`. Marcar a Etapa concluída no CHECKLIST.
 
-Momento de avaliar design patterns: consultar `@.claude/PATTERNS.md` (se disponível) e sugerir um pattern apenas quando resolver dor concreta identificada — nunca na primeira versão, nunca por estética.
+Momento de avaliar design patterns: consultar `~/.claude/PATTERNS.md` e sugerir um pattern apenas quando resolver dor concreta identificada — nunca na primeira versão, nunca por estética.
 
 ### BLOCO C — Fechamento de milestone
 
@@ -150,7 +150,7 @@ Se o projeto já está aberto mas o código pedido não corresponde a nenhuma fe
 
 Só prosseguir se o usuário justificar conscientemente o bypass.
 
-> Esta checagem também é reforçada por um hook `PreToolUse` (`~/.claude/hooks/check_planning_docs.py`), que pergunta automaticamente antes de qualquer escrita de código de produção sem evidência de planejamento — `docs/ROADMAP.md` e `docs/CHECKLIST.md`, ou uma spec em `.spec/features/`. O hook procura em `docs/` e aceita a raiz como fallback, para não disparar falso positivo em projeto ainda não migrado. O texto acima continua valendo como orientação de julgamento para a resposta.
+> Esta checagem também é reforçada por um hook `PreToolUse` (`~/.claude/hooks/check_planning_docs.py`), que pergunta automaticamente e nunca bloqueia. Sem nenhuma tarefa no projeto, pergunta antes de qualquer escrita de código de produção sem evidência de planejamento — `docs/ROADMAP.md` e `docs/CHECKLIST.md`, ou uma spec em `.spec/features/`. Com tarefas, pergunta antes de escrever arquivo de `srcGlobs` que não esteja no `Arquivos:` de nenhuma tarefa — a mesma regra do "código órfão" do audit, que corresponde à segunda fala acima. O hook procura os documentos em `docs/` e aceita a raiz como fallback, para não disparar falso positivo em projeto ainda não migrado. O texto acima continua valendo como orientação de julgamento para a resposta.
 
 ---
 

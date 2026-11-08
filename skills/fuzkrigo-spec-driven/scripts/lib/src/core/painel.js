@@ -87,7 +87,7 @@ function repoToplevel(rootDir) {
 }
 
 export function caminhoLogs(rootDir, plan) {
-  return path.join(path.dirname(repoToplevel(rootDir)), 'onp-worktrees', `${plan.repoName}-${plan.feature}-logs`);
+  return path.join(path.dirname(repoToplevel(rootDir)), 'fuzkrigo-worktrees', `${plan.repoName}-${plan.feature}-logs`);
 }
 
 export function montarEstado({ rootDir, specDir, feature, executorAtivo = false, executorExit = null }) {
@@ -330,7 +330,7 @@ export function renderPainelHtml({ feature, token, podeExecutar }) {
   async function executar() {
     var btn = document.getElementById('btn');
     btn.disabled = true;
-    var r = await fetch('/executar', { method: 'POST', headers: { 'x-onp-token': TOKEN } });
+    var r = await fetch('/executar', { method: 'POST', headers: { 'x-fuzkrigo-token': TOKEN } });
     if (!r.ok) { alert('não consegui executar: ' + (await r.text())); btn.disabled = false; }
   }
   atualizar();
@@ -377,7 +377,7 @@ export function servirPainel({ rootDir, specDir, feature, agent, porta = 4747, a
       return res.end(JSON.stringify(estado));
     }
     if (req.method === 'POST' && req.url === '/executar') {
-      if (req.headers['x-onp-token'] !== token) {
+      if (req.headers['x-fuzkrigo-token'] !== token) {
         res.writeHead(403);
         return res.end('token inválido');
       }
