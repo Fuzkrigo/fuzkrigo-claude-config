@@ -614,7 +614,7 @@ cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
 node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs
 ```
 
-São 27 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+São 28 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks têm testes próprios, que rodam a partir da raiz deste repositório:

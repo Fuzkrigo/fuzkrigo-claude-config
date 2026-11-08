@@ -14,17 +14,35 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const ENGINE = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'fuzkrigo-spec.mjs');
+const SCRIPTS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+const ENGINE = path.join(SCRIPTS_DIR, 'fuzkrigo-spec.mjs');
 
 // Mesmas faixas do hook de estilo, menos os marcadores funcionais liberados.
 // Same ranges as the style hook, minus the allowed functional markers.
 const EMOJI_RANGES = [[0x1f300, 0x1faff], [0x2600, 0x27bf], [0x1f1e6, 0x1f1ff]];
 const ALLOWED = new Set([0x2705, 0x26a0, 0x274c, 0xfe0f, 0x2713, 0x2714, 0x2717, 0x2718]);
+
+function blockedChars(text) {
+  return [...text].filter((ch) => {
+    const cp = ch.codePointAt(0);
+    return !ALLOWED.has(cp) && EMOJI_RANGES.some(([lo, hi]) => cp >= lo && cp <= hi);
+  });
+}
+
+const codepoint = (ch) => `U+${ch.codePointAt(0).toString(16).toUpperCase()}`;
+
+function* filesUnder(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) yield* filesUnder(full);
+    else yield full;
+  }
+}
 
 const TASKS_MD = `# Tasks: Demo
 
@@ -79,10 +97,20 @@ test('o plano gerado nao tem emoji decorativo', () => {
     const proc = engine(root, ['plano', 'demo', '--agents', 'claude']);
     assert.equal(proc.status, 0, proc.stderr);
     const md = readFileSync(path.join(root, '.spec', 'features', 'demo', 'plano-execucao.md'), 'utf-8');
-    const found = [...md].filter((ch) => {
-      const cp = ch.codePointAt(0);
-      return !ALLOWED.has(cp) && EMOJI_RANGES.some(([lo, hi]) => cp >= lo && cp <= hi);
-    });
-    assert.deepEqual(found.map((ch) => `U+${ch.codePointAt(0).toString(16).toUpperCase()}`), []);
+    assert.deepEqual(blockedChars(md).map(codepoint), []);
   });
+});
+
+test('o codigo e os templates do motor nao tem caractere que o hook de estilo bloqueia', () => {
+  // Varre lib/ inteiro: o que o motor imprime ou grava sai daqui.
+  // Scans all of lib/: everything the engine prints or writes comes from here.
+  const libDir = path.join(SCRIPTS_DIR, 'lib');
+  const found = [];
+  for (const file of filesUnder(libDir)) {
+    readFileSync(file, 'utf-8').split(/\r?\n/).forEach((line, i) => {
+      const bad = blockedChars(line);
+      if (bad.length) found.push(`${path.relative(libDir, file)}:${i + 1} ${bad.map(codepoint).join(' ')}`);
+    });
+  }
+  assert.deepEqual(found, []);
 });

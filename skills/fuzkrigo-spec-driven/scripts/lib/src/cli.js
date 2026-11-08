@@ -564,7 +564,7 @@ function cmdLicoes(config, positional, flags) {
     const rotulo = {
       criada: `✔ ${licao.id} registrada como candidata (1 feature) — vira confirmada ao recorrer em ${cfg.limiarPromocao - 1} outra(s)`,
       reforcada: `✔ ${licao.id} reforçada (${licao.recorrencia} feature(s): ${licao.features.join(', ')})`,
-      promovida: `★ ${licao.id} PROMOVIDA a confirmada (${licao.features.join(', ')}) — entra no guia de Especificar/Projetar`,
+      promovida: `↑ ${licao.id} PROMOVIDA a confirmada (${licao.features.join(', ')}) — entra no guia de Especificar/Projetar`,
     }[evento];
     console.log(rotulo);
     if (podadas.length) console.log(`· podadas por estagnação: ${podadas.join(', ')}`);
