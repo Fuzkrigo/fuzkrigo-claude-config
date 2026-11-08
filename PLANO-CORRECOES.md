@@ -510,4 +510,25 @@ o Modo Tarefa não liga. Ficou de fora porque esta rodada não o altera.
 | E20 | `gh` ausente nesta máquina | GitHub CLI 2.103.3 instalado e autenticado (conta `Fuzkrigo`) | — |
 
 Pendentes: local de instalação do `CLAUDE_PASTA PROFFISIONAL.md` (etapa corporativa); pendências
-1-7 do `DESIGN.md` (sessão de design); instalação e validação no `~/.claude/` (F5).
+1-7 do `DESIGN.md` (sessão de design); instalação e validação no `~/.claude/` real.
+
+---
+
+## Verificação final (08/11/2026)
+
+> Estado auditado: commit `1a6a542` (hooks e status line: 39 testes; motor: 6 suítes, 28 casos).
+
+Os 36 itens dos seis commits do briefing foram conferidos um a um na `main` e estão aplicados. A
+instalação descrita no README foi simulada com uma `HOME` temporária, sem tocar no `~/.claude/`
+real: o import do `CODIGO.md` resolve, os três hooks respondem certo quando chamados com os
+comandos do `settings.json`, e o motor roda a partir do local instalado.
+
+| Achado | Decisão | Commit |
+| --- | --- | --- |
+| A status line mostrava o custo sempre como `$0,00`: o Git Bash roda em `pt_BR.UTF-8`, e o `printf` recusava `0.5` | `LC_NUMERIC=C` na formatação do custo, com teste | `1a6a542` |
+| A status line mostrava um segmento vazio entre separadores com o thinking desligado | O segmento de esforço só aparece quando há valor, com teste | `1a6a542` |
+| O README e este plano citavam a "F5", nome de fase de outro projeto | Descrição própria no lugar | este registro |
+
+Observação, sem correção: se o Claude Code entregar `workspace.current_dir` com barras invertidas,
+a status line mostra o caminho inteiro em vez do nome da pasta, porque o `__basename` só corta em
+`/`. Confirmar o formato numa sessão real antes de mudar.

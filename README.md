@@ -78,7 +78,7 @@ Hooks são comandos que o harness executa automaticamente em eventos do ciclo de
 
 ## Instalação no `~/.claude/` (Windows)
 
-Este repositório é o backup versionado; o que o Claude Code carrega é o `~/.claude/`. O procedimento abaixo instala a configuração em qualquer usuário do Windows, porque nenhum caminho depende do nome do usuário. Ele é o da F5, ainda não executado: valide cada passo ao fazê-lo.
+Este repositório é o backup versionado; o que o Claude Code carrega é o `~/.claude/`. O procedimento abaixo instala a configuração em qualquer usuário do Windows, porque nenhum caminho depende do nome do usuário. Ele foi validado numa instalação simulada, com uma `HOME` temporária, em 08/11/2026, mas ainda não foi executado no `~/.claude/` real: valide cada passo ao fazê-lo.
 
 **Pré-requisitos** — confira no Git Bash:
 
