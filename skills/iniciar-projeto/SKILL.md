@@ -47,7 +47,7 @@ Três blocos. O Bloco A roda uma vez, na abertura. O Bloco B roda a cada feature
 
 ### BLOCO B — Ciclo de feature
 
-**Conduzido pela skill `fuzkrigo-spec-driven`, não por esta.** Uma Etapa do CHECKLIST equivale a uma issue, a uma feature em `.spec/features/<nome-kebab>/` e a uma branch. O fluxo (Especificar, Projetar, Tarefas, Plano, Executar, Auditar, Aprender) está documentado lá.
+**Conduzido pela skill `fuzkrigo-spec-driven`, não por esta.** Uma Etapa do CHECKLIST equivale a uma issue, a uma feature em `.spec/features/e<n>-<nome>/` e a uma branch. Issue avulsa de bug ou dívida técnica que muda comportamento também ganha spec, em `.spec/features/i<numero-da-issue>-<nome>/`: o critério de aceite reproduz o defeito e o teste dele vira teste de regressão. Correção trivial (texto, configuração, ajuste estético, refatoração sem mudança de comportamento, já protegida pelos testes existentes) não gera spec e fica documentada na issue e no PR; pendência externa (`EXT<n>`) nunca gera spec; na dúvida sobre "muda comportamento", perguntar ao usuário. O fluxo (Especificar, Projetar, Tarefas, Plano, Executar, Auditar, Aprender) está documentado lá.
 
 O que esta skill exige na saída do Bloco B, em ordem:
 
@@ -64,7 +64,7 @@ O que esta skill exige na saída do Bloco B, em ordem:
    O `security-reviewer` não entra nessa tabela: o gatilho dele é o que a feature **toca**, não o tamanho dela. Feature de um arquivo que mexe em autenticação é feature sensível.
 
    **Fechar com o audit de novo, sempre.** Depois do `docstrings-manager`, rodar `fuzkrigo-spec audit --ci --feature <feature>` mais uma vez, antes do PR. Motivo concreto: esse agente tem permissão de edição e trabalha sobre arquivos de teste — se um título anotado com `@spec:AC-xxx` (ou um nome `test_ac_001`, em Python) for alterado, a prova daquele critério desaparece. A regra que o proíbe está escrita no prompt dele, mas regra escrita não é garantia; o audit é. Custa segundos e transforma um estrago silencioso em falha imediata.
-3. **Portão 3 — entrega.** PR e merge conforme `~/.claude/references/git-conventions.md`, incluindo o squash das faixas de execução paralela. Se a feature introduziu mudança estrutural (novo módulo, integração externa, decisão de arquitetura, modelo de dados), invocar o agente `project-documentation` para atualizar `docs/ARCHITECTURE.md` — critério completo em `references/architecture-md.md`. Quando a mudança estrutural criar uma pasta nova de lógica de negócio, atualizar também o `businessLogicPaths` do bloco `coverage` (e, em projeto Node, o `vitest.config`) — ver `references/cobertura.md`. Marcar a Etapa concluída no CHECKLIST.
+3. **Portão 3 — entrega.** Antes do PR, a `## Resolução` da spec está preenchida: o PR, a abordagem adotada, as decisões da implementação, o resultado do `audit --ci --feature` e os pontos de atenção dos revisores. PR e merge conforme `~/.claude/references/git-conventions.md`, incluindo o squash das faixas de execução paralela. Se a feature introduziu mudança estrutural (novo módulo, integração externa, decisão de arquitetura, modelo de dados), invocar o agente `project-documentation` para atualizar `docs/ARCHITECTURE.md` — critério completo em `references/architecture-md.md`. Quando a mudança estrutural criar uma pasta nova de lógica de negócio, atualizar também o `businessLogicPaths` do bloco `coverage` (e, em projeto Node, o `vitest.config`) — ver `references/cobertura.md`. Marcar a Etapa concluída no CHECKLIST.
 
 Momento de avaliar design patterns: consultar `~/.claude/PATTERNS.md` e sugerir um pattern apenas quando resolver dor concreta identificada — nunca na primeira versão, nunca por estética.
 
@@ -200,7 +200,7 @@ O provisionamento do GitHub (labels, milestones, issues) e a montagem da gestão
 
 **A divisão de papéis é fixa: o GitHub guarda código, labels, milestones e issues; o Linear é a central de gestão** — board, prioridade, estimativa, ciclos e acompanhamento. O GitHub Projects não faz parte do padrão: não criar, não provisionar, não cobrar.
 
-Cada issue de etapa nasce apontando para a pasta da feature correspondente em `.spec/features/`, e é fechada pelo PR do Portão 3.
+Cada issue de etapa nasce apontando para a pasta da feature correspondente em `.spec/features/e<n>-<nome>/`, e é fechada pelo PR do Portão 3.
 
 Quando uma milestone termina, o mesmo agente monta o CHANGELOG.md e o texto do release (C3).
 
@@ -245,14 +245,16 @@ Formato de uma etapa:
 ## Milestone 1 — MVP
 
 ### Fase 1 — Autenticação
-- [x] E1: Login por e-mail — `.spec/features/login-email/` (auditada)
-- [ ] E2: Recuperação de senha — `.spec/features/recuperacao-senha/` (em-implementacao)
+- [x] E1: Login por e-mail — `.spec/features/e1-login-email/` (auditada)
+- [ ] E2: Recuperação de senha — `.spec/features/e2-recuperacao-senha/` (em-implementacao)
 
 ### Fase 2 — Perfil
 - [ ] E3: Editar perfil — spec ainda não criada
 
 Progresso: 1 de 3 etapas
 ```
+
+O número da milestone ("Milestone 1") é fixado quando ela entra no CHECKLIST e nunca muda. Uma milestone nova recebe o próximo número livre, mesmo que entre no meio da ordem. Esse número é o `M<n>` dos títulos das issues.
 
 O status entre parênteses é o da especificação (`rascunho`, `pronta`, `em-implementacao`, `implementada`, `auditada`) — copiado de lá, nunca inventado aqui. Em caso de divergência, `fuzkrigo-spec status` é a fonte da verdade.
 
@@ -294,7 +296,7 @@ Estas regras valem para **todo** artefato do projeto — código, documentação
 ## 9. Quando NÃO aplicar este fluxo
 
 - **Modo Tarefa (`#tarefa`):** tarefas pontuais não geram planejamento nem board
-- Pequenas correções de bug em projeto existente
+- Pequenas correções de bug em projeto existente: sem planejamento nem board. Se a correção muda comportamento e tem issue, ela ainda ganha spec própria (`i<n>-`, Bloco B)
 - Ajustes estéticos ou de configuração
 - **Projeto da coluna "dispensável" da seção 4.1** (experimento, script de uso próprio, prova de
   conceito): o Bloco A não se aplica, mas o Bloco B continua valendo — a feature é especificada e

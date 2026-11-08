@@ -230,8 +230,8 @@ Assim fica uma etapa no CHECKLIST:
 
 ```markdown
 ### Fase 1 — Autenticação
-- [x] E1: Login por e-mail — `.spec/features/login-email/` (auditada)
-- [ ] E2: Recuperação de senha — `.spec/features/recuperacao-senha/` (em-implementacao)
+- [x] E1: Login por e-mail — `.spec/features/e1-login-email/` (auditada)
+- [ ] E2: Recuperação de senha — `.spec/features/e2-recuperacao-senha/` (em-implementacao)
 - [ ] E3: Editar perfil — spec ainda não criada
 ```
 
@@ -311,11 +311,12 @@ abaixo são os que eu rodo — acompanhe a saída, não precisa digitar.
 **[terminal]**
 
 ```bash
-fspec new recuperacao-senha
+fspec new e2-recuperacao-senha --issue 7
 ```
 
-Cria `.spec/features/recuperacao-senha/` com `spec.md` e `tasks.md`. Antes de escrever, o
-contexto do projeto é lido (ROADMAP e a etapa no CHECKLIST) e as lições já confirmadas:
+Cria `.spec/features/e2-recuperacao-senha/` com `spec.md` e `tasks.md`, já com a etapa e a issue
+no cabeçalho da spec. Antes de escrever, o contexto do projeto é lido (ROADMAP e a etapa no
+CHECKLIST) e as lições já confirmadas:
 
 ```bash
 fspec licoes list
@@ -345,6 +346,17 @@ Duas seções são obrigatórias, e a ausência delas é erro:
 
 Não tem nenhuma? Escreva "Nenhuma." e desconfie de si mesmo.
 
+**A spec também documenta a própria feature.** O nome da pasta diz de onde ela veio: `e2-` para a
+etapa E2 do CHECKLIST, `i42-` para a issue avulsa 42, nenhum prefixo em projeto descartável. O
+`new` grava a etapa e a issue no cabeçalho (`> etapa: E2`, `> issue: #7`). Casos de borda (entrada
+vazia, valor no limite, erro de dependência, permissão negada, dado duplicado) viram critérios de
+aceite próprios, porque só critério ganha teste e prova. Se a spec mudar depois de `pronta`, a
+mudança e o motivo entram no `## Histórico`. Antes do PR, a `## Resolução` registra o PR, a
+abordagem, as decisões, o resultado do audit e os pontos de atenção dos revisores. Bug ou dívida
+técnica que muda comportamento também ganha spec, numa pasta `i<n>-` com o número da issue: o
+critério de aceite reproduz o defeito, e o teste dele vira teste de regressão. Correção trivial
+fica só na issue e no PR.
+
 ### Passo 2 — Tarefas
 
 No `tasks.md`, quebre em tarefas com os arquivos que cada uma toca:
@@ -365,7 +377,7 @@ que não estiver, e o hook de planejamento pergunta antes de eu escrever um arqu
 ### Passo 3 — O teste nasce falhando
 
 ```bash
-fspec scaffold recuperacao-senha
+fspec scaffold e2-recuperacao-senha
 ```
 
 Gera o esqueleto de teste para cada critério sem teste — todos **falhando**. Essa é a definição de
@@ -389,8 +401,8 @@ Escreva o código até os testes passarem. Uma tarefa, um commit. Marque `[concl
 Se houver duas ou mais tarefas pendentes, dá para paralelizar:
 
 ```bash
-fspec plano recuperacao-senha     # agrupa tarefas de arquivos disjuntos em faixas
-fspec painel recuperacao-senha    # painel ao vivo no navegador, com botao de executar
+fspec plano e2-recuperacao-senha  # agrupa tarefas de arquivos disjuntos em faixas
+fspec painel e2-recuperacao-senha # painel ao vivo no navegador, com botao de executar
 ```
 
 Cada tarefa recebe `Modelo:` e `Esforço:` pelo critério da skill: tarefa simples usa `sonnet`,
@@ -404,8 +416,8 @@ Cada faixa roda em um worktree próprio, com contexto limpo.
 ### Passo 5 — Portão 1: a máquina decide
 
 ```bash
-fspec verify recuperacao-senha                 # roda os testes e grava a prova
-fspec audit --ci --feature recuperacao-senha   # o veredito desta feature
+fspec verify e2-recuperacao-senha                 # roda os testes e grava a prova
+fspec audit --ci --feature e2-recuperacao-senha   # o veredito desta feature
 ```
 
 O `--feature` limita o veredito à feature da vez: a spec da próxima etapa, ainda em rascunho, não
