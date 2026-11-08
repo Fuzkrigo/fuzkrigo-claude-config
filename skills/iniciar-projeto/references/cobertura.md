@@ -20,6 +20,8 @@ O piso do ecossistema é 95% de cobertura geral e 98% na lógica de negócio, me
 | `businessLogic` | Cobertura mínima dos arquivos que casam com `businessLogicPaths`, no mesmo formato. |
 | `businessLogicPaths` | Padrões de caminho das pastas de lógica de negócio, relativos à raiz do projeto. Lista vazia reprova o CI. |
 
+O `fuzkrigo-spec init` já grava o bloco com 95, 98 e a lista vazia, de propósito: o CI reprova até a A3 declarar as pastas. Num projeto que já tinha `fuzkrigo.config.json`, o `init` não toca no arquivo, e o bloco precisa ser acrescentado à mão.
+
 Formato dos padrões, aceito pelo coverage.py e pelo vitest:
 
 - `/` separa pastas; `*` casa qualquer trecho de um nome, sem atravessar `/`; `**` casa qualquer número de pastas e só aparece como componente inteiro do caminho (`src/dominio/**`, nunca `src/dominio**`).
