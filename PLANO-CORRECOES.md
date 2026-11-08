@@ -484,3 +484,29 @@ caminho com acento corrompia a checagem de mapeamento. Os dois passaram a ler by
 textos ASCII (`#tarefa`, "modo normal", "sair do modo tarefa"), continua funcionando, exceto
 quando `#tarefa` vem colado a um caractere não ASCII (por exemplo `#tarefa—ajuste`), caso em que
 o Modo Tarefa não liga. Ficou de fora porque esta rodada não o altera.
+
+---
+
+## Rodada 2 — pontas soltas (08/11/2026)
+
+> Revisão de todos os documentos depois do merge da rodada 2. Estado auditado: commit `dd2fefc`
+> (hooks: 36 testes; motor: 6 suítes, 28 casos).
+
+| Item | Problema | Decisão | Commit |
+| --- | --- | --- | --- |
+| A1-A8 | Mudanças da rodada 2 sem propagar ao Manual, ao README e à `iniciar-projeto` | Propagadas | `1d7dc19` |
+| B9-B12 | Resumo de comandos sem `--agents`/`--feature`, exemplos de `init`, config sem nome, "fases" | Completados | `6dccc03` |
+| C13 | "Bilíngue" lido como texto PT e tags EN | Texto nas duas línguas, como o `CLAUDE.md` | `afc7532` |
+| C14 | P-004 do preset LGPD só via JavaScript | Regex cobre `print` e logging, glob `src/**` | `0a40d79` |
+| C15 | 73% sem fonte e com atribuição errada | Fonte citada (arXiv 2602.02584) e ressalvas | `96a4b00` |
+| D16-D17 | Corporativo: board no GitHub, `@.claude/`, `view`, caminhos de usuário | Alinhados ao padrão | `2b47f85` |
+| D18 | Distribuição do `DESIGN.md` | Referência sob demanda (fecha o item 10 da rodada 1); pendências 1-7 para sessão de design | `55e2601` |
+| E19 | Sem guia de instalação | Seção no README | `2c56f1d` |
+| E21 | Marcadores de status bloqueados; hook de estilo quebrava com JSON que não é objeto | Marcadores liberados; falha aberta | `29e6848` |
+| E21 | `arm_modo_tarefa.py` em cp1252 | Leitura em bytes | `e661b4b` |
+| E21 | Hook de planejamento ignorava o `specDir` | `specDir` respeitado | `3298ac5` |
+| E21 | Mensagem do `init` por agente, emoji no motor | Orientação por agente; motor sem emoji bloqueado | `73f15cc`, `dd2fefc` |
+| E21 | `Claude outputs/` podia entrar num commit | `.gitignore` | `41a126e` |
+
+Pendentes: local de instalação do `CLAUDE_PASTA PROFFISIONAL.md` (etapa corporativa); pendências
+1-7 do `DESIGN.md` (sessão de design); `gh auth login` nesta máquina; instalação e validação (F5).
