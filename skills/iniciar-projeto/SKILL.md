@@ -150,7 +150,7 @@ Se o projeto já está aberto mas o código pedido não corresponde a nenhuma fe
 
 Só prosseguir se o usuário justificar conscientemente o bypass.
 
-> Esta checagem também é reforçada por um hook `PreToolUse` (`~/.claude/hooks/check_planning_docs.py`), que pergunta automaticamente antes de qualquer escrita de código de produção sem evidência de planejamento — `docs/ROADMAP.md` e `docs/CHECKLIST.md`, ou uma spec em `.spec/features/`. O hook procura em `docs/` e aceita a raiz como fallback, para não disparar falso positivo em projeto ainda não migrado. O texto acima continua valendo como orientação de julgamento para a resposta.
+> Esta checagem também é reforçada por um hook `PreToolUse` (`~/.claude/hooks/check_planning_docs.py`), que pergunta automaticamente e nunca bloqueia. Sem nenhuma tarefa no projeto, pergunta antes de qualquer escrita de código de produção sem evidência de planejamento — `docs/ROADMAP.md` e `docs/CHECKLIST.md`, ou uma spec em `.spec/features/`. Com tarefas, pergunta antes de escrever arquivo de `srcGlobs` que não esteja no `Arquivos:` de nenhuma tarefa — a mesma regra do "código órfão" do audit, que corresponde à segunda fala acima. O hook procura os documentos em `docs/` e aceita a raiz como fallback, para não disparar falso positivo em projeto ainda não migrado. O texto acima continua valendo como orientação de julgamento para a resposta.
 
 ---
 

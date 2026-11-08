@@ -69,13 +69,16 @@ de propósito — `code-reviewer` e `security-reviewer` só leem e apontam.
 
 Sobre os hooks, que são a parte que ninguém pode desligar sem querer:
 
-- `check_planning_docs.py` — antes de escrever código de produção, verifica se existe planejamento
-  (`docs/ROADMAP.md` + `docs/CHECKLIST.md`, **ou** uma spec em `.spec/features/`). Se não houver,
-  ele **pergunta** (não bloqueia): quem decide é você.
+- `check_planning_docs.py` — antes de escrever código de produção, confere o planejamento. Sem
+  nenhuma tarefa no projeto, verifica se existe `docs/ROADMAP.md` + `docs/CHECKLIST.md`, **ou** uma
+  spec em `.spec/features/`, como antes. Com tarefas, aplica a regra do "código órfão" do audit:
+  arquivo de `srcGlobs` que não está no `Arquivos:` de nenhuma tarefa. Nos dois casos, quando falta
+  algo, ele **pergunta** (não bloqueia): quem decide é você.
 - `check_style_prohibitions.py` — bloqueia emoji e frases que atribuem autoria do trabalho a uma
   ferramenta. Esse **bloqueia mesmo**, e é intencional. Tem uma exceção por caminho: dentro de
-  `~/.claude/` e do repositório de backup, citar as frases proibidas é permitido, porque é onde a
-  regra precisa ser documentada. Emoji continua bloqueado em todo lugar.
+  `~/.claude/` e de qualquer pasta chamada `fuzkrigo-claude-config` (este repositório, onde quer que
+  esteja clonado), citar as frases proibidas é permitido, porque é onde a regra precisa ser
+  documentada. Emoji continua bloqueado em todo lugar.
 - `arm_modo_tarefa.py` — roda a cada mensagem sua, não antes de escrita. Mensagem que começa com
   `#tarefa` cria o marcador do Modo Tarefa da sessão; "modo normal" ou "sair do modo tarefa" o
   apagam. É por esse marcador que o hook de planejamento sabe que deve ficar quieto: você não

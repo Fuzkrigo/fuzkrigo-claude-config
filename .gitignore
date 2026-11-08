@@ -7,3 +7,6 @@ Thumbs.db
 # o que tem valor duradouro mora no settings.json.
 settings.local.json
 settings.json.bak*
+
+# Bytecode que o Python grava ao rodar hooks/tests (importa os hooks).
+__pycache__/
