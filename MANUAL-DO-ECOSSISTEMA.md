@@ -614,17 +614,17 @@ instalação de uma status line chegou a sobrescrever o `settings.json` global, 
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são sete conjuntos de ajustes no motor — o suporte a Python, o
+**patches locais** no `README.md`: são oito conjuntos de ajustes no motor — o suporte a Python, o
 audit com escopo de feature, os nomes próprios, o modelo padrão por alias, o preset LGPD para
-Python e JavaScript, as mensagens e a saída do motor, e a spec rastreável. As sete suítes que os
-protegem rodam assim:
+Python e JavaScript, as mensagens e a saída do motor, a spec rastreável e a numeração contínua no
+`new`. As oito suítes que os protegem rodam assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
-node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs test/spec-rastreavel.test.mjs
+node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs test/spec-rastreavel.test.mjs test/numeracao-continua.test.mjs
 ```
 
-São 37 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+São 40 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:

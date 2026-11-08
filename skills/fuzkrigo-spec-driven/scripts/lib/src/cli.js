@@ -247,21 +247,29 @@ function copyDirIfExists(src, dest) {
   cpSync(src, dest, { recursive: true });
 }
 
-// IDs únicos no projeto: continua a numeração a partir do maior ID existente.
-// Project-unique IDs: numbering continues from the highest existing ID.
-function nextStoryIds(rootDir) {
-  const project = loadProject(loadConfig(rootDir));
-  let maxUs = 0;
-  let maxAc = 0;
+// Todos os códigos de rastreio já usados no projeto: US, AC, ASM, Q e T.
+// Every trace code already used in the project: US, AC, ASM, Q and T.
+function projectTraceIds(project) {
+  const ids = [];
   for (const feature of project.features) {
-    if (!feature.spec) continue;
-    for (const s of feature.spec.stories) {
-      maxUs = Math.max(maxUs, parseInt(s.id.slice(3), 10));
-      for (const ac of s.acs) maxAc = Math.max(maxAc, parseInt(ac.id.slice(3), 10));
+    if (feature.spec) {
+      for (const s of feature.spec.stories) ids.push(s.id, ...s.acs.map((ac) => ac.id));
+      ids.push(...feature.spec.assumptions.map((a) => a.id), ...feature.spec.questions.map((q) => q.id));
     }
+    if (feature.tasks) ids.push(...feature.tasks.tasks.map((t) => t.id));
   }
-  const pad = (n) => String(n).padStart(3, '0');
-  return { us: `US-${pad(maxUs + 1)}`, ac: `AC-${pad(maxAc + 1)}` };
+  return ids;
+}
+
+// IDs únicos no projeto: cada código continua a numeração a partir do maior
+// existente. / Project-unique IDs: each code continues from the highest one.
+function nextTraceIds(rootDir) {
+  const used = projectTraceIds(loadProject(loadConfig(rootDir)));
+  const next = (prefix) => {
+    const numbers = used.filter((id) => id.startsWith(`${prefix}-`)).map((id) => parseInt(id.slice(prefix.length + 1), 10));
+    return `${prefix}-${String(Math.max(0, ...numbers) + 1).padStart(3, '0')}`;
+  };
+  return { us: next('US'), ac: next('AC'), asm: next('ASM'), q: next('Q'), t: next('T') };
 }
 
 // "login-email" vira "Login email". / "login-email" becomes "Login email".
@@ -295,7 +303,7 @@ function cmdNew(rootDir, name, flags) {
   }
   mkdirSync(dir, { recursive: true });
 
-  const ids = nextStoryIds(rootDir);
+  const ids = nextTraceIds(rootDir);
   const titulo = titleFromSlug(origin.description);
   const spec = fill(template('spec.md'), {
     TITULO: titulo,
@@ -306,10 +314,14 @@ function cmdNew(rootDir, name, flags) {
     HOJE: localIsoDate(),
     ORIGEM: origin.origin,
   });
-  writeFileSync(path.join(dir, 'spec.md'), spec.replace('US-001', ids.us).replace('AC-001', ids.ac));
+  const specIds = [['US-001', ids.us], ['AC-001', ids.ac], ['ASM-001', ids.asm], ['Q-001', ids.q]];
+  writeFileSync(path.join(dir, 'spec.md'), specIds.reduce((text, [from, to]) => text.replace(from, to), spec));
 
   const tasks = fill(template('tasks.md'), { TITULO: titulo, FEATURE: name });
-  writeFileSync(path.join(dir, 'tasks.md'), tasks.replace('US-001, AC-001', `${ids.us}, ${ids.ac}`));
+  writeFileSync(
+    path.join(dir, 'tasks.md'),
+    tasks.replace('US-001, AC-001', `${ids.us}, ${ids.ac}`).replace('## T-001', `## ${ids.t}`)
+  );
 
   console.log(`✔ .spec/features/${name}/spec.md`);
   console.log(`✔ .spec/features/${name}/tasks.md`);
