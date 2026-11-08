@@ -49,12 +49,12 @@ Templates de issue e PR ficam em:
 
 `~/.claude/references/github/`
 
-Contém `PULL_REQUEST_TEMPLATE.md`, `ISSUE_TEMPLATE/` (`feature.md`, `bug.md`, `tech-debt.md`) e `workflows/ci.yml` (o pipeline: testes, cobertura e auditoria da especificação). Copie a pasta `.github/` inteira para a **raiz** do projeto quando ela ainda não existir lá — o GitHub só reconhece esses templates nesse caminho exato, então ela não vai para `docs/`. O `feature.md` é o template da issue de etapa: título no padrão `[M<n>] Etapa E<n>: ` (ver "Padrão de título das issues" no Passo 3), contexto curto, tarefas como checklist.
+Contém `PULL_REQUEST_TEMPLATE.md`, `ISSUE_TEMPLATE/` (`feature.md`, `bug.md`, `tech-debt.md`), `workflows/ci.yml` (o pipeline: testes, cobertura e auditoria da especificação) e `scripts/` (os scripts de cobertura que o `ci.yml` chama). Copie a pasta `.github/` inteira para a **raiz** do projeto quando ela ainda não existir lá — o GitHub só reconhece esses templates nesse caminho exato, então ela não vai para `docs/`. O `feature.md` é o template da issue de etapa: título no padrão `[M<n>] Etapa E<n>: ` (ver "Padrão de título das issues" no Passo 3), contexto curto, tarefas como checklist.
 
 **Fonte das etapas:**
 
 - **Se `CHECKLIST.md` existir**: as issues nascem das etapas dele, todas de uma vez. Procure em `docs/CHECKLIST.md` primeiro; caia para `CHECKLIST.md` na raiz quando não encontrar (projeto anterior à convenção de `docs/`). O CHECKLIST lista **etapas**, não tarefas atômicas — cada etapa vira uma issue, e as tarefas de implementação vivem no `tasks.md` da feature correspondente.
-- **Elo com a especificação**: quando o CHECKLIST aponta uma pasta de feature (`.spec/features/<kebab>/`), o corpo da issue cita esse caminho. É o que liga a issue de etapa à especificação, às tarefas e às provas. Etapa ainda sem spec entra na issue normalmente, com a linha "spec ainda não criada" — não invente o caminho.
+- **Elo com a especificação**: quando o CHECKLIST aponta uma pasta de feature (`.spec/features/e<n>-<nome>/`), o corpo da issue cita esse caminho. É o que liga a issue de etapa à especificação, às tarefas e às provas. Etapa ainda sem spec entra na issue normalmente, com a linha "spec ainda não criada" — não invente o caminho.
 - **Se não existir** (projeto fora do fluxo `iniciar-projeto`, ex.: legado): investigue o repositório — issues abertas, README, estrutura de pastas, commits recentes — e proponha uma lista de etapas. **Não crie as issues**: sem um CHECKLIST.md já validado por trás, criar issues em massa exige a confirmação do usuário, e você não tem canal com ele. Devolva a lista proposta no relatório final; quem te invocou confirma com o usuário antes de uma nova invocação.
 
 **Documentos de projeto ficam em `docs/`** (`ROADMAP.md`, `CHECKLIST.md`, `ARCHITECTURE.md`, `RESUMO-EXECUTIVO.md`, `DOCUMENTACAO-TECNICA.md`, `MANUAL.md`, `APRESENTACAO.md`). Permanecem na raiz, por convenção externa: `README.md`, `CHANGELOG.md` e `.github/`. Se encontrar documentos de projeto na raiz, **não mova nada por conta própria** — devolva o bloco de migração no relatório final para quem te invocou perguntar ao usuário:
@@ -150,7 +150,7 @@ Formato único para todo projeto, **idêntico no GitHub e no Linear** — a sinc
 
 | Elemento | Regra |
 |---|---|
-| `M<n>` | Posição da milestone na ordem do roadmap — **não** a versão SemVer. A 1ª milestone é `M1`, a 2ª `M2`, e assim por diante, independente de ela se chamar `v0.1.0` ou `v2.3.0` |
+| `M<n>` | O número da milestone no CHECKLIST ("Milestone <n>"). É fixado quando a milestone é criada e nunca é renumerado: uma milestone nova recebe o próximo número livre, mesmo que entre no meio do roadmap. Continua **não** sendo a versão SemVer — `M1` vale tanto para `v0.1.0` quanto para `v2.3.0` |
 | `E<n>` | Etapa de desenvolvimento, numerada de forma contínua ao longo do projeto inteiro (E1, E2, … E11) — a numeração **não reinicia** a cada milestone |
 | `A<n>` / `C<n>` | Bloco do fluxo, quando a issue é de processo e não de produto (ex.: `C1` para a revisão de segurança da milestone, `A3` para o provisionamento). O Bloco B não aparece aqui: ele é o próprio desenvolvimento das etapas |
 | sufixo | Letra minúscula quando uma etapa é subdividida: `E11a`, `E11b` |
@@ -167,12 +167,14 @@ Exemplos reais do padrão em produção:
 [M3] Etapa C1: Revisão de segurança (OWASP + LGPD)
 ```
 
-**Duas famílias que não usam esse formato** — não force o prefixo nelas:
+**Duas famílias que não usam esse formato** — não force o formato de etapa nelas:
 
 | Família | Formato | Quando |
 |---|---|---|
-| Pendência externa | `P<n> — <nome>` | Depende de terceiro e não de desenvolvimento (TI, fornecedor, jurídico). Numeração própria e contínua. Ex.: `P14 — Solicitar à TI acesso de envio à caixa compartilhada` |
-| Issue avulsa | título descritivo, sem prefixo | Bug, melhoria ou débito que surgiu depois do planejamento e não corresponde a uma etapa do CHECKLIST. Ex.: `Refinamento visual: tema dark, shell e dashboard gerencial` |
+| Pendência externa | `EXT<n> — <nome>` | Depende de terceiro e não de desenvolvimento (TI, fornecedor, jurídico). Numeração própria e contínua. Ex.: `EXT14 — Solicitar à TI acesso de envio à caixa compartilhada`. Issue legada no formato `P<n> — ` é reconhecida como pendência externa e não é renomeada por você: renomear é decisão do usuário |
+| Issue avulsa | prefixo do tipo, como os modelos de issue já fazem: `fix: <descrição>` para bug, `refactor: <descrição>` para dívida técnica e, para outros tipos, o prefixo de Conventional Commits correspondente (`feat:`, `docs:`, `chore:`) | Bug, melhoria ou débito que surgiu depois do planejamento e não corresponde a uma etapa do CHECKLIST. Ex.: `feat: refinamento visual do tema dark, shell e dashboard gerencial` |
+
+O motivo do `EXT` é não confundir a pendência externa com as prioridades `P0-critical` a `P3-low`.
 
 Ao provisionar a partir do `CHECKLIST.md`, toda issue nasce no formato de etapa. As outras duas famílias aparecem depois, ao longo do projeto — reconheça-as pelo formato ao rodar o inventário do Passo 2 e não tente renomeá-las.
 
@@ -256,7 +258,7 @@ Setar via `save_issue(..., priority: N)`, inclusive nas issues já sincronizadas
 
 Um Project por repositório/produto (`save_project` com `addTeams`), nome igual ao do repositório no GitHub, descrição citando o repo de origem. Um Milestone por marco do roadmap (`save_milestone`), mesmo nome SemVer da milestone do GitHub. Toda issue do Project recebe `project` e, quando aplicável, `milestone`.
 
-O `M<n>` do título das issues é a **posição** da milestone nesta lista: a primeira do roadmap é `M1`, independente de se chamar `v0.1.0`. Se você criar uma issue faltante aqui (passo 7 da sequência abaixo), o título segue o mesmo padrão do GitHub — ver "Padrão de título das issues" no Passo 3.
+O `M<n>` do título das issues é o número da milestone no CHECKLIST ("Milestone <n>"), fixado quando ela é criada e nunca renumerado: uma milestone nova recebe o próximo número livre, mesmo que entre no meio do roadmap. Não é a versão SemVer — `M1` independe de a milestone se chamar `v0.1.0`. Se você criar uma issue faltante aqui (passo 7 da sequência abaixo), o título segue o mesmo padrão do GitHub — ver "Padrão de título das issues" no Passo 3.
 
 ### Estados do fluxo
 

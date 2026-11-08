@@ -532,3 +532,38 @@ comandos do `settings.json`, e o motor roda a partir do local instalado.
 Observação, sem correção: se o Claude Code entregar `workspace.current_dir` com barras invertidas,
 a status line mostra o caminho inteiro em vez do nome da pasta, porque o `__basename` só corta em
 `/`. Confirmar o formato numa sessão real antes de mudar.
+
+---
+
+## Rodada 3 — 08/11/2026
+
+> Estado auditado: commit `13135d5`, o commit 5 da rodada (motor: 8 suítes, 40 casos, dos quais
+> 37 nas 7 suítes do briefing; hooks e status line: 39 testes).
+
+| Tópico | Problema | Decisão | Commit |
+| --- | --- | --- | --- |
+| Cobertura | Limites de 80/95 só publicados, nunca cobrados | 95% geral, 98% em lógica de negócio, com ramos; CI reprova, inclusive quando não mede | 1 |
+| Ratio | 1,5x media volume, não qualidade | Substituído por cobertura de ramos | 1 |
+| Exclusões | Sem regra | Só com `coverage-justification:`, cobrada pelo `code-reviewer` | 1 |
+| Diagramas | Sem modelo de classes | `classDiagram` nos modelos de arquitetura | 2 |
+| Rastreio | Spec não apontava para etapa e issue | Cabeçalho `etapa` e `issue`, prefixo `e<n>-` e `i<n>-` | 3 e 4 |
+| Histórico | Mudanças de spec só no git | Seções Histórico e Resolução no `spec.md` | 3 e 4 |
+| Casos de borda | Sem orientação | Viram critérios de aceite | 3 e 4 |
+| Issues com spec | Só etapas | Também bug e dívida técnica que mudam comportamento | 4 |
+| Nomes | `P<n>` ambíguo, `M<n>` renumerável, regra de avulsa contraditória | `EXT<n>`, `M<n>` fixo, avulsa com prefixo de tipo | 4 e 5 |
+| Corporativo | 95% em `processor.py` diverge dos 98% | Adiado para a etapa corporativa | — |
+| F3 | Teste de mutação; UML com PlantUML e Java | Registrados como candidatos da F3 | — |
+
+Commits da rodada: 1 = `e66ecd3`, 2 = `14c75f2`, 3 = `a4dba09`, 4 = `b29bd4d`, 5 = `13135d5`.
+
+O registro completo das opções e dos motivos está no log de decisões do projeto de desenho do
+ecossistema (`log-de-decisoes.md` do projeto "Ecosistema de Desenvolvimento", seção "Rodada 3").
+
+Achados fora do briefing, durante a execução:
+
+| Achado | Decisão | Commit |
+| --- | --- | --- |
+| O `new` não continuava a numeração de ASM, Q e T: a segunda feature nascia com `ASM-001` e `Q-001`, e o audit acusava `ID_DUPLICADO` | Os cinco códigos continuam a partir do maior do projeto, com testes (Patch 8) | `de93ffe` |
+| `cli.js` passa do limite de 500 linhas: 783 antes da rodada, 826 depois | Registrado; dividir o arquivo é uma refatoração própria | — |
+| Um nome que começa com `e2e-` é lido como a etapa "E2e" pela regra do prefixo | Registrado | — |
+| O audit não confere `T-xxx` duplicada entre features, embora o `escrevendo-specs.md` diga que duplicar um código é acusado | Registrado | — |

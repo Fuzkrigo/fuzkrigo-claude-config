@@ -36,12 +36,37 @@ Esta skill conduz o **Bloco B** (ciclo de feature) do fluxo definido na skill
 Na prática:
 
 - **A feature nasce de uma Etapa do `docs/CHECKLIST.md`** — que também é uma issue
-  no board. O nome da pasta em `.spec/features/<kebab>/` casa com o nome da etapa.
-  Se não existe etapa, pergunte antes de criar a feature: o escopo do projeto é
-  decidido lá, não aqui.
-- **Ao terminar** (audit com saída 0), o estado da spec é copiado de volta para a
-  linha da etapa no CHECKLIST, e a issue é fechada pelo PR. Você não inventa
-  status no CHECKLIST — `fuzkrigo-spec status` é a fonte.
+  no board — **ou de uma issue avulsa de bug ou dívida técnica que muda
+  comportamento**. O nome da pasta em `.spec/features/` diz de onde ela veio:
+
+  | Origem | Nome | Exemplo |
+  |---|---|---|
+  | Etapa do CHECKLIST | `e<n>-<descricao-kebab>` | `e1-login-email`, `e11a-migracao-legado` |
+  | Issue avulsa de bug ou dívida técnica que muda comportamento | `i<numero-da-issue>-<descricao-kebab>` | `i42-corrige-encoding` |
+  | Projeto descartável, sem board | `<descricao-kebab>` | `entrega-dever-casa` |
+
+  Crie com `fuzkrigo-spec new <nome> --issue <n>`: o motor grava a etapa e a
+  issue no cabeçalho da spec. Na pasta `i<n>-`, o número já vem do nome e o
+  `--issue` é dispensável; se os dois forem passados, precisam coincidir. O
+  motor reconhece o prefixo, mas não o exige.
+- **Quais issues geram spec:**
+  - issue de etapa: sempre (`e<n>-`);
+  - issue avulsa de bug ou dívida técnica que muda comportamento: sim
+    (`i<n>-`). O critério de aceite reproduz o defeito e descreve o
+    comportamento correto, e o teste dele vira teste de regressão;
+  - correção trivial (texto, configuração, ajuste estético, refatoração sem
+    mudança de comportamento, já protegida pelos testes existentes): não gera
+    spec. A documentação fica na issue e no PR;
+  - pendência externa (`EXT<n>`): nunca gera spec;
+  - na dúvida sobre "muda comportamento", pergunte ao usuário.
+
+  Sem etapa e sem issue de bug ou dívida técnica que muda comportamento,
+  pergunte antes de criar a feature: o escopo do projeto é decidido lá, não
+  aqui.
+- **Ao terminar** (audit com saída 0), preencha a `## Resolução` da spec antes
+  do PR. O estado da spec é copiado de volta para a linha da etapa no
+  CHECKLIST, e a issue é fechada pelo PR. Você não inventa status no
+  CHECKLIST — `fuzkrigo-spec status` é a fonte.
 - **Commits das faixas paralelas são efêmeros.** O `T-xxx <feature>: título` vale
   dentro da faixa; o histórico permanente sai por squash no PR, no formato
   `<tipo>(<escopo>): <descrição> (T-003, T-004)`. Regra completa em
@@ -114,7 +139,7 @@ Todos os comandos rodam **a partir da raiz do projeto do usuário**:
 node <dir-desta-skill>/scripts/fuzkrigo-spec.mjs <comando>
 ```
 
-Comandos: `init [--preset base|lgpd-educacao] [--agents claude]` · `new <feature>` ·
+Comandos: `init [--preset base|lgpd-educacao] [--agents claude]` · `new <feature> [--issue <n>]` ·
 `plano <feature> [--agents claude]` · `painel <feature> [--porta N] [--sem-abrir]` ·
 `tarefa <feature> <T-xxx> <status>` ·
 `scaffold <feature> [--force]` · `verify <feature>` ·
@@ -226,8 +251,11 @@ foi subdimensionada.
 - **Depois, carregue o guia aprendido**: `fuzkrigo-spec licoes list`
   (em projeto grande, filtre: `--escopo <dominio>`). São regras confirmadas
   por falhas reais de features anteriores — aplique-as na spec.
-- `fuzkrigo-spec new <feature>` cria `.spec/features/<feature>/spec.md` e `tasks.md`
-  com códigos de rastreio contínuos (únicos no projeto inteiro).
+- `fuzkrigo-spec new <feature> [--issue <n>]` cria `.spec/features/<feature>/spec.md` e `tasks.md`
+  com códigos de rastreio contínuos (únicos no projeto inteiro) e o cabeçalho
+  de rastreio (`> etapa:` e `> issue:`). Confira que o cabeçalho não ficou com
+  `[#<n> da issue]`: etapa criada sem `--issue` deixa esse marcador, e ele
+  recebe o número da issue antes de a spec ficar `pronta`.
 - **Uma spec viva por vez, como prática.** Crie a spec quando for implementar a
   feature, não antes: as etapas futuras já estão registradas no CHECKLIST com
   "spec ainda não criada". Spec aberta e parada vira dívida — ela não reprova
@@ -237,6 +265,13 @@ foi subdimensionada.
   **critérios de aceite (AC-xxx)** em Dado/Quando/Então. O critério precisa
   ser observável — algo que um teste checa. "Deve ser rápido" não é critério;
   "responde em < 300ms" é.
+- **Casos de borda viram critérios de aceite próprios**: entrada vazia, valor
+  no limite, erro de dependência, permissão negada, dado duplicado. Só assim
+  ganham teste e prova — caso de borda descrito em prosa, ou só no código, o
+  audit não cobra. Lista e exemplo: [escrevendo-specs.md](references/escrevendo-specs.md#casos-de-borda-viram-critérios-de-aceite).
+- **Mudou a spec depois de `pronta`?** Registre uma linha no `## Histórico`
+  (data, mudança, motivo): critério alterado, suposição invalidada, escopo
+  mudado. O git guarda o que mudou no arquivo; o Histórico guarda o porquê.
 - **Registre suposições (ASM-xxx) e perguntas em aberto (Q-xxx)** com status
   honesto (`aberta`). Usuário presente? Pergunte na hora (AskUserQuestion) e
   registre a resposta.

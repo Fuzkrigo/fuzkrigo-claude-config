@@ -1,6 +1,8 @@
 # Spec: {{TITULO}}
 
 > feature: {{FEATURE}}
+> etapa: {{ETAPA}}
+> issue: {{ISSUE}}
 > status: rascunho
 
 <!--
@@ -13,6 +15,9 @@
   - Os códigos são únicos no projeto inteiro (nunca reutilize um número).
   - Suposições e Perguntas em aberto são OBRIGATÓRIAS: se não há nenhuma,
     escreva "Nenhuma." — mas desconfie: quase toda feature esconde uma.
+  - "etapa" e "issue" ligam a spec ao CHECKLIST e ao board. Na issue, o
+    marcador entre colchetes é pendência: troque pelo número da issue antes
+    de a spec ficar `pronta`.
 -->
 
 ## Contexto
@@ -38,6 +43,10 @@ Como [papel], quero [ação], para que [valor].
 - **Quando** [ação]
 - **Então** [resultado esperado e observável]
 
+<!-- Casos de borda relevantes (entrada vazia, valor no limite, erro de
+     dependência, permissão negada, dado duplicado) viram critérios de aceite
+     próprios: só assim ganham teste e prova. -->
+
 ## Fora de escopo
 
 - O que esta feature explicitamente NÃO faz.
@@ -57,3 +66,21 @@ Como [papel], quero [ação], para que [valor].
 | ID | Pergunta | Status | Resposta |
 |---|---|---|---|
 | Q-001 | [o que precisa ser decidido pelo dono do produto?] | aberta | — |
+
+## Histórico
+
+<!-- Uma linha por mudança relevante depois que a spec ficou `pronta`
+     (critério alterado, suposição invalidada, escopo mudado). -->
+
+| Data | Mudança | Motivo |
+|---|---|---|
+| {{HOJE}} | Spec criada | {{ORIGEM}} |
+
+## Resolução
+
+<!-- Preenchida no Portão 3, antes do PR, com:
+     - o PR;
+     - a abordagem adotada, em duas ou três frases;
+     - as decisões tomadas durante a implementação;
+     - o resultado do `audit --ci --feature <feature>`;
+     - os pontos de atenção que os revisores deixaram registrados. -->

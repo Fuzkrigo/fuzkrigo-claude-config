@@ -36,7 +36,7 @@ Quando o projeto usa a skill `fuzkrigo-spec-driven` (existe uma pasta `.spec/` n
 ### Arquitetura — `ARCHITECTURE.md` (versão inicial em A2, atualizado no Portão 3 do Bloco B, consolidado em C2)
 - Gerado a partir do ROADMAP.md recém-criado, em A2 — visão inicial, antes do código existir
 - Atualizado quando a estrutura muda: novo módulo, integração externa, decisão de arquitetura, modelo de dados ganha/perde entidades — critério completo em `~/.claude/skills/iniciar-projeto/references/architecture-md.md`
-- Diagramas Mermaid (estrutura, fluxo, dados), níveis C4 quando aplicável — templates em `~/.claude/skills/iniciar-projeto/references/architecture-md.md`
+- Diagramas Mermaid (estrutura, fluxo, dados, classes quando houver modelo de domínio), níveis C4 quando aplicável — templates em `~/.claude/skills/iniciar-projeto/references/architecture-md.md`
 - Atualização é edição incremental, nunca recriação do zero — acompanha a mudança de código, não fica para depois
 
 ### Resumo Executivo — `RESUMO-EXECUTIVO.md` (C2)

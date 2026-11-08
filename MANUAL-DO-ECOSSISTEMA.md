@@ -230,8 +230,8 @@ Assim fica uma etapa no CHECKLIST:
 
 ```markdown
 ### Fase 1 — Autenticação
-- [x] E1: Login por e-mail — `.spec/features/login-email/` (auditada)
-- [ ] E2: Recuperação de senha — `.spec/features/recuperacao-senha/` (em-implementacao)
+- [x] E1: Login por e-mail — `.spec/features/e1-login-email/` (auditada)
+- [ ] E2: Recuperação de senha — `.spec/features/e2-recuperacao-senha/` (em-implementacao)
 - [ ] E3: Editar perfil — spec ainda não criada
 ```
 
@@ -260,17 +260,26 @@ Um princípio `[DEVE]` sem verificação executável é acusado pelo próprio au
 dente não existe.
 
 **O CI nasce aqui também.** Junto com os templates, o projeto ganha `.github/workflows/ci.yml`: a
-cada pull request e a cada push na `main`, o GitHub roda os testes, publica a cobertura e audita a
-especificação — sozinho, sem sessão aberta. É o que garante que nada entre na `main` sem passar
-pelo mesmo crivo, mesmo quando você mescla às pressas de outra máquina.
+cada pull request e a cada push na `main`, o GitHub roda os testes, mede a cobertura e reprova
+abaixo do limite, e audita a especificação — sozinho, sem sessão aberta. É o que garante que nada
+entre na `main` sem passar pelo mesmo crivo, mesmo quando você mescla às pressas de outra máquina.
 
 Duas coisas fazem o CI funcionar, e as duas acontecem em A3:
 
 - `fspec init --agents claude` — o `--agents claude` copia o motor para `.claude/skills/` dentro do
   projeto. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina; sem essa cópia
   commitada, o CI roda testes e cobertura mas pula a auditoria.
-- O `fuzkrigo.config.json` preenchido: o workflow lê o `testCommand` de lá, então a configuração
-  vive num lugar só e o CI acompanha se você trocar de runner.
+- O `fuzkrigo.config.json` preenchido: o workflow lê o `testCommand` e o bloco `coverage` de lá,
+  então a configuração vive num lugar só e o CI acompanha se você trocar de runner.
+
+**A cobertura também tem dente.** O bloco `coverage` do `fuzkrigo.config.json` declara 95% para o
+projeto inteiro e 98% para as pastas de lógica de negócio, listadas em `businessLogicPaths` a
+partir do `docs/ARCHITECTURE.md`. A medição é sempre com ramos: cada lado de cada condição precisa
+de teste, não basta a linha ter rodado. O CI reprova abaixo do limite e também quando não consegue
+medir: sem a ferramenta, sem o bloco ou com a lista de pastas vazia. Em projeto Node, os mesmos
+números ficam também no `vitest.config`. Excluir um trecho da medição só vale com um comentário
+`coverage-justification:` logo acima, e o `code-reviewer` recusa justificativa como "difícil de
+testar". Detalhes em `references/cobertura.md`, na skill `iniciar-projeto`.
 
 No pull request a auditoria é informativa, e na `main` ela bloqueia. O motivo é o mesmo do
 `--feature`: auditar o projeto inteiro num PR reprovaria por causa de uma spec de outra feature
@@ -302,11 +311,12 @@ abaixo são os que eu rodo — acompanhe a saída, não precisa digitar.
 **[terminal]**
 
 ```bash
-fspec new recuperacao-senha
+fspec new e2-recuperacao-senha --issue 7
 ```
 
-Cria `.spec/features/recuperacao-senha/` com `spec.md` e `tasks.md`. Antes de escrever, o
-contexto do projeto é lido (ROADMAP e a etapa no CHECKLIST) e as lições já confirmadas:
+Cria `.spec/features/e2-recuperacao-senha/` com `spec.md` e `tasks.md`, já com a etapa e a issue
+no cabeçalho da spec. Antes de escrever, o contexto do projeto é lido (ROADMAP e a etapa no
+CHECKLIST) e as lições já confirmadas:
 
 ```bash
 fspec licoes list
@@ -336,6 +346,17 @@ Duas seções são obrigatórias, e a ausência delas é erro:
 
 Não tem nenhuma? Escreva "Nenhuma." e desconfie de si mesmo.
 
+**A spec também documenta a própria feature.** O nome da pasta diz de onde ela veio: `e2-` para a
+etapa E2 do CHECKLIST, `i42-` para a issue avulsa 42, nenhum prefixo em projeto descartável. O
+`new` grava a etapa e a issue no cabeçalho (`> etapa: E2`, `> issue: #7`). Casos de borda (entrada
+vazia, valor no limite, erro de dependência, permissão negada, dado duplicado) viram critérios de
+aceite próprios, porque só critério ganha teste e prova. Se a spec mudar depois de `pronta`, a
+mudança e o motivo entram no `## Histórico`. Antes do PR, a `## Resolução` registra o PR, a
+abordagem, as decisões, o resultado do audit e os pontos de atenção dos revisores. Bug ou dívida
+técnica que muda comportamento também ganha spec, numa pasta `i<n>-` com o número da issue: o
+critério de aceite reproduz o defeito, e o teste dele vira teste de regressão. Correção trivial
+fica só na issue e no PR.
+
 ### Passo 2 — Tarefas
 
 No `tasks.md`, quebre em tarefas com os arquivos que cada uma toca:
@@ -356,7 +377,7 @@ que não estiver, e o hook de planejamento pergunta antes de eu escrever um arqu
 ### Passo 3 — O teste nasce falhando
 
 ```bash
-fspec scaffold recuperacao-senha
+fspec scaffold e2-recuperacao-senha
 ```
 
 Gera o esqueleto de teste para cada critério sem teste — todos **falhando**. Essa é a definição de
@@ -380,8 +401,8 @@ Escreva o código até os testes passarem. Uma tarefa, um commit. Marque `[concl
 Se houver duas ou mais tarefas pendentes, dá para paralelizar:
 
 ```bash
-fspec plano recuperacao-senha     # agrupa tarefas de arquivos disjuntos em faixas
-fspec painel recuperacao-senha    # painel ao vivo no navegador, com botao de executar
+fspec plano e2-recuperacao-senha  # agrupa tarefas de arquivos disjuntos em faixas
+fspec painel e2-recuperacao-senha # painel ao vivo no navegador, com botao de executar
 ```
 
 Cada tarefa recebe `Modelo:` e `Esforço:` pelo critério da skill: tarefa simples usa `sonnet`,
@@ -395,8 +416,8 @@ Cada faixa roda em um worktree próprio, com contexto limpo.
 ### Passo 5 — Portão 1: a máquina decide
 
 ```bash
-fspec verify recuperacao-senha                 # roda os testes e grava a prova
-fspec audit --ci --feature recuperacao-senha   # o veredito desta feature
+fspec verify e2-recuperacao-senha                 # roda os testes e grava a prova
+fspec audit --ci --feature e2-recuperacao-senha   # o veredito desta feature
 ```
 
 O `--feature` limita o veredito à feature da vez: a spec da próxima etapa, ainda em rascunho, não
@@ -605,16 +626,17 @@ instalação de uma status line chegou a sobrescrever o `settings.json` global, 
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são seis conjuntos de ajustes no motor — o suporte a Python, o
+**patches locais** no `README.md`: são oito conjuntos de ajustes no motor — o suporte a Python, o
 audit com escopo de feature, os nomes próprios, o modelo padrão por alias, o preset LGPD para
-Python e JavaScript, e as mensagens e a saída do motor. As seis suítes que os protegem rodam assim:
+Python e JavaScript, as mensagens e a saída do motor, a spec rastreável e a numeração contínua no
+`new`. As oito suítes que os protegem rodam assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
-node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs
+node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs test/spec-rastreavel.test.mjs test/numeracao-continua.test.mjs
 ```
 
-São 28 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+São 40 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:

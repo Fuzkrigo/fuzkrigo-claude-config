@@ -18,6 +18,7 @@ import {
 import { servirPainel } from './core/painel.js';
 import { montarPlano, renderPlanoHtml, renderPlanoJson, renderPlanoMd, renderPlanoSh } from './core/plano.js';
 import { loadProject } from './core/project.js';
+import { featureOrigin, localIsoDate } from './core/rastreio.js';
 import { renderJson, renderMarkdown, renderTerminal } from './core/report.js';
 import { scaffoldTests } from './core/scaffold.js';
 import { carregarSinais, registrarAchados, registrarVerify } from './core/sinais.js';
@@ -68,7 +69,11 @@ comandos:
   init [--preset base|lgpd-educacao] [--agents claude|antigravity]
                       cria .spec/, constituição e config no diretório atual
                       (--agents também instala a skill do agente escolhido)
-  new <feature>       cria .spec/features/<feature>/ com spec.md e tasks.md
+  new <feature> [--issue <n>]
+                      cria .spec/features/<feature>/ com spec.md e tasks.md
+                      nome: e<n>-<descricao> (etapa do CHECKLIST),
+                      i<n>-<descricao> (issue avulsa) ou só <descricao>;
+                      ex.: new e1-entrega-dever-casa --issue 12
   plano <feature> [--agents claude|antigravity]
                       plano de execução: agrupa tarefas em faixas PARALELAS
                       (arquivos disjuntos → 1 worktree + 1 branch + 1 janela
@@ -110,11 +115,12 @@ comandos:
 
 fluxo típico:
   fuzkrigo-spec init --preset lgpd-educacao
-  fuzkrigo-spec new entrega-dever-casa      # escreva histórias, critérios, suposições e perguntas
-  fuzkrigo-spec scaffold entrega-dever-casa # cada critério vira um teste que falha
-  fuzkrigo-spec plano entrega-dever-casa    # tarefas em faixas paralelas + artefatos de execução
+  fuzkrigo-spec new e1-entrega-dever-casa --issue 12
+                                               # escreva histórias, critérios, suposições e perguntas
+  fuzkrigo-spec scaffold e1-entrega-dever-casa # cada critério vira um teste que falha
+  fuzkrigo-spec plano e1-entrega-dever-casa    # tarefas em faixas paralelas + artefatos de execução
   ... execute o plano (ou implemente à mão) até os testes passarem ...
-  fuzkrigo-spec verify entrega-dever-casa   # o test runner grava a prova
+  fuzkrigo-spec verify e1-entrega-dever-casa   # o test runner grava a prova
   fuzkrigo-spec audit --ci                  # 0 = especificação e código alinhados`;
 
 function parseFlags(args) {
@@ -173,15 +179,21 @@ function cmdInit(rootDir, flags) {
     // --test-reporter=tap e obrigatorio: do Node 20 em diante o reporter
     // padrao e o "spec", que o parser TAP nao entende — sem a flag, o
     // verify le zero testes e todo criterio fica sem prova.
+    // coverage: lido so pelo CI, nunca pelo motor. A lista de pastas nasce
+    // vazia de proposito: o CI reprova ate a A3 declarar a logica de negocio.
+    // coverage: read only by CI, never by the engine. The folder list starts
+    // empty on purpose: CI fails until A3 declares the business logic.
     const cfg = {
       testCommand: 'node --test --test-reporter=tap',
       reporter: 'tap',
       testGlobs: DEFAULT_CONFIG.testGlobs,
       srcGlobs: DEFAULT_CONFIG.srcGlobs,
+      coverage: { global: 95, businessLogic: 98, businessLogicPaths: [] },
     };
     writeFileSync(configPath, `${JSON.stringify(cfg, null, 2)}\n`);
     console.log('✔ fuzkrigo.config.json criado (testCommand: "node --test --test-reporter=tap" — ajuste à sua stack)');
     console.log('  Python: "pytest --junitxml=.spec/verification/raw.xml" com reporter "junit-xml" e reporterOutputFile no mesmo caminho');
+    console.log('  cobertura: preencha coverage.businessLogicPaths — com a lista vazia, o CI reprova');
   }
 
   const gitignorePath = path.join(specRoot, 'verification', '.gitkeep');
@@ -235,13 +247,53 @@ function copyDirIfExists(src, dest) {
   cpSync(src, dest, { recursive: true });
 }
 
+// Todos os códigos de rastreio já usados no projeto: US, AC, ASM, Q e T.
+// Every trace code already used in the project: US, AC, ASM, Q and T.
+function projectTraceIds(project) {
+  const ids = [];
+  for (const feature of project.features) {
+    if (feature.spec) {
+      for (const s of feature.spec.stories) ids.push(s.id, ...s.acs.map((ac) => ac.id));
+      ids.push(...feature.spec.assumptions.map((a) => a.id), ...feature.spec.questions.map((q) => q.id));
+    }
+    if (feature.tasks) ids.push(...feature.tasks.tasks.map((t) => t.id));
+  }
+  return ids;
+}
+
+// IDs únicos no projeto: cada código continua a numeração a partir do maior
+// existente. / Project-unique IDs: each code continues from the highest one.
+function nextTraceIds(rootDir) {
+  const used = projectTraceIds(loadProject(loadConfig(rootDir)));
+  const next = (prefix) => {
+    const numbers = used.filter((id) => id.startsWith(`${prefix}-`)).map((id) => parseInt(id.slice(prefix.length + 1), 10));
+    return `${prefix}-${String(Math.max(0, ...numbers) + 1).padStart(3, '0')}`;
+  };
+  return { us: next('US'), ac: next('AC'), asm: next('ASM'), q: next('Q'), t: next('T') };
+}
+
+// "login-email" vira "Login email". / "login-email" becomes "Login email".
+function titleFromSlug(slug) {
+  return slug
+    .split('-')
+    .map((w, i) => (i === 0 ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(' ');
+}
+
 function cmdNew(rootDir, name, flags) {
   if (!name) {
-    console.error('uso: fuzkrigo-spec new <nome-da-feature> (kebab-case, ex.: entrega-dever-casa)');
+    console.error('uso: fuzkrigo-spec new <nome-da-feature> [--issue <n>] (kebab-case, ex.: e1-entrega-dever-casa --issue 12)');
     return 2;
   }
   if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) {
     console.error(`nome inválido: "${name}" — use kebab-case (letras minúsculas, números e hífen)`);
+    return 2;
+  }
+  // Validada antes de criar qualquer pasta: erro aqui não deixa resto.
+  // Validated before creating any folder: an error here leaves nothing behind.
+  const origin = featureOrigin(name, flags.issue);
+  if (origin.error) {
+    console.error(origin.error);
     return 2;
   }
   const dir = path.join(rootDir, '.spec', 'features', name);
@@ -251,34 +303,25 @@ function cmdNew(rootDir, name, flags) {
   }
   mkdirSync(dir, { recursive: true });
 
-  // IDs únicos no projeto: continua a numeração a partir do maior ID existente
-  const config = loadConfig(rootDir);
-  const project = loadProject(config);
-  let maxUs = 0;
-  let maxAc = 0;
-  for (const feature of project.features) {
-    if (!feature.spec) continue;
-    for (const s of feature.spec.stories) {
-      maxUs = Math.max(maxUs, parseInt(s.id.slice(3), 10));
-      for (const ac of s.acs) maxAc = Math.max(maxAc, parseInt(ac.id.slice(3), 10));
-    }
-  }
-  const pad = (n) => String(n).padStart(3, '0');
-  const titulo = name
-    .split('-')
-    .map((w, i) => (i === 0 ? w[0].toUpperCase() + w.slice(1) : w))
-    .join(' ');
+  const ids = nextTraceIds(rootDir);
+  const titulo = titleFromSlug(origin.description);
+  const spec = fill(template('spec.md'), {
+    TITULO: titulo,
+    FEATURE: name,
+    TITULO_HISTORIA: '[título da história]',
+    ETAPA: origin.etapa,
+    ISSUE: origin.issue,
+    HOJE: localIsoDate(),
+    ORIGEM: origin.origin,
+  });
+  const specIds = [['US-001', ids.us], ['AC-001', ids.ac], ['ASM-001', ids.asm], ['Q-001', ids.q]];
+  writeFileSync(path.join(dir, 'spec.md'), specIds.reduce((text, [from, to]) => text.replace(from, to), spec));
 
-  let spec = template('spec.md');
-  spec = fill(spec, { TITULO: titulo, FEATURE: name, TITULO_HISTORIA: '[título da história]' });
-  spec = spec.replace('US-001', `US-${pad(maxUs + 1)}`).replace('AC-001', `AC-${pad(maxAc + 1)}`);
-  writeFileSync(path.join(dir, 'spec.md'), spec);
-
-  let tasks = template('tasks.md');
-  tasks = fill(tasks, { TITULO: titulo, FEATURE: name });
-  tasks = tasks
-    .replace('US-001, AC-001', `US-${pad(maxUs + 1)}, AC-${pad(maxAc + 1)}`);
-  writeFileSync(path.join(dir, 'tasks.md'), tasks);
+  const tasks = fill(template('tasks.md'), { TITULO: titulo, FEATURE: name });
+  writeFileSync(
+    path.join(dir, 'tasks.md'),
+    tasks.replace('US-001, AC-001', `${ids.us}, ${ids.ac}`).replace('## T-001', `## ${ids.t}`)
+  );
 
   console.log(`✔ .spec/features/${name}/spec.md`);
   console.log(`✔ .spec/features/${name}/tasks.md`);

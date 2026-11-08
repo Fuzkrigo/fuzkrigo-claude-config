@@ -10,15 +10,17 @@
 fuzkrigo-spec init --preset lgpd-educacao --agents claude
 
 # 2. nova feature
-fuzkrigo-spec new entrega-dever-casa
+fuzkrigo-spec new e1-entrega-dever-casa --issue 12
 ```
 
-Edite `.spec/features/entrega-dever-casa/spec.md`:
+Edite `.spec/features/e1-entrega-dever-casa/spec.md`:
 
 ```markdown
 # Spec: Entrega de dever de casa
 
-> feature: entrega-dever-casa
+> feature: e1-entrega-dever-casa
+> etapa: E1
+> issue: #12
 > status: em-implementacao
 
 ## Histórias
@@ -54,8 +56,8 @@ Como aluno, quero enviar meu dever antes do prazo, para que conte como no prazo.
 
 ```bash
 # 3. cada critério de aceite vira um teste executável (a definição de pronto)
-fuzkrigo-spec scaffold entrega-dever-casa
-# → cria test/entrega-dever-casa.spec.test.js com testes que FALHAM
+fuzkrigo-spec scaffold e1-entrega-dever-casa
+# → cria test/e1-entrega-dever-casa.spec.test.js com testes que FALHAM
 #   (inclui esqueletos p/ princípios da constituição com verificação(teste))
 ```
 
@@ -83,7 +85,7 @@ Com as tarefas escritas em `tasks.md` (com `Arquivos:` honestos), o motor
 monta o plano de execução:
 
 ```bash
-fuzkrigo-spec plano entrega-dever-casa
+fuzkrigo-spec plano e1-entrega-dever-casa
 ```
 
 - Tarefas de **arquivos disjuntos** viram **faixas paralelas**: 1 faixa =
@@ -112,10 +114,10 @@ Agora implemente a lógica e preencha os testes (ou deixe o plano executar). Rod
 
 ```bash
 # 4. o runner prova (ou não) — teste PULADO não conta como prova
-fuzkrigo-spec verify entrega-dever-casa
+fuzkrigo-spec verify e1-entrega-dever-casa
 
 # 5. o gate desta feature — cole a saída; exit 0 ou não está pronto
-fuzkrigo-spec audit --ci --feature entrega-dever-casa
+fuzkrigo-spec audit --ci --feature e1-entrega-dever-casa
 
 # o gate do PROJETO (sem filtro): é o que vale no CI e antes de um release
 fuzkrigo-spec audit --ci
@@ -128,7 +130,7 @@ Rode `fuzkrigo-spec status` a qualquer momento:
 ```
 feature                        status             critérios  com-teste  provados  suposições?  perguntas?
 ────────────────────────────────────────────────────────────────────────────────────────────────────────
-entrega-dever-casa             em-implementacao           2          2         1            1           1
+e1-entrega-dever-casa          em-implementacao           2          2         1            1           1
 ```
 
 Lê-se: 2 critérios de aceite, ambos com teste anotado, mas só 1 provado até
@@ -143,7 +145,7 @@ No seu pipeline (GitHub Actions, GitLab CI):
 No CI você usa o mesmo motor embarcado, commitado junto com a skill:
 
 ```yaml
-- run: node .claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs verify entrega-dever-casa
+- run: node .claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs verify e1-entrega-dever-casa
 - run: node .claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs audit --ci
 ```
 

@@ -16,3 +16,8 @@ labels: type:tech-debt
 ## Proposta
 
 [Como resolver, se ja houver ideia]
+
+## Especificacao
+
+`.spec/features/i<numero-desta-issue>-<nome>/`, se a correcao mudar comportamento.
+[Senao, escrever: sem spec (correcao trivial)]

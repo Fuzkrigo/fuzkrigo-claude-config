@@ -19,6 +19,11 @@ labels: type:bug
 
 [O que deveria acontecer]
 
+## Especificacao
+
+`.spec/features/i<numero-desta-issue>-<nome>/`, se a correcao mudar comportamento.
+[Senao, escrever: sem spec (correcao trivial)]
+
 ## Ambiente
 
 - Sistema operacional:

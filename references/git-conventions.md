@@ -62,7 +62,7 @@ Breaking change: adicionar `!` após o tipo/escopo e uma seção `BREAKING CHANG
 O plano de execução da skill `fuzkrigo-spec-driven` quebra uma feature em faixas paralelas, cada uma numa branch própria (`spec/<feature>-faixa-N`), com um commit por tarefa no formato do motor:
 
 ```
-T-003 login-email: validar formato do e-mail
+T-003 e1-login-email: validar formato do e-mail
 ```
 
 **Esses commits são efêmeros.** Eles existem para rastrear a execução dentro da faixa, não para virar histórico da `main`. A regra:

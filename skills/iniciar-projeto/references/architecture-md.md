@@ -5,7 +5,8 @@ Documento vivo, gerado em `docs/ARCHITECTURE.md` ao final de A2. Usa **Mermaid**
 ## Índice
 - [Princípios](#princípios)
 - [Estrutura do arquivo](#estrutura-do-arquivo)
-- [Templates Mermaid](#templates-mermaid)
+- [Templates Mermaid](#templates-mermaid): contexto, componentes internos, fluxo, modelo de dados (ER), máquina de estados e classes (modelo de domínio)
+- [Sobre C4](#sobre-c4)
 - [Quando atualizar](#quando-atualizar)
 
 ## Princípios
@@ -35,7 +36,7 @@ Visão de arquitetura do sistema. Atualizado em [data].
 [Sequência ou fluxo do caso de uso central]
 
 ## 4. Modelo de dados
-[ER das entidades principais, quando há persistência]
+[ER das entidades principais, quando há persistência; diagrama de classes, quando há modelo de domínio com comportamento]
 
 ## 5. Decisões de arquitetura
 [Lista curta: decisão, alternativa descartada, justificativa. Espelha o ROADMAP.md]
@@ -121,6 +122,32 @@ stateDiagram-v2
     EmAnalise --> Respondida
     Respondida --> Arquivada
     Arquivada --> [*]
+```
+
+### Classes (modelo de domínio)
+Entidades do domínio com o comportamento que carregam: atributos, métodos, herança e composição.
+
+Usar só quando houver modelo de domínio com comportamento (entidades com regra, herança, composição). Tabelas e relações de banco continuam no diagrama de entidades (ER).
+
+```mermaid
+classDiagram
+    class Intimacao {
+        +String numero
+        +Date prazo
+        +String status
+        +responder(texto) void
+        +estaVencida(hoje) bool
+    }
+    class IntimacaoUrgente {
+        +int diasDeAntecedencia
+        +estaVencida(hoje) bool
+    }
+    class Anexo {
+        +String caminho
+    }
+
+    Intimacao <|-- IntimacaoUrgente : herda
+    Intimacao "1" *-- "0..*" Anexo : compoe
 ```
 
 ## Sobre C4

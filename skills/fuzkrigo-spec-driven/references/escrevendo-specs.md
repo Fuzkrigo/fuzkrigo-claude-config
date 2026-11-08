@@ -43,6 +43,35 @@ formato canônico é `- **Dado** ...`. Use `E` para continuar a última:
 - **E** o botão de envio fica desabilitado
 ```
 
+## Casos de borda viram critérios de aceite
+
+O audit só cobra o que é critério de aceite: cada critério precisa de um teste
+anotado e de uma prova gravada pelo `verify`. Caso de borda que fica na prosa
+da história, ou só no código, não tem teste exigido nem prova — e é justamente
+onde o defeito costuma morar. Por isso cada caso de borda relevante vira um
+critério de aceite próprio.
+
+Lista de verificação, para cada história:
+
+- **Entrada vazia**: campo em branco, lista sem itens, arquivo sem conteúdo.
+- **Valor no limite**: o último minuto do prazo, o tamanho máximo, o zero.
+- **Erro de dependência**: banco fora do ar, API que não responde, arquivo
+  que não abre.
+- **Permissão negada**: usuário sem acesso ao recurso, sessão expirada.
+- **Dado duplicado**: o mesmo envio duas vezes, cadastro que já existe.
+
+Nem todo item se aplica a toda história: o que importa é ter passado por eles.
+O que se aplica ganha critério; o que não se aplica e não é óbvio pode virar
+suposição.
+
+```markdown
+#### AC-005 — Entrega no último segundo do prazo conta como no prazo
+
+- **Dado** uma tarefa com prazo até as 23:59:59 de hoje
+- **Quando** o aluno envia o arquivo às 23:59:59
+- **Então** a entrega é registrada com status "no prazo"
+```
+
 ## Suposições vs. perguntas em aberto
 
 - **Suposição (ASM-xxx)**: você preencheu uma lacuna com um palpite razoável e
@@ -83,6 +112,22 @@ rascunho → pronta → em-implementacao → implementada → auditada
 - `auditada`: `audit --ci --feature <feature>` saiu 0 com prova de todos os
   critérios de aceite. (O audit do projeto inteiro, sem filtro, é o que vale
   antes de um release — uma feature auditada não garante um projeto íntegro.)
+
+## Cabeçalho, Histórico e Resolução
+
+A spec documenta a própria feature: de onde ela veio, o que mudou depois de
+combinada e como foi resolvida. O parser e o audit ignoram essas partes —
+elas documentam, não reprovam.
+
+| Parte | O que registra | Quando é preenchida | Por quem |
+|---|---|---|---|
+| Cabeçalho `> etapa:` e `> issue:` | A etapa do CHECKLIST (`E1`, `E11a`) e a issue (`#12`) de onde a feature veio; `—` quando não há | Na criação: `fuzkrigo-spec new <nome> --issue <n>` grava os dois a partir do prefixo do nome (`e<n>-`, `i<n>-`) e da flag. Etapa criada sem `--issue` fica com `[#<n> da issue]`, que recebe o número antes de a spec ficar `pronta` | O motor grava; o Claude confere e completa |
+| `## Histórico` | Uma linha por mudança relevante depois que a spec ficou `pronta` — critério alterado, suposição invalidada, escopo mudado —, com data, mudança e motivo. A primeira linha (data, "Spec criada" e a origem: "Etapa E1", "Issue #42" ou "—") vem do `new` | No momento da mudança, não depois | O Claude, ao mudar a spec |
+| `## Resolução` | O PR; a abordagem adotada, em duas ou três frases; as decisões tomadas durante a implementação; o resultado do `audit --ci --feature`; os pontos de atenção que os revisores deixaram registrados | No Portão 3, antes do PR | O Claude, com a saída do audit e os relatórios dos revisores |
+
+O git guarda o que mudou no arquivo, mas não o porquê de negócio nem a ligação
+com a etapa e a issue. Quem abrir a pasta da feature meses depois encontra as
+três coisas ali, sem precisar escavar o histórico de commits.
 
 ## Tarefas: formato dos campos
 
