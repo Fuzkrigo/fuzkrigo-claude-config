@@ -70,7 +70,16 @@ precisam apontar pros seus arquivos. Guard-rails do motor:
 
 ## Rastreabilidade que dá diferencial de segurança
 
-Um estudo de caso de microsserviços bancários relatou 73% menos defeitos de
-segurança quando os princípios eram rastreados até arquivo e linha. É exatamente
-o que `verificação(proibido)` e `verificação(obrigatório)` fazem: cada violação
-sai com `arquivo:linha`, não com "reveja o código".
+Um estudo de caso em microsserviços bancários relatou 73% menos defeitos de
+segurança com uma constituição de princípios de segurança embutida na
+especificação, em comparação com geração de código por IA sem essas restrições;
+no mesmo trabalho, cada princípio é rastreado até o artefato de código que o
+cumpre. Fonte: Srinivas Rao Marri, *Constitutional Spec-Driven Development:
+Enforcing Security by Construction in AI-Assisted Code Generation*, arXiv
+2602.02584, v1, 31/01/2026 — <https://arxiv.org/abs/2602.02584>. É um preprint de
+um único autor, com um único estudo de caso e sem revisão por pares: vale como
+indício, não como prova.
+
+O rastreio até o código é o que `verificação(proibido)` e
+`verificação(obrigatório)` fazem: cada violação sai com `arquivo:linha`, não com
+"reveja o código".
