@@ -33,6 +33,7 @@ A `main` deste repositório é protegida: toda mudança entra por pull request, 
     ├── arm_modo_tarefa.py           # UserPromptSubmit — cria/apaga o marcador do Modo Tarefa (CLAUDE.md §7)
     ├── check_planning_docs.py       # PreToolUse (Write|Edit) — iniciar-projeto §4, Regra de Bloqueio
     ├── check_style_prohibitions.py  # PreToolUse (Write|Edit) — iniciar-projeto §8, Proibições de Estilo
+    ├── run-python.sh                # Lançador dos três hooks: py -3 no Windows, python3 no Linux/WSL
     └── tests/                       # testes dos hooks e da status line (unittest): py -3 -m unittest discover -s hooks/tests
 ```
 
@@ -105,7 +106,7 @@ jq --version       # opcional: a status line usa o jq e, sem ele, o python3/pyth
 | --- | --- | --- |
 | `CLAUDE.md`, `CODIGO.md`, `PATTERNS.md`, `DESIGN.md`, `statusline.sh` | `~/.claude/` | O `CLAUDE.md` importa o `CODIGO.md`; `PATTERNS.md` e `DESIGN.md` são lidos sob demanda |
 | `settings.json` | `~/.claude/settings.json` | **Mesclar, não sobrescrever** (ver abaixo) |
-| `hooks/*.py` | `~/.claude/hooks/` | A pasta `hooks/tests/` fica só neste repositório |
+| `hooks/*.py`, `hooks/run-python.sh` | `~/.claude/hooks/` | O `run-python.sh` é o lançador que os três hooks chamam; a pasta `hooks/tests/` fica só neste repositório |
 | `agents/` | `~/.claude/agents/` | Inclui `security-reviewer/references/` |
 | `skills/iniciar-projeto/`, `skills/fuzkrigo-spec-driven/` | `~/.claude/skills/` | |
 | `skills/pipeline-corporativo/` | `~/.claude/skills/` | Só na máquina corporativa |
@@ -119,7 +120,7 @@ Não vão para o `~/.claude/`: `README.md`, `MANUAL-DO-ECOSSISTEMA.md` e `PLANO-
 cp ~/.claude/settings.json ~/.claude/settings.json.bak-$(date +%Y%m%d) 2>/dev/null
 mkdir -p ~/.claude/hooks ~/.claude/agents ~/.claude/skills ~/.claude/references
 cp CLAUDE.md CODIGO.md PATTERNS.md DESIGN.md statusline.sh ~/.claude/
-cp hooks/*.py ~/.claude/hooks/
+cp hooks/*.py hooks/run-python.sh ~/.claude/hooks/
 cp -r agents/. ~/.claude/agents/
 cp -r skills/iniciar-projeto skills/fuzkrigo-spec-driven ~/.claude/skills/
 cp -r references/. ~/.claude/references/

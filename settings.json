@@ -11,7 +11,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "~/.claude/statusline.sh"
+    "command": "bash ~/.claude/statusline.sh"
   },
   "hooks": {
     "UserPromptSubmit": [
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "py -3 \"$HOME/.claude/hooks/arm_modo_tarefa.py\"",
+            "command": ". \"$HOME/.claude/hooks/run-python.sh\" \"$HOME/.claude/hooks/arm_modo_tarefa.py\"",
             "shell": "bash",
             "timeout": 5,
             "statusMessage": "Armando marcador de Modo Tarefa..."
@@ -33,14 +33,14 @@
         "hooks": [
           {
             "type": "command",
-            "command": "py -3 \"$HOME/.claude/hooks/check_planning_docs.py\"",
+            "command": ". \"$HOME/.claude/hooks/run-python.sh\" \"$HOME/.claude/hooks/check_planning_docs.py\"",
             "shell": "bash",
             "timeout": 10,
             "statusMessage": "Checando documentos de planejamento (iniciar-projeto)..."
           },
           {
             "type": "command",
-            "command": "py -3 \"$HOME/.claude/hooks/check_style_prohibitions.py\"",
+            "command": ". \"$HOME/.claude/hooks/run-python.sh\" \"$HOME/.claude/hooks/check_style_prohibitions.py\"",
             "shell": "bash",
             "timeout": 10,
             "statusMessage": "Checando proibicoes de estilo (iniciar-projeto)..."
