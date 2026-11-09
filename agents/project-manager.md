@@ -49,7 +49,7 @@ Templates de issue e PR ficam em:
 
 `~/.claude/references/github/`
 
-Contém `PULL_REQUEST_TEMPLATE.md`, `ISSUE_TEMPLATE/` (`feature.md`, `bug.md`, `tech-debt.md`), `workflows/ci.yml` (o pipeline: testes, cobertura e auditoria da especificação) e `scripts/` (os scripts de cobertura que o `ci.yml` chama). Copie a pasta `.github/` inteira para a **raiz** do projeto quando ela ainda não existir lá — o GitHub só reconhece esses templates nesse caminho exato, então ela não vai para `docs/`. O `feature.md` é o template da issue de etapa: título no padrão `[M<n>] Etapa E<n>: ` (ver "Padrão de título das issues" no Passo 3), contexto curto, tarefas como checklist.
+Contém `PULL_REQUEST_TEMPLATE.md`, `ISSUE_TEMPLATE/` (`feature.md`, `bug.md`, `tech-debt.md`), `workflows/ci.yml` (o pipeline: testes, cobertura e auditoria da especificação) e `scripts/` (os scripts que o `ci.yml` chama: `coverage-config.sh` e `coverage-python.sh` para a cobertura, `install-python.sh` para as dependências Python). Copie a pasta `.github/` inteira para a **raiz** do projeto quando ela ainda não existir lá — o GitHub só reconhece esses templates nesse caminho exato, então ela não vai para `docs/`. O `feature.md` é o template da issue de etapa: título no padrão `[M<n>] Etapa E<n>: ` (ver "Padrão de título das issues" no Passo 3), contexto curto, tarefas como checklist.
 
 **Fonte das etapas:**
 

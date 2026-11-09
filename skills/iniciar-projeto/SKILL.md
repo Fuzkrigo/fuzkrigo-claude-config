@@ -40,7 +40,7 @@ Três blocos. O Bloco A roda uma vez, na abertura. O Bloco B roda a cada feature
 #### A3 — Provisionamento e Constituição
 - Invocar o agente `project-manager` (ferramenta Agent) para provisionar o GitHub e montar a gestão no Linear (seção 6). O board nasce aqui, e não em A2, porque depende do repositório já provisionado e das etapas já revisadas no CHECKLIST — cada issue nasce de uma etapa que já existe. O agente não tem canal com o usuário, então dois casos voltam como proposta no relatório dele: repositório que ainda não existe (vem o `gh repo create` montado, não executado) e projeto sem `CHECKLIST.md` (vem a lista de etapas proposta, sem issues criadas). Nos dois, perguntar ao usuário — inclusive se ele digita ou se eu executo, como em `~/.claude/references/git-conventions.md` — e, aprovado, invocar o agente de novo para seguir o provisionamento
 - Inicializar a camada de desenvolvimento: **`fuzkrigo-spec init --agents claude`** (ver a skill `fuzkrigo-spec-driven`), e escrever a constituição do projeto a partir das restrições levantadas em A1. Princípio `[DEVE]` sem verificação executável é acusado pelo próprio audit — a constituição nasce com dente ou não nasce
-- O `--agents claude` não é opcional: ele copia o motor para `.claude/skills/` **dentro do projeto**, e é assim que o CI consegue auditar. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina. Sem isso, o CI roda testes e cobertura, mas pula a auditoria
+- O `--agents claude` não é opcional: ele copia o motor para `.claude/skills/` **dentro do projeto**, e é assim que o CI consegue auditar. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina. Sem isso, o CI reprova no passo "Conferir o motor de auditoria": projeto com `fuzkrigo.config.json` não passa sem auditar.
 - Definir o par `testCommand` e `reporter` em `fuzkrigo.config.json` antes de sair de A3 (tabela por stack na skill `fuzkrigo-spec-driven`). O CI lê o comando desse mesmo arquivo — configuração em um lugar só
 - Preencher o bloco `coverage` do `fuzkrigo.config.json` antes de sair de A3, com as pastas de lógica de negócio derivadas do `docs/ARCHITECTURE.md`; detalhes em `references/cobertura.md`. Sem isso, o CI reprova. Em projeto Node, gravar os mesmos números no `vitest.config` e criar o script `coverage` no `package.json`, porque o vitest só aceita limite por pasta no próprio arquivo de configuração
 - **Fechar o ciclo do ROADMAP:** com a constituição escrita, voltar ao `docs/ROADMAP.md` e anotar o código de cada princípio (`P-xxx`) ao lado da restrição correspondente. É a segunda passada do documento — em A2 a restrição é texto, aqui ela ganha o código que a verifica (seção 7.1, item 4)
@@ -205,7 +205,7 @@ Cada issue de etapa nasce apontando para a pasta da feature correspondente em `.
 Quando uma milestone termina, o mesmo agente monta o CHANGELOG.md e o texto do release (C3).
 
 - Commits semânticos, branches, PRs, releases e a política de execução: `~/.claude/references/git-conventions.md`
-- Templates de issue e PR, workflow de CI e scripts de cobertura: `~/.claude/references/github/`
+- Templates de issue e PR, workflow de CI e os scripts que ele chama (cobertura e instalação das dependências Python, `install-python.sh`): `~/.claude/references/github/`
 - Detalhes de provisionamento GitHub/Linear e do ritual de release: `~/.claude/agents/project-manager.md`
 
 Os padrões do "Fuzkrigo Projects" são **sugestões adaptáveis**, não regras rígidas — ajustar ao contexto de cada projeto quando necessário.

@@ -152,8 +152,8 @@ Comandos: `init [--preset base|lgpd-educacao] [--agents claude]` · `new <featur
 `licoes <add|list|sugerir|penalizar|status>`.
 
 No `init`, o `--agents claude` copia o motor para `.claude/skills/` dentro do projeto — sem essa
-cópia commitada, o CI do projeto pula a auditoria. No `audit`, o `--feature` é o gate de cada
-feature; sem ele, o veredito é do projeto inteiro.
+cópia commitada, o CI do projeto reprova, porque passar sem auditar seria um verde falso. No
+`audit`, o `--feature` é o gate de cada feature; sem ele, o veredito é do projeto inteiro.
 
 Abaixo, `fuzkrigo-spec <comando>` é abreviação dessa invocação.
 

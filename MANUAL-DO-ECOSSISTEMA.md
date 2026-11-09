@@ -268,9 +268,16 @@ Duas coisas fazem o CI funcionar, e as duas acontecem em A3:
 
 - `fspec init --agents claude` — o `--agents claude` copia o motor para `.claude/skills/` dentro do
   projeto. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina; sem essa cópia
-  commitada, o CI roda testes e cobertura mas pula a auditoria.
+  commitada, o CI reprova no passo "Conferir o motor de auditoria", no PR e na `main`, porque
+  passar sem auditar seria um verde falso. Projeto sem `fuzkrigo.config.json` está fora do fluxo e
+  não é auditado.
 - O `fuzkrigo.config.json` preenchido: o workflow lê o `testCommand` e o bloco `coverage` de lá,
   então a configuração vive num lugar só e o CI acompanha se você trocar de runner.
+
+Em projeto Python, o CI instala o `requirements.txt` e, só quando há pacote declarado (`setup.py`,
+ou `[project]` ou `[build-system]` no `pyproject.toml`), o próprio projeto com `pip install -e .`.
+Um `pyproject.toml` só com configuração de ferramentas não tem pacote para instalar. Se a
+instalação falhar, o build reprova, sem `|| true` escondendo o erro.
 
 **A cobertura também tem dente.** O bloco `coverage` do `fuzkrigo.config.json` declara 95% para o
 projeto inteiro e 98% para as pastas de lógica de negócio, listadas em `businessLogicPaths` a
@@ -611,10 +618,10 @@ Coisas que vão te morder e não são culpa sua:
 4. **Skip não é prova.** `@pytest.mark.skip` ou `test.skip` fazem o critério continuar sem prova,
    por mais verde que o terminal pareça.
 5. **Glob de princípio que não casa arquivo** vira regra inerte. O audit avisa; não ignore.
-6. **`init` sem `--agents claude` deixa o CI meio cego.** Sem a flag, o motor não é copiado para
-   dentro do projeto, e o servidor do GitHub não tem o que executar: o CI roda testes e cobertura,
-   mas pula a auditoria — e avisa isso no log, em vez de falhar. Se você vir esse aviso, rode o
-   `init` de novo com a flag e commite a pasta `.claude/skills/`.
+6. **`init` sem `--agents claude` reprova o CI.** Sem a flag, o motor não é copiado para dentro
+   do projeto, e o servidor do GitHub não tem o que executar: o passo "Conferir o motor de
+   auditoria" falha, no PR e na `main`. Rode o `init` de novo com a flag e commite a pasta
+   `.claude/skills/`.
 
 ---
 

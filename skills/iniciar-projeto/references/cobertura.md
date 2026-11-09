@@ -51,6 +51,7 @@ Os dois passos de cobertura do `.github/workflows/ci.yml` leem o bloco por `.git
 
 O passo roda `.github/scripts/coverage-python.sh`.
 
+- As dependências são instaladas antes, pelo `.github/scripts/install-python.sh`: o `requirements.txt` e, quando há pacote declarado (`setup.py`, ou `[project]` ou `[build-system]` no `pyproject.toml`), o próprio projeto com `pip install -e .`. Um `pyproject.toml` só com `[tool.*]` não tem pacote, e a instalação dele é pulada. Falha de instalação reprova o build.
 - `pytest-cov` precisa estar nas dependências do projeto (`requirements.txt` ou `pyproject.toml`).
 - Sem `source` na configuração do coverage.py, o `--cov` mede também os arquivos de teste, que costumam estar em 100% e inflam o número global. Declare a pasta do código: `source = ["src"]` em `[tool.coverage.run]` no `pyproject.toml`, ou `source = src` em `[run]` no `.coveragerc`.
 - A exclusão `# pragma: no cover` é respeitada pelas duas medições.
