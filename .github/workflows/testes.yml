@@ -1,0 +1,62 @@
+# CI do proprio ecossistema (fuzkrigo-claude-config): roda as suites do motor
+# da skill fuzkrigo-spec-driven e as dos hooks, em Linux e em Windows.
+# Nao confundir com references/github/workflows/ci.yml: aquele e o MODELO que
+# a A3 copia para cada projeto, e nunca roda neste repositorio.
+# CI of the ecosystem itself (fuzkrigo-claude-config): runs the test suites of
+# the fuzkrigo-spec-driven engine and of the hooks, on Linux and on Windows.
+# Not to be confused with references/github/workflows/ci.yml: that one is the
+# TEMPLATE that A3 copies into each project, and it never runs here.
+
+name: Testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# O workflow so le o codigo; o resto do GITHUB_TOKEN fica sem acesso.
+# The workflow only reads the code; the rest of GITHUB_TOKEN gets no access.
+permissions:
+  contents: read
+
+jobs:
+  testes:
+    # O ecossistema roda no Windows; o Linux confere que nada depende disso.
+    # Uma perna que falha nao cancela a outra: o diagnostico precisa das duas.
+    # The ecosystem runs on Windows; Linux checks that nothing depends on it.
+    # A failing leg does not cancel the other: diagnosis needs both.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    # Mesma sintaxe nos dois sistemas; no Windows e o bash do Git for Windows,
+    # o mesmo que os testes do executor chamam pelo PATH.
+    # Same syntax on both systems; on Windows it is Git for Windows' bash, the
+    # same one the executor tests call through PATH.
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Preparar Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 'lts/*'
+
+      - name: Preparar Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+
+      # O glob pega toda suite nova sem editar este arquivo.
+      # The glob picks up every new suite without editing this file.
+      - name: Suites do motor
+        working-directory: skills/fuzkrigo-spec-driven/scripts
+        run: node --test test/*.test.mjs
+
+      - name: Suites dos hooks
+        run: python -m unittest discover -s hooks/tests -v

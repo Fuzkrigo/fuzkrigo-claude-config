@@ -655,10 +655,10 @@ mostra o rastreio. As catorze suítes que os protegem rodam assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
-node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs test/spec-rastreavel.test.mjs test/numeracao-continua.test.mjs test/prova-de-principio.test.mjs test/unicidade-tarefas.test.mjs test/unicidade-principios.test.mjs test/executor-plano.test.mjs test/scaffold-acrescenta.test.mjs test/new-mostra-rastreio.test.mjs
+node --test test/*.test.mjs
 ```
 
-São 62 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+O glob pega suíte nova sem mudar o comando. São 62 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:
@@ -670,3 +670,8 @@ py -3 -m unittest discover -s hooks/tests -v
 São 39 casos. Três deles comparam o hook de planejamento com o próprio motor e precisam do `node`
 no PATH, e os três da status line precisam do `bash`; sem eles, ficam pulados (skip), não
 reprovados.
+
+No GitHub, o workflow `.github/workflows/testes.yml` roda as duas suítes a cada push na `main` e
+a cada pull request, em Linux e em Windows, com `node` e `bash` presentes, então nenhum caso fica
+pulado. Ele é o CI deste repositório e não se confunde com o `references/github/workflows/ci.yml`,
+que é o modelo copiado para cada projeto em A3.
