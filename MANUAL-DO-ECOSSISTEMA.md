@@ -111,7 +111,7 @@ grande, justamente porque aplica critérios diferentes dos seus.
 BLOCO A - abertura do projeto (uma vez)
    A1 Briefing e diagnostico
    A2 Documentos-base: ROADMAP, CHECKLIST, ARCHITECTURE
-   A3 Provisionamento: GitHub/Linear, .github/ (templates + CI), constituicao
+   A3 Provisionamento: GitHub/Linear, .github/ (templates + CI), main protegida, constituicao
 
 BLOCO B - ciclo de feature (repete a cada etapa)
    Especificar -> Projetar -> Tarefas -> Plano -> Executar
@@ -239,7 +239,11 @@ Assim fica uma etapa no CHECKLIST:
 issues (uma por etapa) no GitHub, e monta a gestão no Linear — Project, Milestones e as issues já
 sincronizadas, com prioridade nativa. Se o repositório ainda não existe, ele não o cria: devolve o
 comando `gh repo create` montado, eu te pergunto, e ele é invocado de novo com o repositório
-pronto. O GitHub Projects não entra: o board é o do Linear. E o projeto ganha sua constituição:
+pronto. O GitHub Projects não entra: o board é o do Linear. O agente também protege a `main`:
+dali em diante, mudança só entra por PR com o CI verde e a branch atualizada, inclusive a sua, e
+até os arquivos da própria A3 seguem esse caminho. Em repositório privado na conta Free o GitHub
+não oferece a proteção; o agente devolve a recusa, e o risco vai para o ROADMAP. E o projeto
+ganha sua constituição:
 
 **[terminal]** (na prática, quem roda sou eu, durante A3)
 
@@ -507,8 +511,10 @@ resumo executivo, o manual e a apresentação. Esses documentos descrevem o que 
 isso vêm depois da entrega, não antes.
 
 **C3 — Release.** O `project-manager` monta CHANGELOG, texto do release e os comandos Git. Antes,
-ele confere que todas as features estão `auditada` — issue fechada não é prova. A execução do Git
-é sempre uma escolha sua: você digita ou pede para executarem.
+ele confere que todas as features estão `auditada` — issue fechada não é prova — e que a proteção
+da `main` está ativa. Com ela, nem o CHANGELOG vai por push direto: entra por PR, numa branch
+`docs/changelog-vX.Y.Z`, e a tag só é criada depois do merge. A execução do Git é sempre uma
+escolha sua: você digita ou pede para executarem.
 
 ---
 

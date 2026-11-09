@@ -39,6 +39,7 @@ Três blocos. O Bloco A roda uma vez, na abertura. O Bloco B roda a cada feature
 
 #### A3 — Provisionamento e Constituição
 - Invocar o agente `project-manager` (ferramenta Agent) para provisionar o GitHub e montar a gestão no Linear (seção 6). O board nasce aqui, e não em A2, porque depende do repositório já provisionado e das etapas já revisadas no CHECKLIST — cada issue nasce de uma etapa que já existe. O agente não tem canal com o usuário, então dois casos voltam como proposta no relatório dele: repositório que ainda não existe (vem o `gh repo create` montado, não executado) e projeto sem `CHECKLIST.md` (vem a lista de etapas proposta, sem issues criadas). Nos dois, perguntar ao usuário — inclusive se ele digita ou se eu executo, como em `~/.claude/references/git-conventions.md` — e, aprovado, invocar o agente de novo para seguir o provisionamento
+- O mesmo agente liga a **proteção da `main`**: mudança só entra por PR, com o check `verificar` do CI verde e a branch atualizada, inclusive a do administrador. A partir daí, os próprios arquivos da A3 (`.github/`, motor, constituição) também entram por PR. Se o plano não permitir (repositório privado na conta Free), o agente devolve a recusa da API, e o risco vai para o `docs/ROADMAP.md`: a `main` aceita push direto e merge sem CI verde
 - Inicializar a camada de desenvolvimento: **`fuzkrigo-spec init --agents claude`** (ver a skill `fuzkrigo-spec-driven`), e escrever a constituição do projeto a partir das restrições levantadas em A1. Princípio `[DEVE]` sem verificação executável é acusado pelo próprio audit — a constituição nasce com dente ou não nasce
 - O `--agents claude` não é opcional: ele copia o motor para `.claude/skills/` **dentro do projeto**, e é assim que o CI consegue auditar. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina. Sem isso, o CI reprova no passo "Conferir o motor de auditoria": projeto com `fuzkrigo.config.json` não passa sem auditar.
 - Definir o par `testCommand` e `reporter` em `fuzkrigo.config.json` antes de sair de A3 (tabela por stack na skill `fuzkrigo-spec-driven`). O CI lê o comando desse mesmo arquivo — configuração em um lugar só
@@ -88,6 +89,7 @@ Estes documentos descrevem o que existe, não o que se pretende construir. Por i
 #### C3 — Release
 - Invocar o agente `project-manager` para montar `CHANGELOG.md` (na raiz), o texto do release e o bloco de comandos Git
 - A milestone só fecha com todas as suas features em estado `auditada`
+- Pré-condição do release, conferida pelo agente e registrada no relatório dele: a proteção da `main` ativa. Com ela valendo para o administrador, o CHANGELOG entra por PR, numa branch `docs/changelog-vX.Y.Z`, e nunca por push direto
 - A execução da parte Git segue a política de `~/.claude/references/git-conventions.md`: pergunto se você executa ou se eu executo
 
 ---
@@ -196,7 +198,7 @@ Detalhes de geração de cada um: `~/.claude/agents/project-documentation.md`.
 
 ## 6. Integração GitHub e Linear (padrão "Fuzkrigo Projects")
 
-O provisionamento do GitHub (labels, milestones, issues) e a montagem da gestão no Linear são feitos pelo agente `project-manager` (ferramenta Agent) — invocar em A3, com roadmap e milestones já definidos. O agente decide sozinho a ordem (GitHub primeiro, porque a sincronização nativa parte dele; Linear depois, completando o que ela não trouxe) e o guardrail de duplicidade — não preciso orquestrar isso manualmente.
+O provisionamento do GitHub (labels, milestones, issues e a proteção da `main`) e a montagem da gestão no Linear são feitos pelo agente `project-manager` (ferramenta Agent) — invocar em A3, com roadmap e milestones já definidos. O agente decide sozinho a ordem (GitHub primeiro, porque a sincronização nativa parte dele; Linear depois, completando o que ela não trouxe) e o guardrail de duplicidade — não preciso orquestrar isso manualmente.
 
 **A divisão de papéis é fixa: o GitHub guarda código, labels, milestones e issues; o Linear é a central de gestão** — board, prioridade, estimativa, ciclos e acompanhamento. O GitHub Projects não faz parte do padrão: não criar, não provisionar, não cobrar.
 
