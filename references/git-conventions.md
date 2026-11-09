@@ -59,7 +59,7 @@ Breaking change: adicionar `!` após o tipo/escopo e uma seção `BREAKING CHANG
 
 ## Commits de tarefa e execução paralela
 
-O plano de execução da skill `fuzkrigo-spec-driven` quebra uma feature em faixas paralelas, cada uma numa branch própria (`spec/<feature>-faixa-N`), com um commit por tarefa no formato do motor:
+O plano de execução da skill `fuzkrigo-spec-driven` quebra uma feature em faixas paralelas, cada uma numa branch própria (`spec/<feature>-faixa-N`), com um commit por tarefa no formato do motor. As faixas saem da branch da issue (`<tipo>/<numero-issue>-<descricao-curta-kebab>`) e voltam para ela por merge `--no-ff`; o executor recusa rodar na `main`. Formato do commit de tarefa:
 
 ```
 T-003 e1-login-email: validar formato do e-mail

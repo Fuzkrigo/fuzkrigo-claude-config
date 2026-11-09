@@ -321,9 +321,11 @@ produto).
   **faixas paralelas** — 1 faixa = 1 git worktree + 1 branch + 1 janela de
   contexto limpa — e gera três artefatos em `.spec/features/<feature>/`:
   - `plano-execucao.md` — faixas, ondas, gestão de branches/commits e gate;
-  - `executar-tarefas.sh` — executor headless: roda `claude -p` por faixa,
-    em paralelo, com `--model` e `--effort` já definidos por tarefa, mescla
-    as branches de volta, marca as tarefas e fecha com verify + audit;
+  - `executar-tarefas.sh` — executor headless: roda na branch da issue (a
+    atual) e recusa a `main`; roda `claude -p` por faixa, em paralelo, com
+    `--model` e `--effort` já definidos por tarefa, mescla as faixas de volta
+    na branch da issue, marca as tarefas e fecha com o gate da feature
+    (verify + `audit --ci --feature`);
   - `plano-execucao.html` — visual do plano com o botão **"Executar todas as
     tarefas em janelas limpas e paralelas"** (copia o comando do script).
 - **Apresente o plano ao usuário antes de executar**: resuma as faixas,

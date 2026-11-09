@@ -43,6 +43,12 @@ function normFile(f) {
   return f.split('\\').join('/').replace(/^\.\//, '');
 }
 
+// O executor trabalha na branch em que for chamado (a da issue) e recusa a
+// main; o plano não fixa nome de branch de trabalho.
+// The executor works on the branch it is called from (the issue's) and refuses
+// main; the plan does not fix a working branch name.
+const BRANCH_ATUAL = 'a branch atual (a da issue)';
+
 // ── cálculo ────────────────────────────────────────────────────────────────
 
 export function montarPlano(project, featureName, opts = {}) {
@@ -143,7 +149,7 @@ export function montarPlano(project, featureName, opts = {}) {
     feature: featureName,
     specDir: project.config.specDir,
     baseDir: `${project.config.specDir}/features/${featureName}`,
-    branchTrabalho: `spec/${featureName}`,
+    branchTrabalho: BRANCH_ATUAL,
     repoName,
     testCommand: project.config.testCommand || null,
     cfg,
@@ -279,7 +285,7 @@ export function renderPlanoMd(plan) {
   L.push('');
   L.push(`- **${paralelas + plan.sequenciais.length} tarefa(s) pendente(s)**: ${paralelas} em ${plan.faixas.length} faixa(s) paralela(s) + ${plan.sequenciais.length} sequencial(is)${plan.concluidas.length ? ` (${plan.concluidas.length} já concluída(s): ${plan.concluidas.map((t) => t.id).join(', ')})` : ''}`);
   L.push(`- **1 faixa = 1 worktree + 1 branch + 1 janela de contexto limpa** — faixas não compartilham nenhum arquivo entre si`);
-  L.push(`- tudo acontece na branch de trabalho \`${plan.branchTrabalho}\`; mesclagens voltam para ela; levar para a main é decisão sua`);
+  L.push(`- tudo acontece na ${plan.branchTrabalho}, nunca na \`main\`; mesclagens voltam para ela; levar para a main é por pull request, decisão sua`);
   if (plan.avisos.length) {
     L.push('');
     L.push('### Avisos');
@@ -311,11 +317,11 @@ export function renderPlanoMd(plan) {
   }
   L.push('## Gestão de branches e commits');
   L.push('');
-  L.push(`1. branch de trabalho \`${plan.branchTrabalho}\` criada do ponto atual (se ainda não existir)`);
+  L.push(`1. a branch de trabalho é ${plan.branchTrabalho}; o executor recusa \`main\`, \`master\` e a branch padrão do remoto`);
   L.push('2. cada faixa nasce dela como branch própria e roda no seu worktree — **1 tarefa = 1 commit** (`T-xxx feature: título`)');
   L.push('3. terminou a onda → merge `--no-ff` de cada faixa de volta, na ordem; conflito interrompe a faixa e pede resolução humana');
   L.push('4. faixa mesclada → worktree removido, branch apagada, tarefa marcada `[concluida]` no tasks.md');
-  L.push(`5. gate final na branch de trabalho: \`fuzkrigo-spec verify ${plan.feature}\` + \`fuzkrigo-spec audit --ci\` — **exit 0 ou não está pronto**`);
+  L.push(`5. gate final na branch de trabalho: \`fuzkrigo-spec verify ${plan.feature}\` + \`fuzkrigo-spec audit --ci --feature ${plan.feature}\` — **exit 0 ou não está pronto**`);
   L.push('');
   L.push('## Como executar');
   L.push('');
@@ -347,10 +353,10 @@ export function renderPlanoMd(plan) {
   } else {
     L.push('### ▶ Paralelo nativo no Antigravity (janelas limpas, sem Claude CLI)');
     L.push('');
-    L.push('1. **Prepare a branch de trabalho e os worktrees** (terminal, na raiz do repositório):');
+    L.push('1. **Esteja na branch da issue e prepare os worktrees** (terminal, na raiz do repositório):');
     L.push('');
     L.push('```bash');
-    L.push(`git checkout -b ${plan.branchTrabalho}   # ou: git checkout ${plan.branchTrabalho}`);
+    L.push('git branch --show-current   # a branch da issue (<tipo>/<numero>-<descricao>), nunca a main');
     for (const fx of plan.faixas) {
       L.push(`git worktree add ${fx.worktree} -b ${fx.branch}`);
     }
@@ -393,7 +399,7 @@ export function renderPlanoMd(plan) {
     L.push('');
     L.push('```bash');
     L.push(`node ${plan.engine} verify ${plan.feature}`);
-    L.push(`node ${plan.engine} audit --ci`);
+    L.push(`node ${plan.engine} audit --ci --feature ${plan.feature}`);
     L.push('```');
     L.push('');
     L.push(`6. **Acompanhe ao vivo** (opcional): \`fuzkrigo-spec painel ${plan.feature}\` abre um`);
@@ -419,6 +425,26 @@ function chamadaClaude(plan, t) {
   return `claude -p ${shq(promptTarefa(plan, t))} --model ${shq(t.model)} --effort ${t.esforcoCli} "\${CLAUDE_FLAGS[@]}"`;
 }
 
+// Seção 2 do script: a branch de trabalho é a atual (a da issue); recusa a
+// main, a master e a branch padrão do remoto. Roda antes de qualquer commit
+// do script, para nada ser gravado na main.
+// Script section 2: the working branch is the current one (the issue's); it
+// refuses main, master and the remote default branch. It runs before any
+// commit the script makes, so nothing is written to main.
+function linhasBranchAtual() {
+  return [
+    '',
+    '# ── 2. branch de trabalho: a atual (a da issue) ──────────────────',
+    'BASE_BRANCH=$(git rev-parse --abbrev-ref HEAD)',
+    '[ "$BASE_BRANCH" != "HEAD" ] || falhar "HEAD destacado — troque para a branch da issue (<tipo>/<numero>-<descricao>)"',
+    'PADRAO=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || true)',
+    'case "$BASE_BRANCH" in',
+    '  main|master|"${PADRAO#origin/}")',
+    '    falhar "o executor não roda na $BASE_BRANCH — troque para a branch da issue (<tipo>/<numero>-<descricao>, ex.: feat/12-login-email) e rode de novo" ;;',
+    'esac',
+  ];
+}
+
 export function renderPlanoSh(plan) {
   const L = [];
   L.push('#!/usr/bin/env bash');
@@ -426,18 +452,18 @@ export function renderPlanoSh(plan) {
   L.push('# NÃO edite à mão: mudou tasks.md ou a config, regenere o plano.');
   L.push('#');
   L.push('# O que este script faz, na ordem:');
-  L.push('#   1. valida o ambiente (git limpo, claude CLI, node, spec commitada)');
-  L.push(`#   2. garante a branch de trabalho ${plan.branchTrabalho}`);
+  L.push('#   1. valida o ambiente (git, node, claude CLI)');
+  L.push('#   2. trabalha na branch atual (a da issue) e recusa a main; depois exige');
+  L.push('#      git limpo e a spec commitada');
   L.push('#   3. por onda: 1 worktree + 1 branch por faixa, e `claude -p` em');
   L.push('#      paralelo — cada faixa numa janela de contexto LIMPA');
   L.push('#   4. mescla cada faixa de volta (--no-ff) e marca as tarefas [concluida]');
   L.push('#   5. tarefas sem Arquivos: rodam uma a uma na árvore principal');
-  L.push(`#   6. gate final: fuzkrigo-spec verify ${plan.feature} + fuzkrigo-spec audit --ci`);
+  L.push(`#   6. gate final: fuzkrigo-spec verify ${plan.feature} + fuzkrigo-spec audit --ci --feature ${plan.feature}`);
   L.push('set -u');
   L.push('set -o pipefail');
   L.push('');
   L.push(`FEATURE=${shq(plan.feature)}`);
-  L.push(`BASE_BRANCH=${shq(plan.branchTrabalho)}`);
   L.push(`ENGINE=${shq(plan.engine)}`);
   L.push(`CLAUDE_FLAGS=(--permission-mode ${plan.cfg.permissionMode} --allowedTools ${shq(allowedTools(plan))})`);
   L.push('FALHAS=""');
@@ -455,6 +481,7 @@ export function renderPlanoSh(plan) {
   L.push('command -v claude >/dev/null 2>&1 || falhar "Claude Code CLI (claude) não encontrado — instale-o ou siga o modo manual em plano-execucao.md"');
   L.push('TOPLEVEL=$(git rev-parse --show-toplevel 2>/dev/null) || falhar "fora de um repositório git"');
   L.push('cd "$TOPLEVEL" || exit 1');
+  L.push(...linhasBranchAtual());
   L.push('# artefatos recém-gerados pelo `fuzkrigo-spec plano` são sujeira esperada:');
   L.push('# se forem a ÚNICA sujeira, o script mesmo commita; qualquer outra, aborta');
   L.push('if [ -n "$(git status --porcelain)" ]; then');
@@ -467,24 +494,14 @@ export function renderPlanoSh(plan) {
   L.push('  fi');
   L.push('fi');
   L.push(`git ls-files --error-unmatch -- ${shq(`${plan.baseDir}/spec.md`)} >/dev/null 2>&1 || falhar "spec.md não está commitada — os worktrees das faixas precisam dela no git"`);
-  L.push('ATUAL=$(git rev-parse --abbrev-ref HEAD)');
-  L.push('[ "$ATUAL" != "HEAD" ] || falhar "HEAD destacado — troque para uma branch"');
-  L.push('');
-  L.push('# ── 2. branch de trabalho ────────────────────────────────────────');
-  L.push('if [ "$ATUAL" != "$BASE_BRANCH" ]; then');
-  L.push('  if git show-ref --verify --quiet "refs/heads/$BASE_BRANCH"; then');
-  L.push('    git checkout -q "$BASE_BRANCH" || falhar "não consegui trocar para $BASE_BRANCH"');
-  L.push('  else');
-  L.push('    git checkout -q -b "$BASE_BRANCH" || falhar "não consegui criar $BASE_BRANCH"');
-  L.push('  fi');
-  L.push('  info "branch de trabalho: $BASE_BRANCH (a partir de $ATUAL)"');
-  L.push('fi');
   L.push('git worktree prune');
   L.push(`LOG_DIR="$(dirname "$TOPLEVEL")/fuzkrigo-worktrees/${plan.repoName}-${plan.feature}-logs"`);
   L.push('mkdir -p "$LOG_DIR"');
   L.push('EVENTOS="$LOG_DIR/plano-eventos.log"');
   L.push(': > "$EVENTOS"');
   L.push('evento "inicio|$FEATURE"');
+  L.push('evento "branch|$BASE_BRANCH"');
+  L.push('info "branch de trabalho: $BASE_BRANCH"');
   L.push('info "logs por faixa em: $LOG_DIR"');
   L.push(`info "acompanhe ao vivo: fuzkrigo-spec painel ${plan.feature}"`);
   L.push('');
@@ -567,11 +584,11 @@ export function renderPlanoSh(plan) {
   L.push('');
   L.push('# ── gate final: quem decide é a máquina ──────────────────────────');
   L.push('echo');
-  L.push('info "gate final: verify + audit --ci"');
+  L.push('info "gate final: verify + audit --ci --feature"');
   L.push('evento "gate|inicio"');
   L.push('node "$ENGINE" verify "$FEATURE"');
   L.push('evento "gate|verify|$?"');
-  L.push('node "$ENGINE" audit --ci');
+  L.push('node "$ENGINE" audit --ci --feature "$FEATURE"');
   L.push('AUDIT=$?');
   L.push('evento "gate|audit|$AUDIT"');
   L.push('# fecha a contabilidade: status das tarefas + prova do verify no git');
@@ -585,7 +602,7 @@ export function renderPlanoSh(plan) {
   L.push('if [ "$AUDIT" -eq 0 ] && [ -z "$FALHAS" ]; then');
   L.push('  evento "fim|0"');
   L.push('  verde "✔ plano concluído — especificação e código alinhados (audit exit 0) na branch $BASE_BRANCH"');
-  L.push('  info "próximo passo: revise e leve para a main quando quiser (git merge $BASE_BRANCH)"');
+  L.push('  info "próximo passo: revise e abra o pull request da $BASE_BRANCH para a main"');
   L.push('  exit 0');
   L.push('fi');
   L.push('evento "fim|1"');
@@ -683,7 +700,7 @@ export function renderPlanoHtml(plan) {
     <div><b>${paralelas}</b> tarefa(s) em paralelo</div>
     <div><b>${plan.faixas.length}</b> faixa(s) · <b>${plan.ondas.length}</b> onda(s)</div>
     <div><b>${plan.sequenciais.length}</b> sequencial(is)</div>
-    <div>branch <code>${esc(plan.branchTrabalho)}</code></div>
+    <div>branch: ${esc(plan.branchTrabalho)}</div>
   </div>
   ${avisosHtml}
   <div class="executor">
@@ -701,10 +718,10 @@ export function renderPlanoHtml(plan) {
   <section class="onda">
     <h3>Branches e commits</h3>
     <ol>
-      <li>tudo parte da branch de trabalho <code>${esc(plan.branchTrabalho)}</code></li>
+      <li>tudo parte da ${esc(plan.branchTrabalho)}; o executor recusa a <code>main</code></li>
       <li>1 faixa = 1 branch + 1 worktree; 1 tarefa = 1 commit <code>T-xxx ${esc(plan.feature)}: título</code></li>
       <li>merge <code>--no-ff</code> por faixa, na ordem; conflito interrompe e pede você</li>
-      <li>gate final: <code>fuzkrigo-spec verify ${esc(plan.feature)}</code> + <code>fuzkrigo-spec audit --ci</code> — exit 0 ou não está pronto</li>
+      <li>gate final: <code>fuzkrigo-spec verify ${esc(plan.feature)}</code> + <code>fuzkrigo-spec audit --ci --feature ${esc(plan.feature)}</code> — exit 0 ou não está pronto</li>
     </ol>
   </section>
 </main>

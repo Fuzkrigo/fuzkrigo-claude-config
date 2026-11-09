@@ -32,6 +32,7 @@ export function parseEventos(texto) {
     tarefas: {},
     seq: {},
     gate: { verify: null, audit: null },
+    branch: null, // branch de trabalho vinda do executor / working branch from the executor
     ultimoEvento: null,
   };
   for (const linha of String(texto || '').split('\n')) {
@@ -40,6 +41,7 @@ export function parseEventos(texto) {
     const [ts, tipo, ...resto] = partes;
     ex.ultimoEvento = ts;
     if (tipo === 'inicio') ex.inicio = ts;
+    else if (tipo === 'branch') ex.branch = resto[0];
     else if (tipo === 'onda') ex.ondaAtual = parseInt(resto[0], 10) || null;
     else if (tipo === 'faixa') {
       const [id, st, extra] = resto;
@@ -251,7 +253,8 @@ export function renderPainelHtml({ feature, token, podeExecutar }) {
     banner.className = 'banner';
     banner.textContent = '';
     if (ex && ex.fim === 0) { banner.className = 'banner ok';
-      banner.textContent = '✔ Especificação e código alinhados — audit saiu 0 na branch ' + e.plan.branchTrabalho; }
+      banner.textContent = '✔ Especificação e código alinhados — audit saiu 0 ' +
+        (ex.branch ? 'na branch ' + ex.branch : 'na branch de trabalho'); }
     else if (ex && ex.fim === 1) { banner.className = 'banner erro';
       banner.textContent = '✘ Plano terminou com pendências — veja o gate e os logs abaixo'; }
     else if (!e.rodando && e.executorExit != null && e.executorExit !== 0 && (!ex || ex.inicio == null)) {
