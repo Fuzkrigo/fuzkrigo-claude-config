@@ -2,6 +2,8 @@
 
 Backup e documentação da configuração pessoal do Claude Code (Fuzkrigo) — diretrizes globais, skills e settings usados em todos os projetos.
 
+A `main` deste repositório é protegida: toda mudança entra por pull request, com os testes verdes nos dois sistemas (os checks `testes (ubuntu-latest)` e `testes (windows-latest)` do `.github/workflows/testes.yml`), inclusive as do administrador.
+
 ## Estrutura
 
 ```
