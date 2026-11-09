@@ -638,3 +638,35 @@ Esta rodada só garante que o ecossistema funciona nos dois, com um único `sett
 O registro completo das opções e dos motivos está no log de decisões do projeto de desenho do
 ecossistema (`log-de-decisoes.md` do projeto "Ecosistema de Desenvolvimento", seção "Rodada 5:
 decisões").
+
+## F3, item 1 — casos de borda e regras de fechamento — 09/11/2026
+
+> Estado auditado: commit `c6a30c4`, o commit 4 da rodada (motor: 87 casos em 16 suítes; hooks,
+> lançador e status line: 44 testes, intocados).
+
+| # | Decisão | O que muda | Commit |
+| --- | --- | --- | --- |
+| 1 | Catálogo de categorias em arquivo próprio, com pacotes por domínio | `references/casos-de-borda.md` novo, lido no passo Especificar | `cd2a7fb` |
+| 2 | Seção obrigatória na spec que registra a decisão para cada borda | Modelo do `spec.md`, parser e audit (achados novos `BORDA_INCOMPLETA` e `REF_SPEC_INEXISTENTE`) | `414c5da` |
+| 3 | Regra de fechamento com tolerância e dois critérios: um prova que fecha, outro prova que o programa para quando não fecha | Mesma seção da spec, mesmo audit (`FECHAMENTO_INCOMPLETO`); seção 9 do `CODIGO.md` | `414c5da` e `c6a30c4` |
+| 4 | Regras globais na constituição: a A1 pergunta por elas, borda repetida sobe para princípio, presets combináveis entre projetos | `init --preset a,b` e preset novo `dados-tabulares` (`edcfd0e`); `constituicao.md` (`cd2a7fb`); `iniciar-projeto` (`c6a30c4`) | `edcfd0e`, `cd2a7fb` e `c6a30c4` |
+
+Commits da rodada: 1 = `414c5da`, 2 = `edcfd0e`, 3 = `cd2a7fb`, 4 = `c6a30c4`.
+
+**Achado de tamanho, decisão pendente do usuário.** `core/audit.js` (643 linhas antes da rodada,
+645 depois: o import e a chamada ao `core/bordas.js`) e `core/plano.js` (742, intocado) passam do
+limite de 500 linhas sem exceção registrada. O `cli.js` tem a exceção da rodada 4 e ficou com 821
+linhas. As opções são formalizar a exceção, como a do `cli.js`, ou dividir os dois arquivos numa
+rodada própria. Até lá, a lógica nova continua indo para módulos próprios: nesta rodada,
+`parsers/bordas.js`, `core/bordas.js` e `core/presets.js`.
+
+Registrado durante a execução, sem correção:
+
+| Achado | Decisão |
+| --- | --- |
+| `parseSpec` (`parsers/spec.js`) já passava de 50 linhas antes da rodada e ganhou as linhas que entregam a seção nova ao `parsers/bordas.js` | Registrado; quebrar a função é refatoração própria |
+| A mensagem de constituição ausente (`CONSTITUICAO_AUSENTE`) ainda cita só o preset LGPD/educação | Registrado; não afeta o comportamento |
+
+O registro completo das opções e dos motivos está no log de decisões do projeto de desenho do
+ecossistema (`log-de-decisoes.md` do projeto "Ecosistema de Desenvolvimento", seção "Item 1 da F3:
+casos de borda e regras de fechamento").
