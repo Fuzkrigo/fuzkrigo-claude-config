@@ -10,6 +10,7 @@ import { existsSync } from 'fs';
 import path from 'path';
 import { grepPattern } from '../parsers/annotations.js';
 import { allAcs, ASM_STATUSES, Q_STATUSES, SPEC_STATUSES } from '../parsers/spec.js';
+import { edgeSectionFindings } from './bordas.js';
 import { latestMtime } from './project.js';
 import { principleProofFinding, proofForScope } from './prova-principio.js';
 
@@ -192,6 +193,7 @@ export function auditProject(project, { ci = false, feature = null } = {}) {
         )
       );
     }
+    findings.push(...edgeSectionFindings(spec, { feature: name, matured: specMatured }));
 
     for (const story of spec.stories) {
       if (story.acs.length === 0) {

@@ -1,13 +1,16 @@
 // Parser de spec.md — extrai histórias (US), critérios de aceite (AC),
-// suposições (ASM) e perguntas em aberto (Q).
+// suposições (ASM), perguntas em aberto (Q) e a seção de casos de borda e
+// regras de fechamento (lida por parsers/bordas.js).
 //
 // A gramática é markdown humano com âncoras mecânicas:
 //   ### US-001 — Título
 //   #### AC-001 — Título
 //   - **Dado** ... / - **Quando** ... / - **Então** ...
 //   Tabelas em "## Suposições" e "## Perguntas em aberto".
+//   Tabelas em "## Casos de borda e regras de fechamento" (subseções ###).
 
 import { DASH, splitLines, tableCells, isTableSeparator } from '../util/text.js';
+import { parseEdgeSection } from './bordas.js';
 
 const RE_META = /^>\s*(feature|status)\s*:\s*(.+?)\s*$/;
 const RE_STORY = new RegExp(`^###\\s+(US-\\d{3,})\\s*${DASH}\\s*(.+?)\\s*$`);
@@ -40,8 +43,10 @@ export function parseSpec(content, { file = 'spec.md' } = {}) {
     assumptions: [],
     questions: [],
     parseIssues: [],
-    sections: { suposicoes: false, perguntas: false },
+    sections: { suposicoes: false, perguntas: false, bordas: false },
+    edgeSection: null,
   };
+  const edgeEntries = []; // linhas da seção de bordas / edge section lines
 
   let currentStory = null;
   let currentAc = null;
@@ -76,10 +81,20 @@ export function parseSpec(content, { file = 'spec.md' } = {}) {
       } else if (norm.startsWith('perguntas')) {
         currentSection = 'perguntas';
         spec.sections.perguntas = true;
+      } else if (norm.startsWith('casos de borda e regras')) {
+        currentSection = 'bordas';
+        spec.sections.bordas = true;
       } else currentSection = norm;
       currentStory = null;
       currentAc = null;
       inTableHeader = false;
+      continue;
+    }
+
+    // A seção de bordas é dona das próprias linhas, inclusive dos "###".
+    // The edge section owns its lines, "###" subsections included.
+    if (currentSection === 'bordas') {
+      edgeEntries.push({ line: lineNo, text: line });
       continue;
     }
 
@@ -196,6 +211,7 @@ export function parseSpec(content, { file = 'spec.md' } = {}) {
     }
   }
 
+  if (spec.sections.bordas) spec.edgeSection = parseEdgeSection(edgeEntries);
   return spec;
 }
 

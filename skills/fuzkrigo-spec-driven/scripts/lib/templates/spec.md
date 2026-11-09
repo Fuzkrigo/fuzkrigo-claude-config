@@ -43,13 +43,37 @@ Como [papel], quero [ação], para que [valor].
 - **Quando** [ação]
 - **Então** [resultado esperado e observável]
 
-<!-- Casos de borda relevantes (entrada vazia, valor no limite, erro de
-     dependência, permissão negada, dado duplicado) viram critérios de aceite
-     próprios: só assim ganham teste e prova. -->
+<!-- Caso de borda relevante vira critério de aceite próprio: só assim ganha
+     teste e prova. A decisão de cada borda fica registrada na seção "Casos de
+     borda e regras de fechamento", logo abaixo de "Fora de escopo". -->
 
 ## Fora de escopo
 
 - O que esta feature explicitamente NÃO faz.
+
+## Casos de borda e regras de fechamento
+
+<!-- Percorra o catálogo da skill fuzkrigo-spec-driven
+     (references/casos-de-borda.md): categorias gerais e o pacote do domínio.
+     Uma linha por borda relevante. Decisão: o critério de aceite que a cobre
+     (AC-xxx), a suposição que a assume (ASM-xxx) ou "Não se aplica: motivo"
+     — "não se aplica" sem motivo é achado do audit.
+     Regra de fechamento: total que precisa fechar, com tolerância ("exata"
+     vale) e dois critérios diferentes: um prova que fecha, o outro prova que
+     o programa para quando não fecha. Sem total a fechar, troque a tabela de
+     fechamento por uma linha com "Nenhuma." -->
+
+### Casos de borda
+
+| Categoria | Situação | Decisão |
+|---|---|---|
+| [categoria] | [situação no limite do esperado] | [AC-xxx, ASM-xxx ou "Não se aplica: motivo"] |
+
+### Regras de fechamento
+
+| Regra | Tolerância | Prova de que fecha | Prova de que para |
+|---|---|---|---|
+| [total que precisa fechar] | [tolerância ou "exata"] | [AC-xxx] | [AC-xxx] |
 
 ## Suposições
 

@@ -327,7 +327,7 @@ function cmdNew(rootDir, name, flags) {
   console.log(`  ${traceSummary(origin)}   # lido do nome da feature e do --issue`);
   console.log(`\npróximos passos:`);
   console.log(`  1. escreva as histórias de usuário e os critérios de aceite (Dado/Quando/Então)`);
-  console.log(`     e PREENCHA as seções Suposições e Perguntas em aberto`);
+  console.log(`     e PREENCHA as seções Casos de borda, Suposições e Perguntas em aberto`);
   console.log(`  2. fuzkrigo-spec scaffold ${name}   # cada critério vira um teste executável`);
   console.log(`  3. fuzkrigo-spec audit              # veja o que falta`);
   console.log(`  4. fuzkrigo-spec plano ${name}      # com as tarefas escritas: plano de execução paralela`);
