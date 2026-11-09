@@ -49,6 +49,11 @@ Na prática:
   issue no cabeçalho da spec. Na pasta `i<n>-`, o número já vem do nome e o
   `--issue` é dispensável; se os dois forem passados, precisam coincidir. O
   motor reconhece o prefixo, mas não o exige.
+- **Não comece o nome com `e<n><letra>-` sem ser uma etapa.** O motor lê
+  esse começo como etapa: `e2e-testes` vira a etapa "E2e". Para uma feature
+  sobre testes ponta a ponta, use outro nome (`testes-ponta-a-ponta`) ou o
+  prefixo da etapa real (`e5-testes-e2e`). Depois de criar, o `new` mostra o
+  que reconheceu (`etapa: E1 · issue: #12`); confira.
 - **Quais issues geram spec:**
   - issue de etapa: sempre (`e<n>-`);
   - issue avulsa de bug ou dívida técnica que muda comportamento: sim
@@ -142,13 +147,13 @@ node <dir-desta-skill>/scripts/fuzkrigo-spec.mjs <comando>
 Comandos: `init [--preset base|lgpd-educacao] [--agents claude]` · `new <feature> [--issue <n>]` ·
 `plano <feature> [--agents claude]` · `painel <feature> [--porta N] [--sem-abrir]` ·
 `tarefa <feature> <T-xxx> <status>` ·
-`scaffold <feature> [--force]` · `verify <feature>` ·
+`scaffold <feature>` · `verify <feature>` ·
 `audit [--ci] [--json] [--md <arquivo>] [--feature <feature>]` · `status` · `assumptions` ·
 `licoes <add|list|sugerir|penalizar|status>`.
 
 No `init`, o `--agents claude` copia o motor para `.claude/skills/` dentro do projeto — sem essa
-cópia commitada, o CI do projeto pula a auditoria. No `audit`, o `--feature` é o gate de cada
-feature; sem ele, o veredito é do projeto inteiro.
+cópia commitada, o CI do projeto reprova, porque passar sem auditar seria um verde falso. No
+`audit`, o `--feature` é o gate de cada feature; sem ele, o veredito é do projeto inteiro.
 
 Abaixo, `fuzkrigo-spec <comando>` é abreviação dessa invocação.
 
@@ -321,9 +326,11 @@ produto).
   **faixas paralelas** — 1 faixa = 1 git worktree + 1 branch + 1 janela de
   contexto limpa — e gera três artefatos em `.spec/features/<feature>/`:
   - `plano-execucao.md` — faixas, ondas, gestão de branches/commits e gate;
-  - `executar-tarefas.sh` — executor headless: roda `claude -p` por faixa,
-    em paralelo, com `--model` e `--effort` já definidos por tarefa, mescla
-    as branches de volta, marca as tarefas e fecha com verify + audit;
+  - `executar-tarefas.sh` — executor headless: roda na branch da issue (a
+    atual) e recusa a `main`; roda `claude -p` por faixa, em paralelo, com
+    `--model` e `--effort` já definidos por tarefa, mescla as faixas de volta
+    na branch da issue, marca as tarefas e fecha com o gate da feature
+    (verify + `audit --ci --feature`);
   - `plano-execucao.html` — visual do plano com o botão **"Executar todas as
     tarefas em janelas limpas e paralelas"** (copia o comando do script).
 - **Apresente o plano ao usuário antes de executar**: resuma as faixas,
@@ -347,10 +354,12 @@ produto).
 - Espelhe as tarefas na lista de tarefas nativa e vá atualizando o status —
   o usuário acompanha o progresso em tempo real. No tasks.md mecânico, use
   `fuzkrigo-spec tarefa <feature> <T-xxx> <status>`.
-- `fuzkrigo-spec scaffold <feature>` gera o esqueleto de teste **que falha** para
-  cada critério de aceite sem teste — e também para cada princípio da
-  constituição com `verificação(teste)` ainda sem tag. A definição de pronto
-  nasce executável.
+- `fuzkrigo-spec scaffold <feature>` acrescenta os esqueletos dos critérios sem
+  teste — testes **que falham** — e também de cada princípio da constituição
+  com `verificação(teste)` ainda sem tag. Arquivo novo nasce com cabeçalho e
+  imports; arquivo existente recebe os esqueletos no fim e nunca é reescrito,
+  então rodar o scaffold de novo depois de a spec ganhar critérios é seguro.
+  A definição de pronto nasce executável.
 - Implemente até os testes passarem. **1 tarefa = 1 commit atômico** (a
   mensagem cita a tarefa: `T-003 <feature>: ...`). Marque `[concluida]` só
   com prova PASS.
@@ -406,6 +415,7 @@ conversar com o usuário, use o nome legível.
 | suposição em aberto (ASM_ABERTA) | suposição aberta numa feature "pronta" | confirme/invalide com o usuário |
 | seção obrigatória ausente (SECAO_AUSENTE) | spec sem seção Suposições/Perguntas | registre-as ou escreva "Nenhuma." |
 | princípio violado (PRINCIPIO_VIOLADO) | quebrou a constituição | conserte o código, não o princípio |
+| princípio sem prova (PRINCIPIO_SEM_PROVA) | o teste do princípio falhou, foi PULADO ou nunca rodou num verify | rode `verify`; conserte o código até o teste passar |
 | verificação não olha nenhum arquivo (GLOB_SEM_ARQUIVOS) | glob da constituição não casa nada | corrija o glob |
 | nível de princípio inválido (NIVEL_INVALIDO) | nível desconhecido | use [DEVE]/[RECOMENDADO]/[PODE] |
 | código órfão (ARQUIVO_ORFAO) | código que nenhuma tarefa mapeia | mapeie na tarefa ou questione o código |

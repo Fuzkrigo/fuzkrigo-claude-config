@@ -107,5 +107,26 @@ export function parseConstitution(content, { file = 'constituicao.md' } = {}) {
     if (line.trim() && !line.startsWith('#')) current.body.push(line.trim());
   }
 
+  result.parseIssues.push(...duplicatePrincipleIssues(result.principles));
   return result;
+}
+
+// P-xxx repetido na constituição vira ID_DUPLICADO, como os outros códigos de
+// rastreio. / A repeated P-xxx in the constitution is ID_DUPLICADO, like the
+// other trace codes.
+function duplicatePrincipleIssues(principles) {
+  const firstLine = new Map();
+  const issues = [];
+  for (const p of principles) {
+    if (!firstLine.has(p.id)) {
+      firstLine.set(p.id, p.line);
+      continue;
+    }
+    issues.push({
+      code: 'ID_DUPLICADO',
+      line: p.line,
+      message: `${p.id} definido duas vezes na constituição (linhas ${firstLine.get(p.id)} e ${p.line})`,
+    });
+  }
+  return issues;
 }

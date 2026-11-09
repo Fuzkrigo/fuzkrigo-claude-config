@@ -25,8 +25,14 @@ prova, tarefa concluída sem prova). Só para princípios "meta" sobre o process
 ## P-001 [DEVE] Nota de aluno nunca exposta a outro aluno
 - verificação(teste): @principle:P-001
 ```
-→ exige que exista pelo menos um teste com `@principle:P-001` no título e que ele
-passe no verify. Você escreve o teste que prova o princípio.
+→ exige o teste **e** a prova: pelo menos um teste com `@principle:P-001` no
+título, e a prova de que ele passou no último verify. Você escreve o teste que
+prova o princípio. Sem a tag, o audit acusa "princípio violado"
+(`PRINCIPIO_VIOLADO`). Com a tag e sem a prova, acusa "princípio sem prova"
+(`PRINCIPIO_SEM_PROVA`): erro se o teste falhou ou foi pulado (aviso fora do
+[DEVE]), e aviso se nenhum verify gravou o resultado — que vira erro no
+`audit --ci`. Com `--feature`, vale a prova dessa feature; sem filtro, a mais
+recente do projeto.
 
 ```markdown
 ## P-004 [DEVE] Dados pessoais nunca em log

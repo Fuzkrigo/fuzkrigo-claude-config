@@ -18,9 +18,9 @@ import {
 import { servirPainel } from './core/painel.js';
 import { montarPlano, renderPlanoHtml, renderPlanoJson, renderPlanoMd, renderPlanoSh } from './core/plano.js';
 import { loadProject } from './core/project.js';
-import { featureOrigin, localIsoDate } from './core/rastreio.js';
+import { featureOrigin, localIsoDate, traceSummary } from './core/rastreio.js';
 import { renderJson, renderMarkdown, renderTerminal } from './core/report.js';
-import { scaffoldTests } from './core/scaffold.js';
+import { scaffoldSummary, scaffoldTests } from './core/scaffold.js';
 import { carregarSinais, registrarAchados, registrarVerify } from './core/sinais.js';
 import { gitRev, runVerify } from './core/verify.js';
 import { allAcs } from './parsers/spec.js';
@@ -101,9 +101,8 @@ comandos:
                       antes do release, rode sempre sem --feature
   verify <feature>    roda os testes e grava a prova de cada critério de aceite
                       (quem decide é o test runner)
-  scaffold <feature> [--force]
-                      gera esqueleto de teste (que falha) para cada critério
-                      de aceite ainda sem teste
+  scaffold <feature>  acrescenta esqueleto de teste (que falha) para cada
+                      critério de aceite ainda sem teste; nunca reescreve
   status              painel: features, critérios provados, suposições e
                       perguntas abertas
   assumptions         lista todas as suposições e perguntas com status
@@ -325,6 +324,7 @@ function cmdNew(rootDir, name, flags) {
 
   console.log(`✔ .spec/features/${name}/spec.md`);
   console.log(`✔ .spec/features/${name}/tasks.md`);
+  console.log(`  ${traceSummary(origin)}   # lido do nome da feature e do --issue`);
   console.log(`\npróximos passos:`);
   console.log(`  1. escreva as histórias de usuário e os critérios de aceite (Dado/Quando/Então)`);
   console.log(`     e PREENCHA as seções Suposições e Perguntas em aberto`);
@@ -804,16 +804,11 @@ export async function run(argv) {
   if (command === 'scaffold') {
     const featureName = positional[0];
     if (!featureName) {
-      console.error('uso: fuzkrigo-spec scaffold <feature> [--force]');
+      console.error('uso: fuzkrigo-spec scaffold <feature>');
       return 2;
     }
-    const result = scaffoldTests(project, featureName, { force: Boolean(flags.force) });
-    if (result.created) {
-      console.log(`✔ ${result.created} criado com ${result.pending} teste(s)-esqueleto (todos FALHAM até você implementar)`);
-      console.log(`  critérios cobertos: ${result.acIds.join(', ')}`);
-    } else {
-      console.log(result.message);
-    }
+    if (flags.force) console.log('⚠ --force não é mais necessário: o scaffold sempre acrescenta ao arquivo existente e nunca o reescreve');
+    for (const line of scaffoldSummary(scaffoldTests(project, featureName))) console.log(line);
     return 0;
   }
 

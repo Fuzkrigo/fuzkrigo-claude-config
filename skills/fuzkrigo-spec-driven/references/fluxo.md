@@ -58,7 +58,8 @@ Como aluno, quero enviar meu dever antes do prazo, para que conte como no prazo.
 # 3. cada critério de aceite vira um teste executável (a definição de pronto)
 fuzkrigo-spec scaffold e1-entrega-dever-casa
 # → cria test/e1-entrega-dever-casa.spec.test.js com testes que FALHAM
-#   (inclui esqueletos p/ princípios da constituição com verificação(teste))
+#   (inclui esqueletos p/ princípios da constituição com verificação(teste));
+#   se o arquivo já existe, acrescenta no fim só os critérios sem teste
 ```
 
 O scaffold segue a stack do `testCommand`: com `pytest` no comando, ele gera
@@ -104,8 +105,9 @@ fuzkrigo-spec plano e1-entrega-dever-casa
   tarefas em janelas limpas e paralelas"). Na skill do **Antigravity**, o
   plano traz um prompt pronto por faixa para os agentes paralelos nativos.
 - A gestão de commits é do plano: **1 tarefa = 1 commit** (`T-003 <feature>:
-  <título>`), merges `--no-ff` de volta na branch de trabalho `spec/<feature>`,
-  e o gate final (verify + audit) roda depois de tudo mesclado.
+  <título>`), merges `--no-ff` de volta na branch atual (a da issue), e o
+  gate final da feature (verify + `audit --ci --feature`) roda depois de tudo
+  mesclado. O executor recusa rodar na `main`.
 
 Regenere o plano sempre que tasks.md ou a config `paralelo` mudarem — os
 artefatos avisam que não devem ser editados à mão.

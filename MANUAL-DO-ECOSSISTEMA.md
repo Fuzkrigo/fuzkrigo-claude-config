@@ -111,7 +111,7 @@ grande, justamente porque aplica critérios diferentes dos seus.
 BLOCO A - abertura do projeto (uma vez)
    A1 Briefing e diagnostico
    A2 Documentos-base: ROADMAP, CHECKLIST, ARCHITECTURE
-   A3 Provisionamento: GitHub/Linear, .github/ (templates + CI), constituicao
+   A3 Provisionamento: GitHub/Linear, .github/ (templates + CI), main protegida, constituicao
 
 BLOCO B - ciclo de feature (repete a cada etapa)
    Especificar -> Projetar -> Tarefas -> Plano -> Executar
@@ -239,7 +239,11 @@ Assim fica uma etapa no CHECKLIST:
 issues (uma por etapa) no GitHub, e monta a gestão no Linear — Project, Milestones e as issues já
 sincronizadas, com prioridade nativa. Se o repositório ainda não existe, ele não o cria: devolve o
 comando `gh repo create` montado, eu te pergunto, e ele é invocado de novo com o repositório
-pronto. O GitHub Projects não entra: o board é o do Linear. E o projeto ganha sua constituição:
+pronto. O GitHub Projects não entra: o board é o do Linear. O agente também protege a `main`:
+dali em diante, mudança só entra por PR com o CI verde e a branch atualizada, inclusive a sua, e
+até os arquivos da própria A3 seguem esse caminho. Em repositório privado na conta Free o GitHub
+não oferece a proteção; o agente devolve a recusa, e o risco vai para o ROADMAP. E o projeto
+ganha sua constituição:
 
 **[terminal]** (na prática, quem roda sou eu, durante A3)
 
@@ -268,9 +272,16 @@ Duas coisas fazem o CI funcionar, e as duas acontecem em A3:
 
 - `fspec init --agents claude` — o `--agents claude` copia o motor para `.claude/skills/` dentro do
   projeto. O servidor do GitHub não enxerga o `~/.claude/` da sua máquina; sem essa cópia
-  commitada, o CI roda testes e cobertura mas pula a auditoria.
+  commitada, o CI reprova no passo "Conferir o motor de auditoria", no PR e na `main`, porque
+  passar sem auditar seria um verde falso. Projeto sem `fuzkrigo.config.json` está fora do fluxo e
+  não é auditado.
 - O `fuzkrigo.config.json` preenchido: o workflow lê o `testCommand` e o bloco `coverage` de lá,
   então a configuração vive num lugar só e o CI acompanha se você trocar de runner.
+
+Em projeto Python, o CI instala o `requirements.txt` e, só quando há pacote declarado (`setup.py`,
+ou `[project]` ou `[build-system]` no `pyproject.toml`), o próprio projeto com `pip install -e .`.
+Um `pyproject.toml` só com configuração de ferramentas não tem pacote para instalar. Se a
+instalação falhar, o build reprova, sem `|| true` escondendo o erro.
 
 **A cobertura também tem dente.** O bloco `coverage` do `fuzkrigo.config.json` declara 95% para o
 projeto inteiro e 98% para as pastas de lógica de negócio, listadas em `businessLogicPaths` a
@@ -348,7 +359,9 @@ Não tem nenhuma? Escreva "Nenhuma." e desconfie de si mesmo.
 
 **A spec também documenta a própria feature.** O nome da pasta diz de onde ela veio: `e2-` para a
 etapa E2 do CHECKLIST, `i42-` para a issue avulsa 42, nenhum prefixo em projeto descartável. O
-`new` grava a etapa e a issue no cabeçalho (`> etapa: E2`, `> issue: #7`). Casos de borda (entrada
+`new` grava a etapa e a issue no cabeçalho (`> etapa: E2`, `> issue: #7`) e mostra na saída o que
+reconheceu, para você conferir: um nome como `e2e-testes` é lido como a etapa "E2e", então não
+comece o nome com `e<n><letra>-` sem ser uma etapa. Casos de borda (entrada
 vazia, valor no limite, erro de dependência, permissão negada, dado duplicado) viram critérios de
 aceite próprios, porque só critério ganha teste e prova. Se a spec mudar depois de `pronta`, a
 mudança e o motivo entram no `## Histórico`. Antes do PR, a `## Resolução` registra o PR, a
@@ -381,7 +394,9 @@ fspec scaffold e2-recuperacao-senha
 ```
 
 Gera o esqueleto de teste para cada critério sem teste — todos **falhando**. Essa é a definição de
-pronto, executável desde o primeiro minuto.
+pronto, executável desde o primeiro minuto. Se o arquivo de testes da feature já existe, o
+scaffold acrescenta no fim só os esqueletos que faltam e nunca reescreve o que você escreveu;
+rode de novo sempre que a spec ganhar um critério.
 
 Em Python, a etiqueta vive em dois lugares e os dois importam:
 
@@ -411,7 +426,9 @@ tarefa complexa usa `opus`, e na dúvida ela é complexa (tarefa sem `Modelo:` t
 vale na execução paralela: quando eu implemento tarefa por tarefa na conversa, quem trabalha é o
 modelo da sessão.
 
-Cada faixa roda em um worktree próprio, com contexto limpo.
+Cada faixa roda em um worktree próprio, com contexto limpo. O executor trabalha na branch da issue
+e recusa a `main`: as faixas saem dela e voltam para ela, e o gate final é o
+`audit --ci --feature` da feature.
 
 ### Passo 5 — Portão 1: a máquina decide
 
@@ -494,8 +511,10 @@ resumo executivo, o manual e a apresentação. Esses documentos descrevem o que 
 isso vêm depois da entrega, não antes.
 
 **C3 — Release.** O `project-manager` monta CHANGELOG, texto do release e os comandos Git. Antes,
-ele confere que todas as features estão `auditada` — issue fechada não é prova. A execução do Git
-é sempre uma escolha sua: você digita ou pede para executarem.
+ele confere que todas as features estão `auditada` — issue fechada não é prova — e que a proteção
+da `main` está ativa. Com ela, nem o CHANGELOG vai por push direto: entra por PR, numa branch
+`docs/changelog-vX.Y.Z`, e a tag só é criada depois do merge. A execução do Git é sempre uma
+escolha sua: você digita ou pede para executarem.
 
 ---
 
@@ -537,7 +556,7 @@ fspec assumptions                          # o que estamos assumindo
 
 # feature
 fspec new <feature>                        # cria spec.md e tasks.md
-fspec scaffold <feature>                   # gera os testes que falham
+fspec scaffold <feature>                   # acrescenta os testes que falham
 fspec tarefa <feature> <T-xxx> <status>    # pendente | em-andamento | concluida
 fspec plano <feature>                      # agrupa tarefas em faixas paralelas
 fspec painel <feature>                     # acompanhamento ao vivo no navegador
@@ -567,6 +586,7 @@ Os mais comuns:
 | tarefa concluída sem prova | Você marcou `[concluida]` sem o critério provado | Verifique de novo, ou reabra a tarefa |
 | suposição em aberto | A feature quer fechar com um palpite não confirmado | Confirme com quem decide, ou invalide |
 | princípio violado | O código quebrou a constituição | Conserte o código. Nunca o princípio |
+| princípio sem prova | O teste do princípio falhou, foi pulado ou nunca rodou num verify | Rode `verify` e conserte o código até o teste passar |
 | verificação não olha nenhum arquivo | O glob do princípio não casa nada | Corrija o glob: a regra estava inerte |
 | código órfão | Existe código que nenhuma tarefa mapeia | Mapeie na tarefa, ou questione por que ele existe |
 | prova fraca | A prova veio só do código de saída global | Configure um reporter com granularidade |
@@ -604,10 +624,10 @@ Coisas que vão te morder e não são culpa sua:
 4. **Skip não é prova.** `@pytest.mark.skip` ou `test.skip` fazem o critério continuar sem prova,
    por mais verde que o terminal pareça.
 5. **Glob de princípio que não casa arquivo** vira regra inerte. O audit avisa; não ignore.
-6. **`init` sem `--agents claude` deixa o CI meio cego.** Sem a flag, o motor não é copiado para
-   dentro do projeto, e o servidor do GitHub não tem o que executar: o CI roda testes e cobertura,
-   mas pula a auditoria — e avisa isso no log, em vez de falhar. Se você vir esse aviso, rode o
-   `init` de novo com a flag e commite a pasta `.claude/skills/`.
+6. **`init` sem `--agents claude` reprova o CI.** Sem a flag, o motor não é copiado para dentro
+   do projeto, e o servidor do GitHub não tem o que executar: o passo "Conferir o motor de
+   auditoria" falha, no PR e na `main`. Rode o `init` de novo com a flag e commite a pasta
+   `.claude/skills/`.
 
 ---
 
@@ -626,17 +646,19 @@ instalação de uma status line chegou a sobrescrever o `settings.json` global, 
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são oito conjuntos de ajustes no motor — o suporte a Python, o
+**patches locais** no `README.md`: são doze conjuntos de ajustes no motor — o suporte a Python, o
 audit com escopo de feature, os nomes próprios, o modelo padrão por alias, o preset LGPD para
-Python e JavaScript, as mensagens e a saída do motor, a spec rastreável e a numeração contínua no
-`new`. As oito suítes que os protegem rodam assim:
+Python e JavaScript, as mensagens e a saída do motor, a spec rastreável, a numeração contínua no
+`new`, a prova do princípio com a unicidade das tarefas, o princípio repetido na constituição, o
+executor na branch da issue com o gate por feature, e o scaffold que acrescenta com o `new` que
+mostra o rastreio. As catorze suítes que os protegem rodam assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
-node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs test/spec-rastreavel.test.mjs test/numeracao-continua.test.mjs
+node --test test/*.test.mjs
 ```
 
-São 40 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+O glob pega suíte nova sem mudar o comando. São 62 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:
@@ -648,3 +670,8 @@ py -3 -m unittest discover -s hooks/tests -v
 São 39 casos. Três deles comparam o hook de planejamento com o próprio motor e precisam do `node`
 no PATH, e os três da status line precisam do `bash`; sem eles, ficam pulados (skip), não
 reprovados.
+
+No GitHub, o workflow `.github/workflows/testes.yml` roda as duas suítes a cada push na `main` e
+a cada pull request, em Linux e em Windows, com `node` e `bash` presentes, então nenhum caso fica
+pulado. Ele é o CI deste repositório e não se confunde com o `references/github/workflows/ci.yml`,
+que é o modelo copiado para cada projeto em A3.

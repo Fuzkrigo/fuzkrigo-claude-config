@@ -4,10 +4,11 @@
 # arquivo, e o comando de teste sai do fuzkrigo.config.json — a mesma fonte
 # que o motor usa localmente, entao nao ha configuracao duplicada.
 #
-# Para o audit rodar aqui, o motor precisa estar COMMITADO no projeto:
+# Projeto do fluxo (com fuzkrigo.config.json) precisa do motor COMMITADO:
 #   fuzkrigo-spec init --agents claude
-# instala a skill em .claude/skills/fuzkrigo-spec-driven. Sem isso o passo
-# de auditoria e pulado com aviso, e o CI vira so testes e cobertura.
+# instala a skill em .claude/skills/fuzkrigo-spec-driven. Sem ela o CI
+# reprova, porque passar sem auditar seria um verde falso. Projeto sem
+# fuzkrigo.config.json esta fora do fluxo e nao e auditado.
 #
 # Acrescentar outra stack e adicionar um bloco condicional; nada mais muda.
 
@@ -21,20 +22,22 @@ on:
 jobs:
   verificar:
     runs-on: ubuntu-latest
+    env:
+      MOTOR: .claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Node entra sempre: o motor de auditoria roda nele, mesmo em projeto
       # que nao e JavaScript.
       - name: Preparar Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 'lts/*'
 
       - name: Preparar Python
         if: hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.x'
 
@@ -42,12 +45,12 @@ jobs:
         if: hashFiles('package.json') != ''
         run: npm ci || npm install
 
+      # Instala o pacote so quando ele existe, e falha de verdade quando a
+      # instalacao falha. / Installs the package only when there is one, and
+      # really fails when the install fails.
       - name: Instalar dependencias Python
         if: hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f pyproject.toml ] || [ -f setup.py ]; then pip install -e . || true; fi
+        run: bash .github/scripts/install-python.sh
 
       # O comando vem do fuzkrigo.config.json. Fonte unica: se voce mudar de
       # runner no projeto, o CI acompanha sozinho.
@@ -93,6 +96,22 @@ jobs:
         if: hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
         run: bash .github/scripts/coverage-python.sh
 
+      # Projeto do fluxo sem o motor commitado reprova, no PR e na main. Fica
+      # num passo proprio, fora do continue-on-error do audit informativo,
+      # para a falta do motor nao passar verde no PR.
+      # A flow project without the committed engine fails, on PRs and on main.
+      # It is a step of its own, outside the continue-on-error of the
+      # informative audit, so a missing engine never passes green on a PR.
+      - name: Conferir o motor de auditoria
+        run: |
+          if [ ! -f fuzkrigo.config.json ]; then
+            echo "sem fuzkrigo.config.json — projeto fora do fluxo, sem auditoria"; exit 0
+          fi
+          if [ ! -f "$MOTOR" ]; then
+            echo "motor nao encontrado em $MOTOR — rode 'fuzkrigo-spec init --agents claude' e commite"; exit 1
+          fi
+          echo "motor encontrado em $MOTOR"
+
       # No pull request o audit e informativo: auditar o projeto inteiro
       # reprovaria por causa de spec de OUTRA feature ainda em rascunho, e
       # isso nao e problema deste PR. O gate por feature ja rodou local, no
@@ -101,10 +120,7 @@ jobs:
         if: github.event_name == 'pull_request'
         continue-on-error: true
         run: |
-          MOTOR=.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs
-          if [ ! -f "$MOTOR" ]; then
-            echo "motor nao encontrado em $MOTOR — rode 'fuzkrigo-spec init --agents claude' e commite"; exit 0
-          fi
+          if [ ! -f fuzkrigo.config.json ]; then exit 0; fi
           node "$MOTOR" audit
 
       # Na main o audit e bloqueante e SEM filtro: aqui o projeto inteiro
@@ -112,8 +128,5 @@ jobs:
       - name: Auditar a especificacao (bloqueante na main)
         if: github.event_name == 'push'
         run: |
-          MOTOR=.claude/skills/fuzkrigo-spec-driven/scripts/fuzkrigo-spec.mjs
-          if [ ! -f "$MOTOR" ]; then
-            echo "motor nao encontrado em $MOTOR — rode 'fuzkrigo-spec init --agents claude' e commite"; exit 0
-          fi
+          if [ ! -f fuzkrigo.config.json ]; then exit 0; fi
           node "$MOTOR" audit --ci

@@ -11,9 +11,17 @@ import path from 'path';
 import { grepPattern } from '../parsers/annotations.js';
 import { allAcs, ASM_STATUSES, Q_STATUSES, SPEC_STATUSES } from '../parsers/spec.js';
 import { latestMtime } from './project.js';
+import { principleProofFinding, proofForScope } from './prova-principio.js';
 
 // severidade base; em modo --ci os códigos em CI_ESCALATES viram erro
-const CI_ESCALATES = new Set(['AC_SEM_PROVA', 'VERIFY_OBSOLETO', 'Q_ABERTA', 'AC_SEM_TASK', 'ARQUIVO_ORFAO']);
+const CI_ESCALATES = new Set([
+  'AC_SEM_PROVA',
+  'VERIFY_OBSOLETO',
+  'Q_ABERTA',
+  'AC_SEM_TASK',
+  'ARQUIVO_ORFAO',
+  'PRINCIPIO_SEM_PROVA',
+]);
 
 function finding(code, severity, message, extra = {}) {
   return { code, severity, message, ...extra };
@@ -51,7 +59,6 @@ export function auditProject(project, { ci = false, feature = null } = {}) {
   // ---------- unicidade global de IDs ----------
   const seen = new Map(); // id -> {feature, file, line}
   for (const feature of project.features) {
-    if (!feature.spec) continue;
     const register = (id, file, line) => {
       if (seen.has(id)) {
         const first = seen.get(id);
@@ -66,6 +73,9 @@ export function auditProject(project, { ci = false, feature = null } = {}) {
         seen.set(id, { feature: feature.name, file, line });
       }
     };
+    // T-xxx também é único no projeto. / T-xxx is project-unique too.
+    for (const task of feature.tasks?.tasks || []) register(task.id, feature.tasks.file, task.line);
+    if (!feature.spec) continue;
     for (const story of feature.spec.stories) {
       register(story.id, feature.spec.file, story.line);
       for (const ac of story.acs) register(ac.id, feature.spec.file, ac.line);
@@ -493,6 +503,10 @@ export function auditProject(project, { ci = false, feature = null } = {}) {
                 { file: constitution.file, line: check.line }
               )
             );
+          } else {
+            const proof = proofForScope(project.verifications, feature);
+            const semProva = principleProofFinding(p, check, proof, { file: constitution.file, line: check.line });
+            if (semProva) findings.push(semProva);
           }
         } else if (check.kind === 'proibido') {
           const { error, hits, files } = grepPattern(

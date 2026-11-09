@@ -41,6 +41,14 @@ export function featureOrigin(name, issueFlag) {
   };
 }
 
+// O que o `new` reconheceu no nome e no --issue, para o usuario conferir a
+// leitura (ex.: `e2e-testes` vira a etapa E2e).
+// What `new` recognized in the name and --issue, so the user can check the
+// reading (e.g. `e2e-testes` becomes stage E2e).
+export function traceSummary(origin) {
+  return `etapa: ${origin.etapa} · issue: ${origin.issue}`;
+}
+
 // Data local no formato AAAA-MM-DD (a do usuario, nao a UTC).
 // Local date as YYYY-MM-DD (the user's date, not UTC).
 export function localIsoDate(date = new Date()) {
