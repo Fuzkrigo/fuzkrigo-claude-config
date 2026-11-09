@@ -467,7 +467,7 @@ export function auditProject(project, { ci = false, feature = null } = {}) {
       finding(
         'CONSTITUICAO_AUSENTE',
         'aviso',
-        `sem ${config.specDir}/constituicao.md — rode \`fuzkrigo-spec init\` para criar (preset LGPD/educação disponível)`
+        `sem ${config.specDir}/constituicao.md — rode \`fuzkrigo-spec init\` para criar (presets: base, lgpd-educacao, dados-tabulares; combine com vírgula, ex.: --preset base,dados-tabulares)`
       )
     );
   } else {

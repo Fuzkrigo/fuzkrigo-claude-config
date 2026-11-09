@@ -653,19 +653,19 @@ decisões").
 
 Commits da rodada: 1 = `414c5da`, 2 = `edcfd0e`, 3 = `cd2a7fb`, 4 = `c6a30c4`.
 
-**Achado de tamanho, decisão pendente do usuário.** `core/audit.js` (643 linhas antes da rodada,
-645 depois: o import e a chamada ao `core/bordas.js`) e `core/plano.js` (742, intocado) passam do
-limite de 500 linhas sem exceção registrada. O `cli.js` tem a exceção da rodada 4 e ficou com 821
-linhas. As opções são formalizar a exceção, como a do `cli.js`, ou dividir os dois arquivos numa
-rodada própria. Até lá, a lógica nova continua indo para módulos próprios: nesta rodada,
+**Limites de tamanho, decisão do usuário (09/11/2026).** Os limites do `CLAUDE.md` (função até 50
+linhas, arquivo até 500) valem para os projetos desenvolvidos com o ecossistema, não para o motor
+nem para o próprio ecossistema. `cli.js` (821 linhas), `core/audit.js` (645) e `core/plano.js`
+(742) são exceções aceitas. A decisão generaliza a exceção da rodada 4, que cobria só o `cli.js`.
+Por legibilidade, a lógica nova continua indo para módulos próprios: nesta rodada,
 `parsers/bordas.js`, `core/bordas.js` e `core/presets.js`.
 
-Registrado durante a execução, sem correção:
+Registrado durante a execução:
 
 | Achado | Decisão |
 | --- | --- |
-| `parseSpec` (`parsers/spec.js`) já passava de 50 linhas antes da rodada e ganhou as linhas que entregam a seção nova ao `parsers/bordas.js` | Registrado; quebrar a função é refatoração própria |
-| A mensagem de constituição ausente (`CONSTITUICAO_AUSENTE`) ainda cita só o preset LGPD/educação | Registrado; não afeta o comportamento |
+| `parseSpec` (`parsers/spec.js`) já passava de 50 linhas antes da rodada e ganhou as linhas que entregam a seção nova ao `parsers/bordas.js` | Coberto pela decisão de 09/11/2026 sobre os limites: eles não valem para o motor |
+| A mensagem de constituição ausente (`CONSTITUICAO_AUSENTE`) ainda citava só o preset LGPD/educação | Corrigido no commit de ajuste antes do merge: cita os três presets e a combinação com vírgula, com um caso novo na suíte `presets-combinados` (10 casos; 92 no motor) |
 
 **Ajuste da conferência (09/11/2026).** Na conferência do PR, o usuário decidiu que a decisão de
 uma borda também aceita o princípio da constituição (`P-xxx`), além de `AC-xxx`, `ASM-xxx` e

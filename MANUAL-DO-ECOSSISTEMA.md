@@ -703,7 +703,7 @@ cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
 node --test test/*.test.mjs
 ```
 
-O glob pega suíte nova sem mudar o comando. São 91 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+O glob pega suíte nova sem mudar o comando. São 92 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:

@@ -139,6 +139,21 @@ test('constituicao existente e mantida mesmo com uma lista de presets', () => {
   });
 });
 
+test('audit sem constituicao cita todos os presets e a combinacao com virgula', () => {
+  withTempDir('fspec-presets-', (root) => {
+    mkdirSync(path.join(root, '.spec', 'features'), { recursive: true });
+    const found = findingsOf(runAudit(root).report, 'CONSTITUICAO_AUSENTE');
+    assert.equal(found.length, 1);
+    // A lista vem da pasta de modelos: preset novo sem citar na mensagem quebra aqui.
+    // The list comes from the templates folder: a new preset missing from the message fails here.
+    const presets = readdirSync(TEMPLATES)
+      .filter((file) => file.startsWith('constituicao-') && file.endsWith('.md'))
+      .map((file) => file.slice('constituicao-'.length, -'.md'.length));
+    for (const name of presets) assert.match(found[0].message, new RegExp(`\\b${name}\\b`));
+    assert.match(found[0].message, /--preset base,dados-tabulares/);
+  });
+});
+
 test('scaffold depois de init --preset base,dados-tabulares usa as etiquetas renumeradas', () => {
   withTempDir('fspec-presets-', (root) => {
     initWith(root, '--preset', 'base,dados-tabulares');
