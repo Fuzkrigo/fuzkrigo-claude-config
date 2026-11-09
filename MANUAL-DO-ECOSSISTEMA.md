@@ -251,12 +251,17 @@ constituição:
 **[terminal]** (na prática, quem roda sou eu, durante A3)
 
 ```bash
-fspec init --agents claude                             # projeto generico
-fspec init --agents claude --preset lgpd-educacao      # com dados de aluno
+fspec init --agents claude                                   # projeto generico
+fspec init --agents claude --preset lgpd-educacao            # com dados de aluno
+fspec init --agents claude --preset base,dados-tabulares     # planilhas, CSV, bases
 ```
 
-Isso cria `.spec/` e `.spec/constituicao.md`. Agora traduza as restrições de A1 em princípios que
-a máquina verifica:
+Isso cria `.spec/` e `.spec/constituicao.md`. Os presets combinam com vírgula: sai um arquivo só,
+com os princípios de cada preset renumerados em sequência (o `P-001` do preset de dados vira
+`P-003` depois dos dois do `base`). O que não se aplica ao projeto sai da constituição, com o
+motivo no ROADMAP. Agora traduza as restrições de A1 em princípios que a máquina verifica. Entram
+também as bordas que valem para o projeto inteiro e os totais que precisam fechar sempre, que a A1
+pergunta junto com as restrições: viram princípios com `verificação(teste)`.
 
 ```markdown
 ## P-002 [DEVE] Senha nunca aparece em log
@@ -355,20 +360,50 @@ Como usuário, quero redefinir minha senha, para voltar a acessar a conta.
 Regra de ouro do critério: se um teste não consegue checar, não é critério. "Deve ser seguro" não
 serve; "senha com menos de 8 caracteres é rejeitada" serve.
 
-Duas seções são obrigatórias, e a ausência delas é erro:
+Três seções são obrigatórias, e a ausência delas é erro a partir da spec `pronta` (em rascunho, é
+aviso):
 
+- **Casos de borda e regras de fechamento** — a decisão sobre cada borda relevante e cada total
+  que precisa fechar.
 - **Suposições (ASM-xxx)** — você preencheu uma lacuna com um palpite e seguiu.
 - **Perguntas em aberto (Q-xxx)** — você parou porque falta informação.
 
-Não tem nenhuma? Escreva "Nenhuma." e desconfie de si mesmo.
+Não tem suposição nem pergunta? Escreva "Nenhuma." e desconfie de si mesmo.
+
+Os casos de borda saem do catálogo da skill (`references/casos-de-borda.md`): categorias gerais
+(vazio, limites, formato, unidade, identificador com cara de número, tempo, repetição, volume,
+falha de dependência, permissão, ambiente) e pacotes por domínio (dados tabulares, interface web,
+integração e API). Cada borda relevante ganha uma linha com a decisão: o critério de aceite que a
+cobre, a suposição que a assume, o princípio da constituição que já a cobre (`P-xxx`), ou "Não se
+aplica:" com o motivo. Cada total que precisa fechar ganha tolerância e dois critérios diferentes,
+um que prova que fecha e outro que prova que o programa para quando não fecha:
+
+```markdown
+## Casos de borda e regras de fechamento
+
+### Casos de borda
+
+| Categoria | Situação | Decisão |
+|---|---|---|
+| Limites | Link aberto exatamente aos 30 minutos | AC-004 |
+| Repetição e ordem | Dois pedidos de redefinição seguidos | ASM-003 |
+| Volume | Mil pedidos por minuto | Não se aplica: o sistema tem 40 usuários |
+
+### Regras de fechamento
+
+Nenhuma.
+```
+
+Critério e suposição citados precisam existir nesta spec (critério de outra feature é erro, mesmo
+em rascunho); princípio citado precisa existir na constituição. As provas do fechamento são sempre
+critérios desta spec.
 
 **A spec também documenta a própria feature.** O nome da pasta diz de onde ela veio: `e2-` para a
 etapa E2 do CHECKLIST, `i42-` para a issue avulsa 42, nenhum prefixo em projeto descartável. O
 `new` grava a etapa e a issue no cabeçalho (`> etapa: E2`, `> issue: #7`) e mostra na saída o que
 reconheceu, para você conferir: um nome como `e2e-testes` é lido como a etapa "E2e", então não
-comece o nome com `e<n><letra>-` sem ser uma etapa. Casos de borda (entrada
-vazia, valor no limite, erro de dependência, permissão negada, dado duplicado) viram critérios de
-aceite próprios, porque só critério ganha teste e prova. Se a spec mudar depois de `pronta`, a
+comece o nome com `e<n><letra>-` sem ser uma etapa. Casos de borda que se aplicam viram critérios
+de aceite próprios, porque só critério ganha teste e prova. Se a spec mudar depois de `pronta`, a
 mudança e o motivo entram no `## Histórico`. Antes do PR, a `## Resolução` registra o PR, a
 abordagem, as decisões, o resultado do audit e os pontos de atenção dos revisores. Bug ou dívida
 técnica que muda comportamento também ganha spec, numa pasta `i<n>-` com o número da issue: o
@@ -553,9 +588,10 @@ quiser conferir algo sozinho, ou com `!` no chat para eu ver a saída.
 
 ```bash
 # projeto
-fspec init --agents claude [--preset base|lgpd-educacao]
+fspec init --agents claude [--preset base|lgpd-educacao|dados-tabulares[,...]]
                                            # cria .spec/, a constituicao e
-                                           # copia o motor para o projeto (o CI precisa)
+                                           # copia o motor para o projeto (o CI precisa);
+                                           # presets combinam com virgula
 fspec status                               # onde cada feature esta
 fspec assumptions                          # o que estamos assumindo
 
@@ -595,6 +631,9 @@ Os mais comuns:
 | verificação não olha nenhum arquivo | O glob do princípio não casa nada | Corrija o glob: a regra estava inerte |
 | código órfão | Existe código que nenhuma tarefa mapeia | Mapeie na tarefa, ou questione por que ele existe |
 | prova fraca | A prova veio só do código de saída global | Configure um reporter com granularidade |
+| caso de borda sem decisão | Uma borda sem decisão válida, "Não se aplica" sem motivo, ou nenhuma borda registrada | Decida: o critério, a suposição, o princípio ou "Não se aplica:" com o motivo |
+| regra de fechamento incompleta | Total a fechar sem tolerância, sem os dois critérios ou com o mesmo critério nos dois | Declare a tolerância e escreva o critério que fecha e o que para |
+| referência a código que não existe | A seção de bordas cita critério ou suposição que não está nesta spec, ou princípio que não está na constituição | Corrija o código, ou crie o critério aqui |
 
 ---
 
@@ -651,19 +690,20 @@ instalação de uma status line chegou a sobrescrever o `settings.json` global, 
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são doze conjuntos de ajustes no motor — o suporte a Python, o
+**patches locais** no `README.md`: são catorze conjuntos de ajustes no motor — o suporte a Python, o
 audit com escopo de feature, os nomes próprios, o modelo padrão por alias, o preset LGPD para
 Python e JavaScript, as mensagens e a saída do motor, a spec rastreável, a numeração contínua no
 `new`, a prova do princípio com a unicidade das tarefas, o princípio repetido na constituição, o
-executor na branch da issue com o gate por feature, e o scaffold que acrescenta com o `new` que
-mostra o rastreio. As catorze suítes que os protegem rodam assim:
+executor na branch da issue com o gate por feature, o scaffold que acrescenta com o `new` que
+mostra o rastreio, os casos de borda e regras de fechamento na spec, e os presets de constituição
+combináveis. As dezesseis suítes que os protegem rodam assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
 node --test test/*.test.mjs
 ```
 
-O glob pega suíte nova sem mudar o comando. São 62 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+O glob pega suíte nova sem mudar o comando. São 92 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:

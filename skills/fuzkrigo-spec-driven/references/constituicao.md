@@ -75,6 +75,67 @@ precisam apontar pros seus arquivos. Guard-rails do motor:
 - o esqueleto dos testes de princípio (`verificação(teste)`) nasce no
   `scaffold`, junto com os testes dos critérios de aceite.
 
+## Preset dados tabulares
+
+`fuzkrigo-spec init --preset dados-tabulares` traz princípios para projetos que
+leem, cruzam ou gravam dados em tabela (planilhas, CSV, exportações de
+sistema, bases), tirados de defeitos reais:
+
+- **P-001** identificador é texto, nunca número (teste)
+- **P-002** unidade declarada e convertida num ponto só (teste)
+- **P-003** coluna obrigatória ausente para a leitura com mensagem clara (teste)
+- **P-004** fechamento nunca é forçado (teste)
+- **P-005** registro sem par num vínculo é reportado (recomendado)
+- **P-006** formato normalizado na leitura (recomendado)
+
+## Presets combináveis
+
+`--preset` aceita uma lista separada por vírgula, na ordem em que os presets
+entram no arquivo:
+
+```bash
+fuzkrigo-spec init --preset base,dados-tabulares
+fuzkrigo-spec init --preset base,lgpd-educacao
+```
+
+- **Um preset só:** o arquivo sai exatamente como o modelo do preset.
+- **Mais de um:** sai uma constituição única, com:
+  - um cabeçalho que nomeia os presets e a versão de cada um
+    (`# Constituição (presets: base v1.1.0, dados-tabulares v1.0.0)`);
+  - o comentário explicativo do primeiro preset;
+  - cada preset seguinte precedido do marcador `<!-- preset: <nome> -->`, com
+    os comentários dele preservados;
+  - os códigos `P-xxx` **renumerados em sequência**, inclusive dentro das
+    etiquetas `@principle:`. Em `base,dados-tabulares`, o `P-001` do preset
+    de dados vira `P-003`, e a verificação dele passa a pedir
+    `@principle:P-003`. Sem a renumeração, dois `P-001` no mesmo arquivo
+    dariam código duplicado (`ID_DUPLICADO`).
+- Preset desconhecido ou repetido na lista: o `init` sai com código 2, não
+  cria nada e lista os presets disponíveis.
+- Constituição que já existe é mantida, com ou sem lista de presets.
+
+O que não se aplica ao projeto é removido da constituição gerada, com o motivo
+registrado no ROADMAP. Os princípios restantes não precisam ser renumerados:
+a sequência com buracos é válida; código repetido é que não é.
+
+## Quando uma borda sobe para a constituição
+
+O catálogo de casos de borda ([casos-de-borda.md](casos-de-borda.md)) é por
+feature. Duas situações o levam para o projeto:
+
+- **Borda repetida vira princípio.** Se a mesma borda aparece na spec de uma
+  segunda feature, ela é do projeto, não da feature. Proponha ao usuário um
+  princípio com `verificação(teste)`; daí em diante, as specs registram a
+  linha da borda com o código do princípio na decisão (`P-xxx`). O audit
+  confere que o princípio existe nesta constituição (senão, referência a
+  código que não existe, `REF_SPEC_INEXISTENTE`), e quem prova a regra é o
+  teste do princípio.
+- **Regra de fechamento global vira princípio.** Total que precisa fechar em
+  todo o projeto (débito igual a crédito, conciliação entre duas bases) vira
+  princípio [DEVE] com `verificação(teste)`. O teste do princípio prova as
+  duas coisas que a spec exigiria: que fecha dentro da tolerância declarada e
+  que o processamento para, listando os itens, quando não fecha.
+
 ## Rastreabilidade que dá diferencial de segurança
 
 Um estudo de caso em microsserviços bancários relatou 73% menos defeitos de

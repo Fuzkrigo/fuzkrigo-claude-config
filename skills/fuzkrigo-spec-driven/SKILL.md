@@ -1,6 +1,6 @@
 ---
 name: fuzkrigo-spec-driven
-description: Desenvolvimento spec-anchored — a especificação continua verdadeira porque é auditada mecanicamente contra o código. Fluxo Especificar → Projetar → Tarefas → Plano → Executar → Auditar → Aprender, com rastreabilidade história→critério de aceite→tarefa→teste, definição de pronto executável (cada critério de aceite vira teste anotado), suposições e perguntas como cidadãs de primeira classe, constituição de princípios verificáveis (preset LGPD/educação), lições aprendidas com lastro mecânico (o motor recusa lição sem sinal real de audit/verify; promoção por recorrência entre features) e plano de execução PARALELA (tarefas de arquivos disjuntos viram faixas em git worktrees, executadas por claude headless com modelo e esforço por tarefa — inclui script pronto e artefato visual com botão). Motor mecânico EMBARCADO na skill (zero instalação — roda com o node do ambiente). Use ao planejar features, implementar com verificação, ou auditar uma implementação contra a spec. Gatilhos "especificar feature", "nova feature", "implementar", "auditar spec", "verificar", "plano de execução", "executar em paralelo", "o que não tem teste", "lições aprendidas". NÃO use para abertura de projeto, briefing, roadmap, documentação de gestão, board ou release — isso é da skill `iniciar-projeto`.
+description: Desenvolvimento spec-anchored — a especificação continua verdadeira porque é auditada mecanicamente contra o código. Fluxo Especificar → Projetar → Tarefas → Plano → Executar → Auditar → Aprender, com rastreabilidade história→critério de aceite→tarefa→teste, definição de pronto executável (cada critério de aceite vira teste anotado), suposições e perguntas como cidadãs de primeira classe, casos de borda e regras de fechamento registrados na spec, constituição de princípios verificáveis (presets LGPD/educação e dados tabulares, combináveis), lições aprendidas com lastro mecânico (o motor recusa lição sem sinal real de audit/verify; promoção por recorrência entre features) e plano de execução PARALELA (tarefas de arquivos disjuntos viram faixas em git worktrees, executadas por claude headless com modelo e esforço por tarefa — inclui script pronto e artefato visual com botão). Motor mecânico EMBARCADO na skill (zero instalação — roda com o node do ambiente). Use ao planejar features, implementar com verificação, ou auditar uma implementação contra a spec. Gatilhos "especificar feature", "nova feature", "implementar", "auditar spec", "verificar", "plano de execução", "executar em paralelo", "o que não tem teste", "lições aprendidas". NÃO use para abertura de projeto, briefing, roadmap, documentação de gestão, board ou release — isso é da skill `iniciar-projeto`.
 license: MIT
 metadata:
   author: "Bruno Krieger [Fuzkrigo] (adaptação)"
@@ -144,7 +144,7 @@ Todos os comandos rodam **a partir da raiz do projeto do usuário**:
 node <dir-desta-skill>/scripts/fuzkrigo-spec.mjs <comando>
 ```
 
-Comandos: `init [--preset base|lgpd-educacao] [--agents claude]` · `new <feature> [--issue <n>]` ·
+Comandos: `init [--preset base|lgpd-educacao|dados-tabulares[,...]] [--agents claude]` · `new <feature> [--issue <n>]` ·
 `plano <feature> [--agents claude]` · `painel <feature> [--porta N] [--sem-abrir]` ·
 `tarefa <feature> <T-xxx> <status>` ·
 `scaffold <feature>` · `verify <feature>` ·
@@ -152,8 +152,12 @@ Comandos: `init [--preset base|lgpd-educacao] [--agents claude]` · `new <featur
 `licoes <add|list|sugerir|penalizar|status>`.
 
 No `init`, o `--agents claude` copia o motor para `.claude/skills/` dentro do projeto — sem essa
-cópia commitada, o CI do projeto reprova, porque passar sem auditar seria um verde falso. No
-`audit`, o `--feature` é o gate de cada feature; sem ele, o veredito é do projeto inteiro.
+cópia commitada, o CI do projeto reprova, porque passar sem auditar seria um verde falso. O
+`--preset` combina presets com vírgula (`--preset base,dados-tabulares`): sai uma constituição
+única, com os princípios renumerados em sequência (`P-001` em diante, etiquetas `@principle:`
+incluídas); preset desconhecido ou repetido sai 2 sem criar nada. Detalhes em
+[constituicao.md](references/constituicao.md#presets-combináveis). No `audit`, o `--feature` é o
+gate de cada feature; sem ele, o veredito é do projeto inteiro.
 
 Abaixo, `fuzkrigo-spec <comando>` é abreviação dessa invocação.
 
@@ -270,10 +274,18 @@ foi subdimensionada.
   **critérios de aceite (AC-xxx)** em Dado/Quando/Então. O critério precisa
   ser observável — algo que um teste checa. "Deve ser rápido" não é critério;
   "responde em < 300ms" é.
-- **Casos de borda viram critérios de aceite próprios**: entrada vazia, valor
-  no limite, erro de dependência, permissão negada, dado duplicado. Só assim
-  ganham teste e prova — caso de borda descrito em prosa, ou só no código, o
-  audit não cobra. Lista e exemplo: [escrevendo-specs.md](references/escrevendo-specs.md#casos-de-borda-viram-critérios-de-aceite).
+- **Casos de borda e regras de fechamento**: leia o catálogo
+  [casos-de-borda.md](references/casos-de-borda.md) e percorra as categorias
+  gerais e o pacote do domínio. Preencha a seção
+  `## Casos de borda e regras de fechamento` da spec: uma linha por borda
+  relevante, com a decisão — o critério de aceite que a cobre (`AC-xxx`), a
+  suposição que a assume (`ASM-xxx`), o princípio da constituição que já a
+  cobre (`P-xxx`) ou `Não se aplica: <motivo>` (sem motivo, é achado). As duas
+  provas de cada regra de fechamento são critérios desta spec. Cada total que precisa fechar entra com tolerância e dois
+  critérios diferentes: um prova que fecha, o outro prova que o programa para
+  quando não fecha; sem total a fechar, "Nenhuma.". Caso de borda descrito em
+  prosa, ou só no código, o audit não cobra. Formato e exemplo:
+  [escrevendo-specs.md](references/escrevendo-specs.md#casos-de-borda-viram-critérios-de-aceite).
 - **Mudou a spec depois de `pronta`?** Registre uma linha no `## Histórico`
   (data, mudança, motivo): critério alterado, suposição invalidada, escopo
   mudado. O git guarda o que mudou no arquivo; o Histórico guarda o porquê.
@@ -413,7 +425,10 @@ conversar com o usuário, use o nome legível.
 | tarefa concluída sem prova (TASK_CONCLUIDA_SEM_PROVA) | tarefa [concluida] sem critério provado | verifique ou reabra a tarefa |
 | status de tarefa inválido (TASK_STATUS_INVALIDO) | status não reconhecido | use pendente/em-andamento/concluida |
 | suposição em aberto (ASM_ABERTA) | suposição aberta numa feature "pronta" | confirme/invalide com o usuário |
-| seção obrigatória ausente (SECAO_AUSENTE) | spec sem seção Suposições/Perguntas | registre-as ou escreva "Nenhuma." |
+| seção obrigatória ausente (SECAO_AUSENTE) | spec sem seção Suposições, Perguntas ou Casos de borda e regras de fechamento | registre-as ou escreva "Nenhuma." (nas bordas, uma linha por borda) |
+| caso de borda sem decisão (BORDA_INCOMPLETA) | borda sem categoria, situação ou decisão válida, "Não se aplica" sem motivo, ou subseção de bordas vazia | decida: `AC-xxx`, `ASM-xxx`, `P-xxx` ou `Não se aplica: motivo` |
+| regra de fechamento incompleta (FECHAMENTO_INCOMPLETO) | total a fechar sem tolerância, sem os dois critérios ou com o mesmo critério nas duas provas; subseção sem regra e sem "Nenhuma." | declare a tolerância e escreva o critério que fecha e o que para |
+| referência a código que não existe (REF_SPEC_INEXISTENTE) | a seção de bordas cita critério ou suposição que não existe nesta spec (inclusive o de outra feature), ou princípio que não existe na constituição; erro mesmo em rascunho | corrija o código, ou crie o critério nesta spec |
 | princípio violado (PRINCIPIO_VIOLADO) | quebrou a constituição | conserte o código, não o princípio |
 | princípio sem prova (PRINCIPIO_SEM_PROVA) | o teste do princípio falhou, foi PULADO ou nunca rodou num verify | rode `verify`; conserte o código até o teste passar |
 | verificação não olha nenhum arquivo (GLOB_SEM_ARQUIVOS) | glob da constituição não casa nada | corrija o glob |

@@ -17,6 +17,7 @@ import {
 } from './core/licoes.js';
 import { servirPainel } from './core/painel.js';
 import { montarPlano, renderPlanoHtml, renderPlanoJson, renderPlanoMd, renderPlanoSh } from './core/plano.js';
+import { composeConstitution } from './core/presets.js';
 import { loadProject } from './core/project.js';
 import { featureOrigin, localIsoDate, traceSummary } from './core/rastreio.js';
 import { renderJson, renderMarkdown, renderTerminal } from './core/report.js';
@@ -66,7 +67,7 @@ const HELP = `fuzkrigo-spec — spec-anchored development (a especificação que
 uso: fuzkrigo-spec <comando> [opções]
 
 comandos:
-  init [--preset base|lgpd-educacao] [--agents claude|antigravity]
+  init [--preset base|lgpd-educacao|dados-tabulares[,...]] [--agents claude|antigravity]
                       cria .spec/, constituição e config no diretório atual
                       (--agents também instala a skill do agente escolhido)
   new <feature> [--issue <n>]
@@ -152,10 +153,9 @@ function fill(text, vars) {
 }
 
 function cmdInit(rootDir, flags) {
-  const preset = flags.preset || 'base';
-  const presetFile = `constituicao-${preset}.md`;
-  if (!existsSync(path.join(TEMPLATES_DIR, presetFile))) {
-    console.error(`preset desconhecido: ${preset} (use: base, lgpd-educacao)`);
+  const constitution = composeConstitution(flags.preset || 'base', TEMPLATES_DIR);
+  if (constitution.error) {
+    console.error(constitution.error);
     return 2;
   }
 
@@ -167,8 +167,8 @@ function cmdInit(rootDir, flags) {
   if (existsSync(constitutionPath)) {
     console.log('· .spec/constituicao.md já existe — mantido');
   } else {
-    writeFileSync(constitutionPath, template(presetFile));
-    console.log(`✔ .spec/constituicao.md criado (preset: ${preset})`);
+    writeFileSync(constitutionPath, constitution.content);
+    console.log(`✔ .spec/constituicao.md criado (${constitution.label})`);
   }
 
   const configPath = path.join(rootDir, 'fuzkrigo.config.json');
@@ -327,7 +327,7 @@ function cmdNew(rootDir, name, flags) {
   console.log(`  ${traceSummary(origin)}   # lido do nome da feature e do --issue`);
   console.log(`\npróximos passos:`);
   console.log(`  1. escreva as histórias de usuário e os critérios de aceite (Dado/Quando/Então)`);
-  console.log(`     e PREENCHA as seções Suposições e Perguntas em aberto`);
+  console.log(`     e PREENCHA as seções Casos de borda, Suposições e Perguntas em aberto`);
   console.log(`  2. fuzkrigo-spec scaffold ${name}   # cada critério vira um teste executável`);
   console.log(`  3. fuzkrigo-spec audit              # veja o que falta`);
   console.log(`  4. fuzkrigo-spec plano ${name}      # com as tarefas escritas: plano de execução paralela`);

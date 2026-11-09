@@ -638,3 +638,44 @@ Esta rodada só garante que o ecossistema funciona nos dois, com um único `sett
 O registro completo das opções e dos motivos está no log de decisões do projeto de desenho do
 ecossistema (`log-de-decisoes.md` do projeto "Ecosistema de Desenvolvimento", seção "Rodada 5:
 decisões").
+
+## F3, item 1 — casos de borda e regras de fechamento — 09/11/2026
+
+> Estado auditado: commit `c6a30c4`, o commit 4 da rodada (motor: 87 casos em 16 suítes; hooks,
+> lançador e status line: 44 testes, intocados).
+
+| # | Decisão | O que muda | Commit |
+| --- | --- | --- | --- |
+| 1 | Catálogo de categorias em arquivo próprio, com pacotes por domínio | `references/casos-de-borda.md` novo, lido no passo Especificar | `cd2a7fb` |
+| 2 | Seção obrigatória na spec que registra a decisão para cada borda | Modelo do `spec.md`, parser e audit (achados novos `BORDA_INCOMPLETA` e `REF_SPEC_INEXISTENTE`) | `414c5da` |
+| 3 | Regra de fechamento com tolerância e dois critérios: um prova que fecha, outro prova que o programa para quando não fecha | Mesma seção da spec, mesmo audit (`FECHAMENTO_INCOMPLETO`); seção 9 do `CODIGO.md` | `414c5da` e `c6a30c4` |
+| 4 | Regras globais na constituição: a A1 pergunta por elas, borda repetida sobe para princípio, presets combináveis entre projetos | `init --preset a,b` e preset novo `dados-tabulares` (`edcfd0e`); `constituicao.md` (`cd2a7fb`); `iniciar-projeto` (`c6a30c4`) | `edcfd0e`, `cd2a7fb` e `c6a30c4` |
+
+Commits da rodada: 1 = `414c5da`, 2 = `edcfd0e`, 3 = `cd2a7fb`, 4 = `c6a30c4`.
+
+**Limites de tamanho, decisão do usuário (09/11/2026).** Os limites do `CLAUDE.md` (função até 50
+linhas, arquivo até 500) valem para os projetos desenvolvidos com o ecossistema, não para o motor
+nem para o próprio ecossistema. `cli.js` (821 linhas), `core/audit.js` (645) e `core/plano.js`
+(742) são exceções aceitas. A decisão generaliza a exceção da rodada 4, que cobria só o `cli.js`.
+Por legibilidade, a lógica nova continua indo para módulos próprios: nesta rodada,
+`parsers/bordas.js`, `core/bordas.js` e `core/presets.js`.
+
+Registrado durante a execução:
+
+| Achado | Decisão |
+| --- | --- |
+| `parseSpec` (`parsers/spec.js`) já passava de 50 linhas antes da rodada e ganhou as linhas que entregam a seção nova ao `parsers/bordas.js` | Coberto pela decisão de 09/11/2026 sobre os limites: eles não valem para o motor |
+| A mensagem de constituição ausente (`CONSTITUICAO_AUSENTE`) ainda citava só o preset LGPD/educação | Corrigido no commit de ajuste antes do merge: cita os três presets e a combinação com vírgula, com um caso novo na suíte `presets-combinados` (10 casos; 92 no motor) |
+
+**Ajuste da conferência (09/11/2026).** Na conferência do PR, o usuário decidiu que a decisão de
+uma borda também aceita o princípio da constituição (`P-xxx`), além de `AC-xxx`, `ASM-xxx` e
+"Não se aplica:". Princípio que não existe na constituição, ou citado num projeto sem
+constituição, é `REF_SPEC_INEXISTENTE` (erro sempre); o rótulo do achado passou a "referência a
+código que não existe". As duas provas da regra de fechamento continuam só `AC-xxx`. Motor:
+commit `d8a4f45`, com 4 casos novos na suíte `bordas-e-fechamento` (20 ao todo; 91 no motor).
+A documentação (catálogo, referências e `SKILL.md` da skill, MANUAL e README) foi ajustada no
+mesmo commit deste registro.
+
+O registro completo das opções e dos motivos está no log de decisões do projeto de desenho do
+ecossistema (`log-de-decisoes.md` do projeto "Ecosistema de Desenvolvimento", seção "Item 1 da F3:
+casos de borda e regras de fechamento").

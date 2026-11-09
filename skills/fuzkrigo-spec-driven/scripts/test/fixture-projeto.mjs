@@ -36,11 +36,21 @@ function write(root, rel, content) {
   writeFileSync(path.join(root, rel), content);
 }
 
+// A secao de casos de borda e obrigatoria de `pronta` em diante: a spec da
+// fixture a traz completa, para o audit dela continuar limpo.
+// The edge case section is required from `pronta` on: the fixture spec
+// carries it complete, so its audit stays clean.
+function edgeSectionFor(n) {
+  return `## Casos de borda e regras de fechamento\n\n### Casos de borda\n\n` +
+    `| Categoria | Situação | Decisão |\n|---|---|---|\n| Limites | Nota no limite da escala | AC-00${n} |\n\n` +
+    `### Regras de fechamento\n\nNenhuma.\n\n`;
+}
+
 function specFor(name, n) {
   return `# Spec: ${name}\n\n> feature: ${name}\n> status: em-implementacao\n\n## Histórias\n\n` +
     `### US-00${n} — História de ${name}\n\nComo usuário, quero algo, para ter um benefício.\n\n` +
     `#### AC-00${n} — Critério de ${name}\n\n- **Dado** um contexto\n- **Quando** eu ajo\n` +
-    `- **Então** vejo o resultado\n\n## Suposições\n\nNenhuma.\n\n## Perguntas em aberto\n\nNenhuma.\n`;
+    `- **Então** vejo o resultado\n\n${edgeSectionFor(n)}## Suposições\n\nNenhuma.\n\n## Perguntas em aberto\n\nNenhuma.\n`;
 }
 
 function tasksFor(name, n, taskIds) {
