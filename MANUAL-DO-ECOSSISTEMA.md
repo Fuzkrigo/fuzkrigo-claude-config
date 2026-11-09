@@ -627,18 +627,18 @@ instalação de uma status line chegou a sobrescrever o `settings.json` global, 
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são nove conjuntos de ajustes no motor — o suporte a Python, o
+**patches locais** no `README.md`: são dez conjuntos de ajustes no motor — o suporte a Python, o
 audit com escopo de feature, os nomes próprios, o modelo padrão por alias, o preset LGPD para
 Python e JavaScript, as mensagens e a saída do motor, a spec rastreável, a numeração contínua no
-`new`, e a prova do princípio com a unicidade das tarefas. As dez suítes que os protegem rodam
-assim:
+`new`, a prova do princípio com a unicidade das tarefas, e o princípio repetido na constituição.
+As onze suítes que os protegem rodam assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
-node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs test/spec-rastreavel.test.mjs test/numeracao-continua.test.mjs test/prova-de-principio.test.mjs test/unicidade-tarefas.test.mjs
+node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs test/spec-rastreavel.test.mjs test/numeracao-continua.test.mjs test/prova-de-principio.test.mjs test/unicidade-tarefas.test.mjs test/unicidade-principios.test.mjs
 ```
 
-São 48 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+São 51 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:

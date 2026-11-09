@@ -96,8 +96,9 @@ quase toda feature esconde uma suposição.
 (suposição), `Q-xxx` (pergunta), `T-xxx` (tarefa) e `P-xxx` (princípio) são
 únicos no projeto inteiro. `fuzkrigo-spec new` continua a numeração
 automaticamente. Se você duplicar uma história, um critério, uma suposição, uma
-pergunta ou uma tarefa (`T-xxx`, também entre os `tasks.md` de features
-diferentes), o audit acusa código duplicado (`ID_DUPLICADO`).
+pergunta, uma tarefa (`T-xxx`, também entre os `tasks.md` de features
+diferentes) ou um princípio (`P-xxx`, na constituição), o audit acusa código
+duplicado (`ID_DUPLICADO`).
 
 ## O ciclo de vida do status da especificação
 
