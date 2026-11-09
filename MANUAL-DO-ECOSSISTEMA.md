@@ -136,7 +136,8 @@ uma branch. Esse é o elo que amarra tudo: se você entender só uma coisa deste
 
 ```bash
 node --version     # o motor de auditoria roda nele
-py -3 --version    # os tres hooks rodam com o lancador do Python
+py -3 --version    # Windows: os tres hooks rodam com o lancador do Python
+python3 --version  # Linux/WSL: no lugar do py -3; o run-python.sh escolhe sozinho
 git --version
 gh auth status     # so se voce for criar repositorio, labels e issues no GitHub
 ```
@@ -242,8 +243,10 @@ comando `gh repo create` montado, eu te pergunto, e ele é invocado de novo com 
 pronto. O GitHub Projects não entra: o board é o do Linear. O agente também protege a `main`:
 dali em diante, mudança só entra por PR com o CI verde e a branch atualizada, inclusive a sua, e
 até os arquivos da própria A3 seguem esse caminho. Em repositório privado na conta Free o GitHub
-não oferece a proteção; o agente devolve a recusa, e o risco vai para o ROADMAP. E o projeto
-ganha sua constituição:
+não oferece a proteção; o agente devolve a recusa, e o risco vai para o ROADMAP. Cuidado com a
+volta: tornar o repositório privado na conta Free derruba a proteção, e voltar a público não a
+restaura. Invoque o `project-manager` de novo para reaplicá-la. E o projeto ganha sua
+constituição:
 
 **[terminal]** (na prática, quem roda sou eu, durante A3)
 
@@ -267,6 +270,8 @@ dente não existe.
 cada pull request e a cada push na `main`, o GitHub roda os testes, mede a cobertura e reprova
 abaixo do limite, e audita a especificação — sozinho, sem sessão aberta. É o que garante que nada
 entre na `main` sem passar pelo mesmo crivo, mesmo quando você mescla às pressas de outra máquina.
+O `.github/` traz também um `.gitattributes` que mantém os scripts do CI em LF: com CRLF, vindo de
+uma cópia no Windows, o bash quebraria em cada linha.
 
 Duas coisas fazem o CI funcionar, e as duas acontecem em A3:
 
@@ -664,12 +669,14 @@ qual e onde.
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:
 
 ```bash
-py -3 -m unittest discover -s hooks/tests -v
+py -3 -m unittest discover -s hooks/tests -v      # Windows
+python3 -m unittest discover -s hooks/tests -v    # Linux/WSL
 ```
 
-São 39 casos. Três deles comparam o hook de planejamento com o próprio motor e precisam do `node`
-no PATH, e os três da status line precisam do `bash`; sem eles, ficam pulados (skip), não
-reprovados.
+São 44 casos. Três deles comparam o hook de planejamento com o próprio motor e precisam do `node`
+no PATH, e os três da status line e os cinco do lançador `run-python.sh` precisam do `bash`; sem
+eles, ficam pulados (skip), não reprovados. No WSL, sem `node` instalado no Linux, os três de
+paridade com o motor ficam pulados.
 
 No GitHub, o workflow `.github/workflows/testes.yml` roda as duas suítes a cada push na `main` e
 a cada pull request, em Linux e em Windows, com `node` e `bash` presentes, então nenhum caso fica

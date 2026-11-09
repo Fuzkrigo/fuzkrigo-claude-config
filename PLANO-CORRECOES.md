@@ -612,3 +612,29 @@ Achados fora do briefing, durante a execução:
 | Os `.sh` de `.github/scripts/`, copiados para projeto sem `.gitattributes`, viram CRLF na cópia de trabalho no Windows | Registrado: só afeta quem rodar os scripts no Windows; o CI roda em Linux | — |
 | Este repositório era privado, e a proteção da `main` não existe em repositório privado na conta Free | O usuário tornou o repositório público para o passo final | — |
 | O grep de aceite do commit 3 acha a sintaxe antiga num relatório antigo em `Claude outputs/` | Aceito pelo usuário: nos arquivos versionados o grep volta vazio | — |
+
+## Rodada 5 — 09/11/2026
+
+> Estado auditado: commit `ec8eb9c`, o commit 4 da rodada (motor: 62 casos, intocado; hooks,
+> lançador e status line: 44 testes no Windows, e 44 no WSL com 3 pulados por falta de `node`).
+
+| Item | Problema | Decisão | Commit |
+| --- | --- | --- | --- |
+| 1 | Os `.sh` do modelo de CI, copiados para um projeto sem `.gitattributes`, podem virar CRLF no Windows, e o bash quebra com `$'\r': command not found` | Um `.gitattributes` dentro do modelo, que vira `.github/.gitattributes` no projeto, com `*.sh text eol=lf` | `7604259` |
+| 2 | Tornar um repositório privado na conta Free derruba a proteção da `main`, e voltar a público não a restaura (aconteceu com este repositório em 09/11/2026) | Aviso no `project-manager`, na skill `iniciar-projeto`, no MANUAL e no README, com o caminho de volta | `2ef0893` |
+| 3 | O ecossistema não roda no Linux nem no WSL: hooks chamando `py -3`, `statusline.sh` sem permissão de execução chamado direto, instalação documentada só no Windows | Lançador único `hooks/run-python.sh`; status line chamada por `bash`; seção de instalação no Linux/WSL | `5c6dba7` e `ec8eb9c` |
+
+Commits da rodada: 1 = `7604259`, 2 = `2ef0893`, 3 = `5c6dba7`, 4 = `ec8eb9c`.
+
+Pendência de rodada anterior resolvida:
+
+| Achado | Rodada | Antes | Agora |
+| --- | --- | --- | --- |
+| Os `.sh` de `.github/scripts/`, copiados para projeto sem `.gitattributes`, viram CRLF na cópia de trabalho no Windows | 4 | Registrado | Resolvido pelo commit 1 (`7604259`) |
+
+Fica para a F5: qual `~/.claude` é o principal, o do Windows ou o do WSL, e se os dois coexistem.
+Esta rodada só garante que o ecossistema funciona nos dois, com um único `settings.json`.
+
+O registro completo das opções e dos motivos está no log de decisões do projeto de desenho do
+ecossistema (`log-de-decisoes.md` do projeto "Ecosistema de Desenvolvimento", seção "Rodada 5:
+decisões").

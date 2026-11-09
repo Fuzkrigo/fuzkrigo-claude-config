@@ -8,7 +8,8 @@ The script really runs, with the session JSON on stdin and the Brazilian
 locale, where bash printf expects a decimal comma.
 
 Rodar da raiz / Run from the repository root:
-    py -3 -m unittest discover -s hooks/tests -v
+    py -3 -m unittest discover -s hooks/tests -v      (Windows)
+    python3 -m unittest discover -s hooks/tests -v    (Linux/WSL)
 """
 import json
 import os
