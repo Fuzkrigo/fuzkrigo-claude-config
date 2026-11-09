@@ -51,18 +51,49 @@ da história, ou só no código, não tem teste exigido nem prova — e é justa
 onde o defeito costuma morar. Por isso cada caso de borda relevante vira um
 critério de aceite próprio.
 
-Lista de verificação, para cada história:
+Quais bordas procurar: o catálogo [casos-de-borda.md](casos-de-borda.md) traz
+as categorias gerais (vazio, limites, formato, unidade, identificador com cara
+de número, tempo, repetição, volume, falha de dependência, permissão,
+ambiente) e os pacotes por domínio (dados tabulares, interface web,
+integração e API). Percorra as categorias e o pacote do domínio; o que é
+relevante se escolhe por risco: possível neste domínio e caro se der errado.
 
-- **Entrada vazia**: campo em branco, lista sem itens, arquivo sem conteúdo.
-- **Valor no limite**: o último minuto do prazo, o tamanho máximo, o zero.
-- **Erro de dependência**: banco fora do ar, API que não responde, arquivo
-  que não abre.
-- **Permissão negada**: usuário sem acesso ao recurso, sessão expirada.
-- **Dado duplicado**: o mesmo envio duas vezes, cadastro que já existe.
+A decisão sobre cada borda fica registrada na seção
+`## Casos de borda e regras de fechamento`, entre `## Fora de escopo` e
+`## Suposições`. A mesma seção lista os totais que precisam fechar:
 
-Nem todo item se aplica a toda história: o que importa é ter passado por eles.
-O que se aplica ganha critério; o que não se aplica e não é óbvio pode virar
-suposição.
+```markdown
+## Casos de borda e regras de fechamento
+
+### Casos de borda
+
+| Categoria | Situação | Decisão |
+|---|---|---|
+| Identificador | Número da nota com e sem zeros à esquerda | AC-004 |
+| Unidade | Alíquota gravada como 18 ou como 0,18 | AC-005 |
+| Volume | Base com 200 mil linhas | Não se aplica: a base mensal tem até 5 mil linhas |
+| Tempo | Nota de dezembro lançada em janeiro | ASM-002 |
+
+### Regras de fechamento
+
+| Regra | Tolerância | Prova de que fecha | Prova de que para |
+|---|---|---|---|
+| Percentual de saídas do ICMS efetivo soma 100% | ±0,01 p.p. | AC-006 | AC-007 |
+```
+
+O que o audit cobra nessa seção:
+
+| Situação | Achado |
+|---|---|
+| Spec sem a seção | `SECAO_AUSENTE` |
+| Borda sem categoria, situação ou decisão válida (`AC-xxx`, `ASM-xxx` ou "Não se aplica:" com motivo); subseção de bordas sem nenhuma linha | caso de borda sem decisão (`BORDA_INCOMPLETA`) |
+| Regra de fechamento sem tolerância ("exata" vale), sem os dois critérios ou com o mesmo critério nas duas colunas; subseção sem regra e sem "Nenhuma." | regra de fechamento incompleta (`FECHAMENTO_INCOMPLETO`) |
+| Decisão ou prova que cita critério ou suposição que não existe nesta spec | referência inexistente (`REF_SPEC_INEXISTENTE`) |
+
+Os três primeiros são aviso em `rascunho` e erro de `pronta` em diante, como as
+outras seções obrigatórias. A referência inexistente é erro sempre. A borda
+que se aplica ganha critério próprio; a que depende de algo não confirmado
+vira suposição; a que não se aplica leva o motivo.
 
 ```markdown
 #### AC-005 — Entrega no último segundo do prazo conta como no prazo
