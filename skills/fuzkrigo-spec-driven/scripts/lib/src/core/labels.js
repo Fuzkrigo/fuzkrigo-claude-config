@@ -12,7 +12,7 @@ export const FINDING_LABELS = {
   SECAO_AUSENTE: 'seção obrigatória ausente',
   BORDA_INCOMPLETA: 'caso de borda sem decisão',
   FECHAMENTO_INCOMPLETO: 'regra de fechamento incompleta',
-  REF_SPEC_INEXISTENTE: 'referência a critério ou suposição que não existe nesta especificação',
+  REF_SPEC_INEXISTENTE: 'referência a código que não existe',
   US_SEM_AC: 'história sem critério de aceite',
   AC_INCOMPLETO: 'critério de aceite incompleto',
   AC_FORA_DE_US: 'critério de aceite fora de história',

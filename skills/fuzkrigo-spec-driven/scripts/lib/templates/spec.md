@@ -56,8 +56,9 @@ Como [papel], quero [ação], para que [valor].
 <!-- Percorra o catálogo da skill fuzkrigo-spec-driven
      (references/casos-de-borda.md): categorias gerais e o pacote do domínio.
      Uma linha por borda relevante. Decisão: o critério de aceite que a cobre
-     (AC-xxx), a suposição que a assume (ASM-xxx) ou "Não se aplica: motivo"
-     — "não se aplica" sem motivo é achado do audit.
+     (AC-xxx), a suposição que a assume (ASM-xxx), o princípio da constituição
+     que já a cobre (P-xxx) ou "Não se aplica: motivo" — "não se aplica" sem
+     motivo é achado do audit.
      Regra de fechamento: total que precisa fechar, com tolerância ("exata"
      vale) e dois critérios diferentes: um prova que fecha, o outro prova que
      o programa para quando não fecha. Sem total a fechar, troque a tabela de
@@ -67,7 +68,7 @@ Como [papel], quero [ação], para que [valor].
 
 | Categoria | Situação | Decisão |
 |---|---|---|
-| [categoria] | [situação no limite do esperado] | [AC-xxx, ASM-xxx ou "Não se aplica: motivo"] |
+| [categoria] | [situação no limite do esperado] | [AC-xxx, ASM-xxx, P-xxx ou "Não se aplica: motivo"] |
 
 ### Regras de fechamento
 

@@ -193,7 +193,7 @@ export function auditProject(project, { ci = false, feature = null } = {}) {
         )
       );
     }
-    findings.push(...edgeSectionFindings(spec, { feature: name, matured: specMatured }));
+    findings.push(...edgeSectionFindings(spec, { feature: name, matured: specMatured, constitution: project.constitution }));
 
     for (const story of spec.stories) {
       if (story.acs.length === 0) {

@@ -89,11 +89,22 @@ function buildSpecs(root, specs) {
   write(root, 'test/demo.test.js', `import { test } from 'node:test';\n${tests}`);
 }
 
-function auditSpec(spec, ...args) {
+// Constituicao com um principio [PODE] sem verificacao: existe, mas nao gera
+// achado proprio. / Constitution with one [PODE] principle and no check: it
+// exists but raises no finding of its own.
+const CONSTITUTION = '# Constituição\n\n## P-001 [PODE] Identificador é texto\n\nNota, CEP e CNPJ são texto.\n';
+
+// `constitution` null: projeto sem constituicao. / null: no constitution.
+function auditWithConstitution(spec, constitution, ...args) {
   return withTempDir('fspec-bordas-', (root) => {
     buildSpecs(root, { demo: spec });
+    if (constitution !== null) write(root, '.spec/constituicao.md', constitution);
     return runAudit(root, ...args);
   });
+}
+
+function auditSpec(spec, ...args) {
+  return auditWithConstitution(spec, null, ...args);
 }
 
 function newFindings(report) {
@@ -175,6 +186,37 @@ test('decisao que cita AC de outra spec gera REF_SPEC_INEXISTENTE de erro', () =
     assert.deepEqual(found.map((f) => [f.feature, f.severity]), [['demo', 'erro']]);
     assert.match(found[0].message, /AC-005/);
   });
+});
+
+test('decisao que cita principio da constituicao nao gera achado novo', () => {
+  const section = VALID_SECTION.replace('| AC-001 |', '| P-001 |');
+  const { status, report } = auditWithConstitution(specText({ status: 'pronta', section }), CONSTITUTION);
+  assert.deepEqual(newFindings(report), []);
+  assert.equal(status, 0, JSON.stringify(report.findings));
+});
+
+test('decisao que cita principio fora da constituicao gera REF_SPEC_INEXISTENTE de erro mesmo no rascunho', () => {
+  const section = VALID_SECTION.replace('| AC-001 |', '| P-009 |');
+  const { status, report } = auditWithConstitution(specText({ section }), CONSTITUTION);
+  const found = findingsOf(report, 'REF_SPEC_INEXISTENTE');
+  assert.equal(found.length, 1, JSON.stringify(report.findings));
+  assert.equal(found[0].severity, 'erro');
+  assert.match(found[0].message, /P-009/);
+  assert.match(found[0].message, /constituição/);
+  assert.deepEqual(findingsOf(report, 'BORDA_INCOMPLETA'), []);
+  assert.equal(status, 1);
+});
+
+test('decisao que cita principio num projeto sem constituicao gera REF_SPEC_INEXISTENTE', () => {
+  const { report } = auditSpec(specText({ section: VALID_SECTION.replace('| AC-001 |', '| P-001 |') }));
+  assert.deepEqual(findingsOf(report, 'REF_SPEC_INEXISTENTE').map((f) => f.severity), ['erro']);
+});
+
+test('prova de regra de fechamento continua so AC: principio gera FECHAMENTO_INCOMPLETO', () => {
+  const section = VALID_SECTION.replace('| AC-004 |', '| P-001 |');
+  const { report } = auditWithConstitution(specText({ section }), CONSTITUTION);
+  assert.equal(findingsOf(report, 'FECHAMENTO_INCOMPLETO').length, 1, JSON.stringify(report.findings));
+  assert.deepEqual(findingsOf(report, 'REF_SPEC_INEXISTENTE'), []);
 });
 
 test('regra de fechamento sem tolerancia gera FECHAMENTO_INCOMPLETO', () => {
