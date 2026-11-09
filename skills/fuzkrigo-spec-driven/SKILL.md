@@ -49,6 +49,11 @@ Na prática:
   issue no cabeçalho da spec. Na pasta `i<n>-`, o número já vem do nome e o
   `--issue` é dispensável; se os dois forem passados, precisam coincidir. O
   motor reconhece o prefixo, mas não o exige.
+- **Não comece o nome com `e<n><letra>-` sem ser uma etapa.** O motor lê
+  esse começo como etapa: `e2e-testes` vira a etapa "E2e". Para uma feature
+  sobre testes ponta a ponta, use outro nome (`testes-ponta-a-ponta`) ou o
+  prefixo da etapa real (`e5-testes-e2e`). Depois de criar, o `new` mostra o
+  que reconheceu (`etapa: E1 · issue: #12`); confira.
 - **Quais issues geram spec:**
   - issue de etapa: sempre (`e<n>-`);
   - issue avulsa de bug ou dívida técnica que muda comportamento: sim
@@ -142,7 +147,7 @@ node <dir-desta-skill>/scripts/fuzkrigo-spec.mjs <comando>
 Comandos: `init [--preset base|lgpd-educacao] [--agents claude]` · `new <feature> [--issue <n>]` ·
 `plano <feature> [--agents claude]` · `painel <feature> [--porta N] [--sem-abrir]` ·
 `tarefa <feature> <T-xxx> <status>` ·
-`scaffold <feature> [--force]` · `verify <feature>` ·
+`scaffold <feature>` · `verify <feature>` ·
 `audit [--ci] [--json] [--md <arquivo>] [--feature <feature>]` · `status` · `assumptions` ·
 `licoes <add|list|sugerir|penalizar|status>`.
 
@@ -349,10 +354,12 @@ produto).
 - Espelhe as tarefas na lista de tarefas nativa e vá atualizando o status —
   o usuário acompanha o progresso em tempo real. No tasks.md mecânico, use
   `fuzkrigo-spec tarefa <feature> <T-xxx> <status>`.
-- `fuzkrigo-spec scaffold <feature>` gera o esqueleto de teste **que falha** para
-  cada critério de aceite sem teste — e também para cada princípio da
-  constituição com `verificação(teste)` ainda sem tag. A definição de pronto
-  nasce executável.
+- `fuzkrigo-spec scaffold <feature>` acrescenta os esqueletos dos critérios sem
+  teste — testes **que falham** — e também de cada princípio da constituição
+  com `verificação(teste)` ainda sem tag. Arquivo novo nasce com cabeçalho e
+  imports; arquivo existente recebe os esqueletos no fim e nunca é reescrito,
+  então rodar o scaffold de novo depois de a spec ganhar critérios é seguro.
+  A definição de pronto nasce executável.
 - Implemente até os testes passarem. **1 tarefa = 1 commit atômico** (a
   mensagem cita a tarefa: `T-003 <feature>: ...`). Marque `[concluida]` só
   com prova PASS.

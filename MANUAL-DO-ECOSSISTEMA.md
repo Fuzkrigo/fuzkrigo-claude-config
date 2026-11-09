@@ -348,7 +348,9 @@ Não tem nenhuma? Escreva "Nenhuma." e desconfie de si mesmo.
 
 **A spec também documenta a própria feature.** O nome da pasta diz de onde ela veio: `e2-` para a
 etapa E2 do CHECKLIST, `i42-` para a issue avulsa 42, nenhum prefixo em projeto descartável. O
-`new` grava a etapa e a issue no cabeçalho (`> etapa: E2`, `> issue: #7`). Casos de borda (entrada
+`new` grava a etapa e a issue no cabeçalho (`> etapa: E2`, `> issue: #7`) e mostra na saída o que
+reconheceu, para você conferir: um nome como `e2e-testes` é lido como a etapa "E2e", então não
+comece o nome com `e<n><letra>-` sem ser uma etapa. Casos de borda (entrada
 vazia, valor no limite, erro de dependência, permissão negada, dado duplicado) viram critérios de
 aceite próprios, porque só critério ganha teste e prova. Se a spec mudar depois de `pronta`, a
 mudança e o motivo entram no `## Histórico`. Antes do PR, a `## Resolução` registra o PR, a
@@ -381,7 +383,9 @@ fspec scaffold e2-recuperacao-senha
 ```
 
 Gera o esqueleto de teste para cada critério sem teste — todos **falhando**. Essa é a definição de
-pronto, executável desde o primeiro minuto.
+pronto, executável desde o primeiro minuto. Se o arquivo de testes da feature já existe, o
+scaffold acrescenta no fim só os esqueletos que faltam e nunca reescreve o que você escreveu;
+rode de novo sempre que a spec ganhar um critério.
 
 Em Python, a etiqueta vive em dois lugares e os dois importam:
 
@@ -539,7 +543,7 @@ fspec assumptions                          # o que estamos assumindo
 
 # feature
 fspec new <feature>                        # cria spec.md e tasks.md
-fspec scaffold <feature>                   # gera os testes que falham
+fspec scaffold <feature>                   # acrescenta os testes que falham
 fspec tarefa <feature> <T-xxx> <status>    # pendente | em-andamento | concluida
 fspec plano <feature>                      # agrupa tarefas em faixas paralelas
 fspec painel <feature>                     # acompanhamento ao vivo no navegador
@@ -629,18 +633,19 @@ instalação de uma status line chegou a sobrescrever o `settings.json` global, 
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são onze conjuntos de ajustes no motor — o suporte a Python, o
+**patches locais** no `README.md`: são doze conjuntos de ajustes no motor — o suporte a Python, o
 audit com escopo de feature, os nomes próprios, o modelo padrão por alias, o preset LGPD para
 Python e JavaScript, as mensagens e a saída do motor, a spec rastreável, a numeração contínua no
-`new`, a prova do princípio com a unicidade das tarefas, o princípio repetido na constituição, e
-o executor na branch da issue com o gate por feature. As doze suítes que os protegem rodam assim:
+`new`, a prova do princípio com a unicidade das tarefas, o princípio repetido na constituição, o
+executor na branch da issue com o gate por feature, e o scaffold que acrescenta com o `new` que
+mostra o rastreio. As catorze suítes que os protegem rodam assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
-node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs test/spec-rastreavel.test.mjs test/numeracao-continua.test.mjs test/prova-de-principio.test.mjs test/unicidade-tarefas.test.mjs test/unicidade-principios.test.mjs test/executor-plano.test.mjs
+node --test test/ponte-python.test.mjs test/audit-por-feature.test.mjs test/nomes-fuzkrigo.test.mjs test/modelo-padrao.test.mjs test/preset-lgpd.test.mjs test/saida-do-motor.test.mjs test/spec-rastreavel.test.mjs test/numeracao-continua.test.mjs test/prova-de-principio.test.mjs test/unicidade-tarefas.test.mjs test/unicidade-principios.test.mjs test/executor-plano.test.mjs test/scaffold-acrescenta.test.mjs test/new-mostra-rastreio.test.mjs
 ```
 
-São 56 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+São 62 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:

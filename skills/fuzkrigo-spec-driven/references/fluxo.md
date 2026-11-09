@@ -58,7 +58,8 @@ Como aluno, quero enviar meu dever antes do prazo, para que conte como no prazo.
 # 3. cada critério de aceite vira um teste executável (a definição de pronto)
 fuzkrigo-spec scaffold e1-entrega-dever-casa
 # → cria test/e1-entrega-dever-casa.spec.test.js com testes que FALHAM
-#   (inclui esqueletos p/ princípios da constituição com verificação(teste))
+#   (inclui esqueletos p/ princípios da constituição com verificação(teste));
+#   se o arquivo já existe, acrescenta no fim só os critérios sem teste
 ```
 
 O scaffold segue a stack do `testCommand`: com `pytest` no comando, ele gera

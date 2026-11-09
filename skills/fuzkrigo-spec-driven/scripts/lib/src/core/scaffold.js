@@ -1,9 +1,12 @@
 // scaffold — o DoD nasce executável.
 // Para cada AC sem teste anotado, gera um esqueleto de teste que FALHA
 // até ser implementado. O título carrega @spec:AC-xxx; o corpo carrega
-// o Dado/Quando/Então da spec como roteiro.
+// o Dado/Quando/Então da spec como roteiro. Com o arquivo de testes já
+// existente, acrescenta os esqueletos ao fim e nunca o reescreve.
+// With the test file already in place, it appends the skeletons at the end
+// and never rewrites it.
 
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
 function detectStyle(config) {
@@ -56,25 +59,13 @@ function renderPyTest(story, ac) {
   return lines.join('\n');
 }
 
-export function scaffoldTests(project, featureName, { force = false } = {}) {
-  const { config } = project;
-  const feature = project.features.find((f) => f.name === featureName);
-  if (!feature?.spec) {
-    throw new Error(`feature "${featureName}" não encontrada ou sem spec.md`);
-  }
-
+// Critérios de aceite e princípios ainda sem teste anotado.
+// Acceptance criteria and principles still without an annotated test.
+function pendingItems(project, feature) {
   const testFileSet = new Set(project.testFiles);
   const tagged = new Set(
     project.annotations.specTags.filter((t) => testFileSet.has(t.file)).map((t) => t.acId)
   );
-
-  const style = detectStyle(config);
-  const ext = style === 'pytest' ? 'py' : 'js';
-  const fileName =
-    style === 'pytest' ? `test_spec_${featureName.replace(/-/g, '_')}.py` : `${featureName}.spec.test.${ext}`;
-  const outDir = path.join(config.rootDir, style === 'pytest' ? 'tests' : 'test');
-  const outPath = path.join(outDir, fileName);
-
   const pending = [];
   for (const story of feature.spec.stories) {
     for (const ac of story.acs) {
@@ -87,52 +78,85 @@ export function scaffoldTests(project, featureName, { force = false } = {}) {
   const taggedPrinciples = new Set(
     project.annotations.principleTags.filter((t) => testFileSet.has(t.file)).map((t) => t.principleId)
   );
-  const pendingPrinciples = [];
+  const principles = [];
   for (const p of project.constitution?.principles || []) {
     for (const check of p.checks) {
       if (check.kind === 'teste' && !taggedPrinciples.has(check.principleTag)) {
-        pendingPrinciples.push({ principle: p, tag: check.principleTag });
+        principles.push({ principle: p, tag: check.principleTag });
       }
     }
   }
+  return { pending, principles };
+}
 
-  if (pending.length === 0 && pendingPrinciples.length === 0) {
-    return { created: null, pending: 0, message: 'todos os critérios de aceite (e princípios) já têm teste anotado' };
-  }
-  if (existsSync(outPath) && !force) {
-    throw new Error(
-      `${path.relative(config.rootDir, outPath)} já existe — use --force para sobrescrever ou anote os testes existentes`
+// Cabeçalho e imports: só no arquivo novo. / Header and imports: new file only.
+function fileHeader(style, featureName) {
+  return style === 'pytest'
+    ? `# Testes de spec da feature ${featureName} — gerados por fuzkrigo-spec scaffold\n\n`
+    : `// Testes de spec da feature ${featureName} — gerados por fuzkrigo-spec scaffold\n${jsHeader(style)}\n`;
+}
+
+// Os esqueletos, separados por uma linha em branco.
+// The skeletons, separated by a blank line.
+function renderBody(style, { pending, principles }) {
+  if (style === 'pytest') {
+    return (
+      pending.map(({ story, ac }) => renderPyTest(story, ac)).join('\n\n') +
+      principles.map(({ principle, tag }) => `\n\n${renderPyPrinciple(principle, tag)}`).join('')
     );
   }
+  return (
+    pending.map(({ story, ac }) => renderJsTest(style, story, ac)).join('\n\n') +
+    principles.map(({ principle, tag }) => `\n\n${renderJsPrinciple(style, principle, tag)}`).join('')
+  );
+}
 
-  let content;
-  if (style === 'pytest') {
-    content = `# Testes de spec da feature ${featureName} — gerados por fuzkrigo-spec scaffold\n\n`;
-    content += pending.map(({ story, ac }) => renderPyTest(story, ac)).join('\n\n');
-    content += pendingPrinciples
-      .map(({ principle, tag }) => `\n\n${renderPyPrinciple(principle, tag)}`)
-      .join('');
-    content += '\n';
-  } else {
-    content = `// Testes de spec da feature ${featureName} — gerados por fuzkrigo-spec scaffold\n${jsHeader(style)}\n`;
-    content += pending.map(({ story, ac }) => renderJsTest(style, story, ac)).join('\n\n');
-    content += pendingPrinciples
-      .map(({ principle, tag }) => `\n\n${renderJsPrinciple(style, principle, tag)}`)
-      .join('');
-    content += '\n';
+export function scaffoldTests(project, featureName) {
+  const { config } = project;
+  const feature = project.features.find((f) => f.name === featureName);
+  if (!feature?.spec) {
+    throw new Error(`feature "${featureName}" não encontrada ou sem spec.md`);
   }
 
-  mkdirSync(outDir, { recursive: true });
-  writeFileSync(outPath, content);
+  const style = detectStyle(config);
+  const fileName =
+    style === 'pytest' ? `test_spec_${featureName.replace(/-/g, '_')}.py` : `${featureName}.spec.test.js`;
+  const outDir = path.join(config.rootDir, style === 'pytest' ? 'tests' : 'test');
+  const outPath = path.join(outDir, fileName);
+
+  const items = pendingItems(project, feature);
+  const total = items.pending.length + items.principles.length;
+  if (total === 0) {
+    return { file: null, pending: 0, message: 'todos os critérios de aceite (e princípios) já têm teste anotado' };
+  }
+
+  const body = renderBody(style, items);
+  const appended = existsSync(outPath);
+  if (appended) {
+    // Nunca reescreve: só acrescenta ao fim, depois de uma linha em branco.
+    // Never rewrites: only appends at the end, after a blank line.
+    const separator = readFileSync(outPath, 'utf-8').endsWith('\n') ? '\n' : '\n\n';
+    appendFileSync(outPath, `${separator}${body.replace(/^\n+/, '')}\n`);
+  } else {
+    mkdirSync(outDir, { recursive: true });
+    writeFileSync(outPath, `${fileHeader(style, featureName)}${body}\n`);
+  }
 
   return {
-    created: path.relative(config.rootDir, outPath),
-    pending: pending.length + pendingPrinciples.length,
-    acIds: [
-      ...pending.map((p) => p.ac.id),
-      ...pendingPrinciples.map((p) => p.tag),
-    ],
+    file: path.relative(config.rootDir, outPath),
+    appended,
+    pending: total,
+    acIds: [...items.pending.map((p) => p.ac.id), ...items.principles.map((p) => p.tag)],
   };
+}
+
+// O que o CLI imprime depois do scaffold. / What the CLI prints after scaffold.
+export function scaffoldSummary(result) {
+  if (!result.file) return [result.message];
+  const head = result.appended
+    ? `✔ ${result.file} recebeu ${result.pending} esqueleto(s) no fim (falham até você implementar); o que já estava no arquivo ficou intacto`
+    : `✔ ${result.file} criado com ${result.pending} teste(s)-esqueleto (todos FALHAM até você implementar)`;
+  return [head, `  critérios cobertos: ${result.acIds.join(', ')}`];
 }
 
 function renderJsPrinciple(style, principle, tag) {
