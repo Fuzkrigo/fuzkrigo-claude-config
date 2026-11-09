@@ -18,7 +18,7 @@ A `main` deste repositório é protegida: toda mudança entra por pull request, 
 ├── settings.json                    # Configuração do Claude Code (modelo, idioma, tema, effort level, hooks, status line)
 ├── references/                      # Referências globais, fora de qualquer skill (~/.claude/references/)
 │   ├── git-conventions.md           # Commits semânticos, branches, PRs, squash das faixas paralelas
-│   └── github/                      # Copiado para o .github/ do projeto: templates de issue e PR + workflow de CI + scripts de cobertura
+│   └── github/                      # Copiado para o .github/ do projeto: templates de issue e PR + workflow de CI + scripts de cobertura + .gitattributes (scripts em LF)
 ├── skills/                          # Skills empacotadas, extraídas para texto legível
 │   ├── iniciar-projeto/             # Abertura, documentação e gestão de projeto (Blocos A e C)
 │   ├── fuzkrigo-spec-driven/        # Desenvolvimento por feature com prova mecânica (Bloco B), motor node embarcado

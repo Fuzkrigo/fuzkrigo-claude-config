@@ -267,6 +267,8 @@ dente não existe.
 cada pull request e a cada push na `main`, o GitHub roda os testes, mede a cobertura e reprova
 abaixo do limite, e audita a especificação — sozinho, sem sessão aberta. É o que garante que nada
 entre na `main` sem passar pelo mesmo crivo, mesmo quando você mescla às pressas de outra máquina.
+O `.github/` traz também um `.gitattributes` que mantém os scripts do CI em LF: com CRLF, vindo de
+uma cópia no Windows, o bash quebraria em cada linha.
 
 Duas coisas fazem o CI funcionar, e as duas acontecem em A3:
 

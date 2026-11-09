@@ -1,0 +1,9 @@
+# Vira .github/.gitattributes no projeto. Os scripts que o ci.yml chama
+# precisam de LF: com CRLF, o bash quebra em cada linha ($'\r': command not
+# found). O Git aplica este arquivo ao que esta abaixo de .github/, com
+# prioridade sobre o .gitattributes da raiz do projeto, sem mesclar nada nele.
+# Becomes .github/.gitattributes in the project. The scripts that ci.yml calls
+# need LF: with CRLF, bash breaks on every line ($'\r': command not found).
+# Git applies this file to everything under .github/, with precedence over the
+# project's root .gitattributes, without merging anything into it.
+*.sh text eol=lf
