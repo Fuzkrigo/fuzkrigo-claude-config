@@ -567,3 +567,48 @@ Achados fora do briefing, durante a execução:
 | `cli.js` passa do limite de 500 linhas: 783 antes da rodada, 826 depois | Registrado; dividir o arquivo é uma refatoração própria | — |
 | Um nome que começa com `e2e-` é lido como a etapa "E2e" pela regra do prefixo | Registrado | — |
 | O audit não confere `T-xxx` duplicada entre features, embora o `escrevendo-specs.md` diga que duplicar um código é acusado | Registrado | — |
+
+## Rodada 4 — 08/11/2026
+
+> Estado auditado: commit `d9ceae8`, o commit 6 da rodada (motor: 14 suítes, 62 casos; hooks e
+> status line: 39 testes; workflow `Testes` verde em `ubuntu-latest` e `windows-latest` no PR #9).
+
+| Item | Problema | Decisão | Commit |
+| --- | --- | --- | --- |
+| 1 | O audit não confere se o teste de um princípio passou | O audit lê a prova do princípio (achado `PRINCIPIO_SEM_PROVA`) | `b6206e0` |
+| 2 | O gate final do executor paralelo roda `audit --ci` sem `--feature` | Gate por feature | `c4e27d2` |
+| 3 | O executor força a branch `spec/<feature>` | Trabalhar na branch atual; recusar a `main` | `c4e27d2` |
+| 4 | O CI não impede merge | A A3 liga a proteção da `main` (conta Free, repositórios públicos) | `8bf510b` |
+| 5a | O audit do CI é pulado quando o motor não foi commitado | Falhar quando o projeto é do fluxo | `ee6ad1c` |
+| 5b | `pip install -e . \|\| true` esconde falha | Instalar só quando há pacote, e falhar de verdade | `ee6ad1c` |
+| 6 | `scaffold --force` apaga testes já escritos | O scaffold sempre acrescenta, nunca reescreve | `b3023ce` |
+| 7 | `cli.js` acima de 500 linhas | Exceção consciente (abaixo) | — |
+| 8 | O audit não acusa `T-xxx` duplicada | Tarefas entram na checagem de unicidade | `b6206e0` |
+| 9 | Nome `e2e-...` é lido como etapa "E2e" | O `new` imprime a etapa e a issue reconhecidas | `b3023ce` |
+| 10 | Relatórios soltos na raiz | Relatórios ficam em `Claude outputs/` (abaixo) | — |
+| 11 | Este repositório não tem CI | Workflow `.github/workflows/testes.yml`; depois do merge, a `main` deste repositório também fica protegida | `d9ceae8` |
+
+Commits da rodada: 1 = `b6206e0`, 2 = `c4e27d2`, 3 = `b3023ce`, 4 = `ee6ad1c`, 5 = `8bf510b`,
+6 = `d9ceae8`.
+
+**Item 7, exceção consciente.** O `cli.js` passa de 500 linhas (826 antes da rodada, 821 depois) e
+fica assim por decisão do usuário, por ser o ponto de entrada essencial do motor. Ele não deve
+crescer além do necessário: nesta rodada, a lógica nova do `new` foi para `core/rastreio.js`.
+
+**Item 10.** Os relatórios das rodadas ficam em `Claude outputs/`, que não é versionado
+(`.gitignore`). `RELATORIO-RODADA-2.md` e `RELATORIO-RODADA-3.md` saíram da raiz para lá.
+
+O registro completo das opções e dos motivos está no log de decisões do projeto de desenho do
+ecossistema (`log-de-decisoes.md` do projeto "Ecosistema de Desenvolvimento", seção "Rodada 4").
+
+Achados fora do briefing, durante a execução:
+
+| Achado | Decisão | Commit |
+| --- | --- | --- |
+| Dois `## P-001` na constituição passavam sem achado | `ID_DUPLICADO` com as duas linhas (Patch 10), aprovado pelo usuário | `f088d58` |
+| No PR, o passo de audit tem `continue-on-error`, então falhar ali pela falta do motor não reprovaria | Passo próprio "Conferir o motor de auditoria", aprovado pelo usuário | `ee6ad1c` |
+| Em repositório sem nenhum push, a API de proteção responde `Branch not found` | O agente reporta e deixa a proteção para depois do primeiro push | `8bf510b` |
+| As actions oficiais do modelo de CI (`checkout` e `setup-node` v4, `setup-python` v5) usam Node 20, descontinuado nos runners | Atualizadas para v7 (Node 24), com prova num repositório descartável, aprovado pelo usuário | `de37f5d` |
+| Os `.sh` de `.github/scripts/`, copiados para projeto sem `.gitattributes`, viram CRLF na cópia de trabalho no Windows | Registrado: só afeta quem rodar os scripts no Windows; o CI roda em Linux | — |
+| Este repositório era privado, e a proteção da `main` não existe em repositório privado na conta Free | O usuário tornou o repositório público para o passo final | — |
+| O grep de aceite do commit 3 acha a sintaxe antiga num relatório antigo em `Claude outputs/` | Aceito pelo usuário: nos arquivos versionados o grep volta vazio | — |
