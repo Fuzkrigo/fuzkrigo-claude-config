@@ -204,3 +204,15 @@ Critério de coerência, aplicado pelo agente `code-reviewer`:
 - **Não aceitos:** "difícil de testar"; "sem tempo"; qualquer trecho com regra de negócio real; justificativa genérica que serviria para qualquer linha.
 
 Exclusão sem justificativa, ou com justificativa incoerente, é achado crítico do `code-reviewer`.
+
+---
+
+## 9. Conferência de Fechamento
+
+Total que precisa fechar (percentuais que somam 100%, débito igual a crédito, conciliação entre bases) é conferido pelo próprio programa; na spec, entra como regra de fechamento (skill `fuzkrigo-spec-driven`, `references/casos-de-borda.md`).
+
+- Roda no fim do processamento, sobre o resultado final.
+- A tolerância é declarada num lugar só (constante ou configuração), nunca repetida pelo código.
+- Diferença acima da tolerância para o processamento com erro e lista os itens que quebraram o fechamento.
+- Nunca criar linha de ajuste, arredondamento ou "diferença" para forçar o total.
+- O caminho de falha tem teste próprio, além do teste de que fecha.
