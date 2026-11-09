@@ -279,8 +279,9 @@ foi subdimensionada.
   gerais e o pacote do domínio. Preencha a seção
   `## Casos de borda e regras de fechamento` da spec: uma linha por borda
   relevante, com a decisão — o critério de aceite que a cobre (`AC-xxx`), a
-  suposição que a assume (`ASM-xxx`) ou `Não se aplica: <motivo>` (sem motivo,
-  é achado). Cada total que precisa fechar entra com tolerância e dois
+  suposição que a assume (`ASM-xxx`), o princípio da constituição que já a
+  cobre (`P-xxx`) ou `Não se aplica: <motivo>` (sem motivo, é achado). As duas
+  provas de cada regra de fechamento são critérios desta spec. Cada total que precisa fechar entra com tolerância e dois
   critérios diferentes: um prova que fecha, o outro prova que o programa para
   quando não fecha; sem total a fechar, "Nenhuma.". Caso de borda descrito em
   prosa, ou só no código, o audit não cobra. Formato e exemplo:
@@ -425,9 +426,9 @@ conversar com o usuário, use o nome legível.
 | status de tarefa inválido (TASK_STATUS_INVALIDO) | status não reconhecido | use pendente/em-andamento/concluida |
 | suposição em aberto (ASM_ABERTA) | suposição aberta numa feature "pronta" | confirme/invalide com o usuário |
 | seção obrigatória ausente (SECAO_AUSENTE) | spec sem seção Suposições, Perguntas ou Casos de borda e regras de fechamento | registre-as ou escreva "Nenhuma." (nas bordas, uma linha por borda) |
-| caso de borda sem decisão (BORDA_INCOMPLETA) | borda sem categoria, situação ou decisão válida, "Não se aplica" sem motivo, ou subseção de bordas vazia | decida: `AC-xxx`, `ASM-xxx` ou `Não se aplica: motivo` |
+| caso de borda sem decisão (BORDA_INCOMPLETA) | borda sem categoria, situação ou decisão válida, "Não se aplica" sem motivo, ou subseção de bordas vazia | decida: `AC-xxx`, `ASM-xxx`, `P-xxx` ou `Não se aplica: motivo` |
 | regra de fechamento incompleta (FECHAMENTO_INCOMPLETO) | total a fechar sem tolerância, sem os dois critérios ou com o mesmo critério nas duas provas; subseção sem regra e sem "Nenhuma." | declare a tolerância e escreva o critério que fecha e o que para |
-| referência a critério ou suposição que não existe nesta especificação (REF_SPEC_INEXISTENTE) | a seção de bordas cita código que não existe nesta spec (inclusive o de outra feature); erro mesmo em rascunho | corrija o código ou crie o critério nesta spec |
+| referência a código que não existe (REF_SPEC_INEXISTENTE) | a seção de bordas cita critério ou suposição que não existe nesta spec (inclusive o de outra feature), ou princípio que não existe na constituição; erro mesmo em rascunho | corrija o código, ou crie o critério nesta spec |
 | princípio violado (PRINCIPIO_VIOLADO) | quebrou a constituição | conserte o código, não o princípio |
 | princípio sem prova (PRINCIPIO_SEM_PROVA) | o teste do princípio falhou, foi PULADO ou nunca rodou num verify | rode `verify`; conserte o código até o teste passar |
 | verificação não olha nenhum arquivo (GLOB_SEM_ARQUIVOS) | glob da constituição não casa nada | corrija o glob |

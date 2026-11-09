@@ -86,14 +86,16 @@ O que o audit cobra nessa seção:
 | Situação | Achado |
 |---|---|
 | Spec sem a seção | `SECAO_AUSENTE` |
-| Borda sem categoria, situação ou decisão válida (`AC-xxx`, `ASM-xxx` ou "Não se aplica:" com motivo); subseção de bordas sem nenhuma linha | caso de borda sem decisão (`BORDA_INCOMPLETA`) |
+| Borda sem categoria, situação ou decisão válida (`AC-xxx`, `ASM-xxx`, `P-xxx` ou "Não se aplica:" com motivo); subseção de bordas sem nenhuma linha | caso de borda sem decisão (`BORDA_INCOMPLETA`) |
 | Regra de fechamento sem tolerância ("exata" vale), sem os dois critérios ou com o mesmo critério nas duas colunas; subseção sem regra e sem "Nenhuma." | regra de fechamento incompleta (`FECHAMENTO_INCOMPLETO`) |
-| Decisão ou prova que cita critério ou suposição que não existe nesta spec | referência inexistente (`REF_SPEC_INEXISTENTE`) |
+| Decisão ou prova que cita critério ou suposição que não existe nesta spec, ou princípio que não existe na constituição | referência a código que não existe (`REF_SPEC_INEXISTENTE`) |
 
 Os três primeiros são aviso em `rascunho` e erro de `pronta` em diante, como as
 outras seções obrigatórias. A referência inexistente é erro sempre. A borda
 que se aplica ganha critério próprio; a que depende de algo não confirmado
-vira suposição; a que não se aplica leva o motivo.
+vira suposição; a que um princípio da constituição já cobre cita o `P-xxx`;
+a que não se aplica leva o motivo. As provas da regra de fechamento são
+sempre critérios desta spec (`AC-xxx`).
 
 ```markdown
 #### AC-005 — Entrega no último segundo do prazo conta como no prazo

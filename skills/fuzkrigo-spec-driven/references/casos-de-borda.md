@@ -32,6 +32,8 @@ exigido nem prova. É onde o defeito costuma morar.
    - `AC-xxx`: o critério de aceite desta spec que cobre a borda (o normal);
    - `ASM-xxx`: a suposição desta spec que a assume, quando a borda depende
      de algo ainda não confirmado;
+   - `P-xxx`: o princípio da constituição que já cobre a borda no projeto
+     inteiro (seção 6); quem prova é o teste do princípio;
    - `Não se aplica: <motivo>`: a borda não cabe nesta feature. **O motivo é
      obrigatório**; sem ele, o audit acusa caso de borda sem decisão
      (`BORDA_INCOMPLETA`).
@@ -41,8 +43,9 @@ exigido nem prova. É onde o defeito costuma morar.
 4. Liste os totais que precisam fechar na tabela `### Regras de fechamento`
    (seção 5), ou escreva "Nenhuma." no lugar da tabela.
 
-O código citado precisa existir **nesta** spec. Critério ou suposição de outra
-feature não vale aqui: o audit acusa referência inexistente
+Critério e suposição citados precisam existir **nesta** spec: os de outra
+feature não valem aqui. Princípio citado precisa existir na constituição do
+projeto. Fora disso, o audit acusa referência a código que não existe
 (`REF_SPEC_INEXISTENTE`, erro mesmo em rascunho).
 
 ```markdown
@@ -56,6 +59,7 @@ feature não vale aqui: o audit acusa referência inexistente
 | Unidade | Alíquota gravada como 18 ou como 0,18 | AC-005 |
 | Volume | Base com 200 mil linhas | Não se aplica: a base mensal tem até 5 mil linhas |
 | Tempo | Nota de dezembro lançada em janeiro | ASM-002 |
+| Identificador | Chave de acesso da NF-e com 44 dígitos | P-003 |
 
 ### Regras de fechamento
 
@@ -162,6 +166,8 @@ Cada regra registra quatro coisas na tabela `### Regras de fechamento`:
 Os dois critérios são obrigatórios e **diferentes entre si**. Só o primeiro
 prova o caminho feliz; é o segundo que garante que um fechamento quebrado não
 passa em silêncio. Mesmo critério nas duas colunas é `FECHAMENTO_INCOMPLETO`.
+As duas provas são sempre critérios desta spec (`AC-xxx`): princípio não vale
+ali, porque total que fecha no projeto inteiro mora na constituição (seção 6).
 
 **Nunca ajuste o resultado para fechar.** Linha de "ajuste", "arredondamento"
 ou "diferença" criada para forçar o total esconde o defeito que o fechamento
@@ -192,9 +198,9 @@ Feature sem total que precise fechar: troque a tabela por uma linha com
 - **Borda repetida vira princípio.** Se a mesma borda aparece na spec de uma
   segunda feature, ela não é da feature: é do projeto. Proponha ao usuário um
   princípio na constituição, com `verificação(teste)`. Daí em diante, as specs
-  registram a linha com a decisão
-  `Não se aplica: coberta pelo princípio P-xxx da constituição`, e quem prova
-  a regra é o teste do princípio.
+  registram a linha da borda com o código do princípio na decisão (`P-xxx`);
+  o audit confere que ele existe na constituição, e quem prova a regra é o
+  teste do princípio.
 - **Regra de fechamento que vale para o projeto inteiro vira princípio** com
   `verificação(teste)`: o teste do princípio prova o fechamento e a parada.
 - **Presets de domínio já trazem os princípios mais comuns.**

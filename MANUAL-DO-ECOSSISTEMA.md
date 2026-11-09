@@ -374,9 +374,9 @@ Os casos de borda saem do catálogo da skill (`references/casos-de-borda.md`): c
 (vazio, limites, formato, unidade, identificador com cara de número, tempo, repetição, volume,
 falha de dependência, permissão, ambiente) e pacotes por domínio (dados tabulares, interface web,
 integração e API). Cada borda relevante ganha uma linha com a decisão: o critério de aceite que a
-cobre, a suposição que a assume, ou "Não se aplica:" com o motivo. Cada total que precisa fechar
-ganha tolerância e dois critérios diferentes, um que prova que fecha e outro que prova que o
-programa para quando não fecha:
+cobre, a suposição que a assume, o princípio da constituição que já a cobre (`P-xxx`), ou "Não se
+aplica:" com o motivo. Cada total que precisa fechar ganha tolerância e dois critérios diferentes,
+um que prova que fecha e outro que prova que o programa para quando não fecha:
 
 ```markdown
 ## Casos de borda e regras de fechamento
@@ -394,7 +394,9 @@ programa para quando não fecha:
 Nenhuma.
 ```
 
-O código citado precisa existir nesta spec; critério de outra feature é erro, mesmo em rascunho.
+Critério e suposição citados precisam existir nesta spec (critério de outra feature é erro, mesmo
+em rascunho); princípio citado precisa existir na constituição. As provas do fechamento são sempre
+critérios desta spec.
 
 **A spec também documenta a própria feature.** O nome da pasta diz de onde ela veio: `e2-` para a
 etapa E2 do CHECKLIST, `i42-` para a issue avulsa 42, nenhum prefixo em projeto descartável. O
@@ -629,9 +631,9 @@ Os mais comuns:
 | verificação não olha nenhum arquivo | O glob do princípio não casa nada | Corrija o glob: a regra estava inerte |
 | código órfão | Existe código que nenhuma tarefa mapeia | Mapeie na tarefa, ou questione por que ele existe |
 | prova fraca | A prova veio só do código de saída global | Configure um reporter com granularidade |
-| caso de borda sem decisão | Uma borda sem decisão válida, "Não se aplica" sem motivo, ou nenhuma borda registrada | Decida: o critério, a suposição ou "Não se aplica:" com o motivo |
+| caso de borda sem decisão | Uma borda sem decisão válida, "Não se aplica" sem motivo, ou nenhuma borda registrada | Decida: o critério, a suposição, o princípio ou "Não se aplica:" com o motivo |
 | regra de fechamento incompleta | Total a fechar sem tolerância, sem os dois critérios ou com o mesmo critério nos dois | Declare a tolerância e escreva o critério que fecha e o que para |
-| referência a critério ou suposição que não existe nesta especificação | A seção de bordas cita um código que não está nesta spec | Corrija o código ou crie o critério aqui |
+| referência a código que não existe | A seção de bordas cita critério ou suposição que não está nesta spec, ou princípio que não está na constituição | Corrija o código, ou crie o critério aqui |
 
 ---
 
@@ -701,7 +703,7 @@ cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
 node --test test/*.test.mjs
 ```
 
-O glob pega suíte nova sem mudar o comando. São 87 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+O glob pega suíte nova sem mudar o comando. São 91 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:

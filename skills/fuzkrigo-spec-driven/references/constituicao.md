@@ -126,9 +126,10 @@ feature. Duas situações o levam para o projeto:
 - **Borda repetida vira princípio.** Se a mesma borda aparece na spec de uma
   segunda feature, ela é do projeto, não da feature. Proponha ao usuário um
   princípio com `verificação(teste)`; daí em diante, as specs registram a
-  linha da borda com a decisão
-  `Não se aplica: coberta pelo princípio P-xxx da constituição`, e quem prova
-  a regra é o teste do princípio.
+  linha da borda com o código do princípio na decisão (`P-xxx`). O audit
+  confere que o princípio existe nesta constituição (senão, referência a
+  código que não existe, `REF_SPEC_INEXISTENTE`), e quem prova a regra é o
+  teste do princípio.
 - **Regra de fechamento global vira princípio.** Total que precisa fechar em
   todo o projeto (débito igual a crédito, conciliação entre duas bases) vira
   princípio [DEVE] com `verificação(teste)`. O teste do princípio prova as

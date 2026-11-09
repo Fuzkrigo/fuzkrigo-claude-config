@@ -667,6 +667,15 @@ Registrado durante a execução, sem correção:
 | `parseSpec` (`parsers/spec.js`) já passava de 50 linhas antes da rodada e ganhou as linhas que entregam a seção nova ao `parsers/bordas.js` | Registrado; quebrar a função é refatoração própria |
 | A mensagem de constituição ausente (`CONSTITUICAO_AUSENTE`) ainda cita só o preset LGPD/educação | Registrado; não afeta o comportamento |
 
+**Ajuste da conferência (09/11/2026).** Na conferência do PR, o usuário decidiu que a decisão de
+uma borda também aceita o princípio da constituição (`P-xxx`), além de `AC-xxx`, `ASM-xxx` e
+"Não se aplica:". Princípio que não existe na constituição, ou citado num projeto sem
+constituição, é `REF_SPEC_INEXISTENTE` (erro sempre); o rótulo do achado passou a "referência a
+código que não existe". As duas provas da regra de fechamento continuam só `AC-xxx`. Motor:
+commit `d8a4f45`, com 4 casos novos na suíte `bordas-e-fechamento` (20 ao todo; 91 no motor).
+A documentação (catálogo, referências e `SKILL.md` da skill, MANUAL e README) foi ajustada no
+mesmo commit deste registro.
+
 O registro completo das opções e dos motivos está no log de decisões do projeto de desenho do
 ecossistema (`log-de-decisoes.md` do projeto "Ecosistema de Desenvolvimento", seção "Item 1 da F3:
 casos de borda e regras de fechamento").
