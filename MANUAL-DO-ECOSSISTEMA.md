@@ -242,8 +242,10 @@ comando `gh repo create` montado, eu te pergunto, e ele é invocado de novo com 
 pronto. O GitHub Projects não entra: o board é o do Linear. O agente também protege a `main`:
 dali em diante, mudança só entra por PR com o CI verde e a branch atualizada, inclusive a sua, e
 até os arquivos da própria A3 seguem esse caminho. Em repositório privado na conta Free o GitHub
-não oferece a proteção; o agente devolve a recusa, e o risco vai para o ROADMAP. E o projeto
-ganha sua constituição:
+não oferece a proteção; o agente devolve a recusa, e o risco vai para o ROADMAP. Cuidado com a
+volta: tornar o repositório privado na conta Free derruba a proteção, e voltar a público não a
+restaura. Invoque o `project-manager` de novo para reaplicá-la. E o projeto ganha sua
+constituição:
 
 **[terminal]** (na prática, quem roda sou eu, durante A3)
 
