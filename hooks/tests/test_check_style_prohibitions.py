@@ -8,7 +8,8 @@ Emoji and forbidden phrases are built by construction, never written
 literally: the hook itself would block writing this file.
 
 Rodar da raiz / Run from the repository root:
-    py -3 -m unittest discover -s hooks/tests -v
+    py -3 -m unittest discover -s hooks/tests -v      (Windows)
+    python3 -m unittest discover -s hooks/tests -v    (Linux/WSL)
 """
 import os
 import tempfile

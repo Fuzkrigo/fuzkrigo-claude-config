@@ -12,7 +12,8 @@ the harness does, controlling CLAUDE_PROJECT_DIR, the working directory and
 the system temp folder (where the Task Mode marker lives).
 
 Rodar da raiz / Run from the repository root:
-    py -3 -m unittest discover -s hooks/tests -v
+    py -3 -m unittest discover -s hooks/tests -v      (Windows)
+    python3 -m unittest discover -s hooks/tests -v    (Linux/WSL)
 """
 import json
 import os

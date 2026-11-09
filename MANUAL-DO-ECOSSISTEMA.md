@@ -136,7 +136,8 @@ uma branch. Esse é o elo que amarra tudo: se você entender só uma coisa deste
 
 ```bash
 node --version     # o motor de auditoria roda nele
-py -3 --version    # os tres hooks rodam com o lancador do Python
+py -3 --version    # Windows: os tres hooks rodam com o lancador do Python
+python3 --version  # Linux/WSL: no lugar do py -3; o run-python.sh escolhe sozinho
 git --version
 gh auth status     # so se voce for criar repositorio, labels e issues no GitHub
 ```
@@ -668,12 +669,14 @@ qual e onde.
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:
 
 ```bash
-py -3 -m unittest discover -s hooks/tests -v
+py -3 -m unittest discover -s hooks/tests -v      # Windows
+python3 -m unittest discover -s hooks/tests -v    # Linux/WSL
 ```
 
-São 39 casos. Três deles comparam o hook de planejamento com o próprio motor e precisam do `node`
-no PATH, e os três da status line precisam do `bash`; sem eles, ficam pulados (skip), não
-reprovados.
+São 44 casos. Três deles comparam o hook de planejamento com o próprio motor e precisam do `node`
+no PATH, e os três da status line e os cinco do lançador `run-python.sh` precisam do `bash`; sem
+eles, ficam pulados (skip), não reprovados. No WSL, sem `node` instalado no Linux, os três de
+paridade com o motor ficam pulados.
 
 No GitHub, o workflow `.github/workflows/testes.yml` roda as duas suítes a cada push na `main` e
 a cada pull request, em Linux e em Windows, com `node` e `bash` presentes, então nenhum caso fica

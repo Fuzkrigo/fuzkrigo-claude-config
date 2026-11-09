@@ -34,7 +34,7 @@ A `main` deste repositório é protegida: toda mudança entra por pull request, 
     ├── check_planning_docs.py       # PreToolUse (Write|Edit) — iniciar-projeto §4, Regra de Bloqueio
     ├── check_style_prohibitions.py  # PreToolUse (Write|Edit) — iniciar-projeto §8, Proibições de Estilo
     ├── run-python.sh                # Lançador dos três hooks: py -3 no Windows, python3 no Linux/WSL
-    └── tests/                       # testes dos hooks e da status line (unittest): py -3 -m unittest discover -s hooks/tests
+    └── tests/                       # testes dos hooks, do lançador e da status line (unittest): py -3 -m unittest discover -s hooks/tests no Windows, python3 no lugar de py -3 no Linux/WSL
 ```
 
 Cada skill segue o formato padrão do Claude Code: `SKILL.md` (entrada principal) + `references/` (documentação detalhada carregada sob demanda). A `fuzkrigo-spec-driven` traz também `scripts/`, com o motor de auditoria embarcado (Node, sem dependências externas).
@@ -58,7 +58,7 @@ Hooks são comandos que o harness executa automaticamente em eventos do ciclo de
 - As pastas em `skills/` correspondem a skills instaladas em `~/.claude/skills/` — aqui mantidas como texto para versionamento e documentação.
 - `references/` corresponde a `~/.claude/references/`. `git-conventions.md` e os templates de `.github/` viviam dentro da skill `iniciar-projeto`, mas o agente `project-manager` os lia por caminho físico — o que o quebraria em qualquer troca de skill. Saíram para cá justamente para que o agente não dependa de nenhuma skill específica.
 - `skills/fuzkrigo-spec-driven/` é uma adaptação de [onp-spec-driven](https://github.com/onovoprogramador/onp-spec-driven), de onovoprogramador, sob licença MIT — preservada aqui. A adaptação (renomeação, integração com o fluxo da `iniciar-projeto` e ajustes locais do motor) é própria. Os nomes funcionais herdados do projeto original foram trocados pelos próprios (Patch 3, abaixo): o motor lê `fuzkrigo.config.json` e os worktrees do plano paralelo nascem em `../fuzkrigo-worktrees/`. O motor é Node puro, sem dependências, e roda com o `node` do ambiente — não há instalação.
-- **Patches locais no motor** (reaplique se atualizar a skill a partir do upstream). São doze conjuntos, cobertos por catorze suítes em `skills/fuzkrigo-spec-driven/scripts/test/` — 62 casos ao todo, rodáveis com `node --test test/*.test.mjs` a partir de `scripts/`; o glob pega suíte nova sem mudar o comando. O workflow `.github/workflows/testes.yml` roda essas suítes e as dos hooks (39 casos) a cada push na `main` e a cada pull request, em Linux e em Windows.
+- **Patches locais no motor** (reaplique se atualizar a skill a partir do upstream). São doze conjuntos, cobertos por catorze suítes em `skills/fuzkrigo-spec-driven/scripts/test/` — 62 casos ao todo, rodáveis com `node --test test/*.test.mjs` a partir de `scripts/`; o glob pega suíte nova sem mudar o comando. O workflow `.github/workflows/testes.yml` roda essas suítes e as dos hooks (44 casos) a cada push na `main` e a cada pull request, em Linux e em Windows.
 - **Patch 12 — scaffold que acrescenta e `new` que mostra o rastreio** (`test/scaffold-acrescenta.test.mjs`, 4 casos, e `test/new-mostra-rastreio.test.mjs`, 2 casos): com o arquivo de testes da feature existente, o `scaffold` recusava, e o `--force` reescrevia o arquivo inteiro, apagando os testes escritos à mão. Agora ele acrescenta ao fim só os esqueletos dos critérios (e princípios) sem teste, depois de uma linha em branco, sem cabeçalho nem imports; arquivo novo continua nascendo igual, byte a byte. O `--force` é aceito, mas só avisa que não é mais necessário, e a mensagem final diz se o arquivo foi criado ou recebeu N esqueletos. O `new` passou a imprimir a etapa e a issue que reconheceu (`etapa: E1 · issue: #12`), porque um nome como `e2e-testes` é lido como a etapa "E2e". Tocou `core/scaffold.js` (a função principal foi quebrada em partes menores, abaixo de 50 linhas), `core/rastreio.js` e `cli.js`, que ficou 5 linhas menor.
 - **Patch 11 — executor na branch da issue e gate por feature** (`test/executor-plano.test.mjs`, 5 casos): o `executar-tarefas.sh` criava a branch `spec/<feature>` e fechava com `audit --ci` sem `--feature`; o gate de uma feature reprovava por causa de outra, e o trabalho saía da branch da issue. Agora o script trabalha na branch atual e recusa `main`, `master` e a branch padrão do remoto antes de qualquer commit, emite o evento `branch|<nome>`, que o painel usa no banner do gate, e fecha com `audit --ci --feature`. O `plano.json`, o `plano-execucao.md` (inclusive o modo manual) e o html deixaram de fixar `spec/<feature>`; as faixas continuam `spec/<feature>-faixa-N`. Tocou `core/plano.js` e `core/painel.js`.
 - **Patch 10 — princípio repetido na constituição** (`test/unicidade-principios.test.mjs`, 3 casos): dois `## P-001` na constituição passavam sem achado, e o segundo era auditado como se fosse outro princípio. Agora o parser da constituição acusa `ID_DUPLICADO` com as duas linhas; o achado é do projeto e sobrevive ao `--feature`. Tocou só `parsers/constitution.js`.
@@ -94,7 +94,7 @@ Este repositório é o backup versionado; o que o Claude Code carrega é o `~/.c
 
 ```bash
 git --version      # Git for Windows: traz o Git Bash, que roda os hooks (shell: bash)
-py -3 --version    # lancador do Python: os tres hooks rodam com ele
+py -3 --version    # lancador do Python: o run-python.sh dos hooks usa py -3 no Windows e python3 no Linux
 node --version     # Node LTS: o motor da fuzkrigo-spec-driven
 gh auth status     # GitHub CLI autenticado: o agente project-manager usa em A3 e C3
 jq --version       # opcional: a status line usa o jq e, sem ele, o python3/python do PATH
@@ -132,7 +132,41 @@ Para atualizar uma instalação antiga, apague antes a pasta de cada skill em `~
 
 **Validar:**
 
-1. Testes: `py -3 -m unittest discover -s hooks/tests` (neste repositório) e as suítes do motor a partir de `~/.claude/skills/fuzkrigo-spec-driven/scripts` (comando na seção 13 do `MANUAL-DO-ECOSSISTEMA.md`).
+1. Testes: `py -3 -m unittest discover -s hooks/tests` (neste repositório; no Linux/WSL, `python3` no lugar de `py -3`) e as suítes do motor a partir de `~/.claude/skills/fuzkrigo-spec-driven/scripts` (comando na seção 13 do `MANUAL-DO-ECOSSISTEMA.md`).
 2. Numa sessão nova, `/context all` lista o `~/.claude/CLAUDE.md` e o `CODIGO.md` importado em **Memory files**.
 3. Hooks: uma mensagem que começa com `#tarefa` cria `claude-modo-tarefa/<session_id>.flag` na pasta temporária do Windows; pedir a gravação de um arquivo com emoji, fora deste repositório, é negado pelo hook de estilo.
 4. A status line aparece no rodapé da sessão.
+
+## Instalação no `~/.claude/` (Linux e WSL)
+
+O procedimento é o da seção do Windows, com as diferenças abaixo. O `settings.json` é o mesmo, sem variante por sistema: o `run-python.sh` escolhe `py -3` no Windows e `python3` no Linux, e a status line é chamada por `bash`, então não depende da permissão de execução do arquivo, que se perde ao copiar entre Windows e WSL.
+
+**Pré-requisitos:**
+
+```bash
+bash --version     # roda os hooks (shell: bash) e a status line
+git --version
+python3 --version  # os tres hooks rodam com ele, pelo run-python.sh
+node --version     # Node LTS: o motor da fuzkrigo-spec-driven
+gh auth status     # GitHub CLI autenticado: o agente project-manager usa em A3 e C3
+jq --version       # opcional: a status line usa o jq e, sem ele, o python3
+```
+
+**No WSL, clone dentro do Linux**, e não em `/mnt/c`: o acesso ao disco do Windows é lento e mistura permissões e finais de linha.
+
+```bash
+mkdir -p ~/code
+gh repo clone Fuzkrigo/fuzkrigo-claude-config ~/code/fuzkrigo-claude-config
+cd ~/code/fuzkrigo-claude-config
+```
+
+**O que vai para onde, comandos e `settings.json`:** iguais aos da seção do Windows, num terminal bash na raiz do clone. A cópia dos hooks inclui o lançador: `cp hooks/*.py hooks/run-python.sh ~/.claude/hooks/`. O `settings.json` é o mesmo arquivo, mesclado do mesmo jeito.
+
+**Validar:**
+
+1. Testes: `python3 -m unittest discover -s hooks/tests -v` (neste repositório). Sem `node` no Linux, os três casos de paridade com o motor ficam pulados, não reprovados.
+2. Numa sessão nova, `/context all`, como no Windows.
+3. Hooks: uma mensagem que começa com `#tarefa` cria `/tmp/claude-modo-tarefa/<session_id>.flag`.
+4. A status line aparece no rodapé da sessão.
+
+**Dois `~/.claude`:** o Claude Code do WSL tem o próprio `~/.claude`, separado do `~/.claude` do Windows. Uma instalação num não chega ao outro. Qual dos dois é o principal, e se os dois coexistem, ainda está em aberto (F5).

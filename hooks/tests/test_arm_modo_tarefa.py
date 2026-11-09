@@ -8,7 +8,8 @@ The hook creates and removes the Task Mode marker from the prompt. TMP, TEMP
 and TMPDIR point to a per-case temporary folder.
 
 Rodar da raiz / Run from the repository root:
-    py -3 -m unittest discover -s hooks/tests -v
+    py -3 -m unittest discover -s hooks/tests -v      (Windows)
+    python3 -m unittest discover -s hooks/tests -v    (Linux/WSL)
 """
 import os
 import tempfile
