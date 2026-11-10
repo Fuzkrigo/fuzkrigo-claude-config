@@ -32,12 +32,14 @@ missing
 '
 
 # Projeto fora do fluxo, sem fuzkrigo.config.json: nada a medir. E o mesmo
-# criterio do passo de testes.
+# criterio do passo de testes. O argumento opcional nomeia a medida na
+# mensagem (padrao: cobertura); o passo de mutacao passa "mutacao".
 # Project outside the flow, without fuzkrigo.config.json: nothing to measure.
-# Same rule as the test step.
+# Same rule as the test step. The optional argument names the measure in the
+# message (default: cobertura); the mutation step passes "mutacao".
 skip_without_config() {
   if [ ! -f "$COVERAGE_CONFIG_FILE" ]; then
-    echo "sem $COVERAGE_CONFIG_FILE — cobertura nao medida"
+    echo "sem $COVERAGE_CONFIG_FILE — ${1:-cobertura} nao medida"
     exit 0
   fi
 }

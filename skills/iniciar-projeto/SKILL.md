@@ -209,7 +209,7 @@ Cada issue de etapa nasce apontando para a pasta da feature correspondente em `.
 Quando uma milestone termina, o mesmo agente monta o CHANGELOG.md e o texto do release (C3).
 
 - Commits semânticos, branches, PRs, releases e a política de execução: `~/.claude/references/git-conventions.md`
-- Templates de issue e PR, workflow de CI e os scripts que ele chama (cobertura e instalação das dependências Python, `install-python.sh`): `~/.claude/references/github/`
+- Templates de issue e PR, workflow de CI e os scripts que ele chama (cobertura, `coverage-config.sh` e `coverage-python.sh`; teste de mutação, `mutation-config.sh` e `mutation-python.sh`; instalação das dependências Python, `install-python.sh`): `~/.claude/references/github/`
 - Detalhes de provisionamento GitHub/Linear e do ritual de release: `~/.claude/agents/project-manager.md`
 
 Os padrões do "Fuzkrigo Projects" são **sugestões adaptáveis**, não regras rígidas — ajustar ao contexto de cada projeto quando necessário.
