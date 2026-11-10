@@ -285,8 +285,9 @@ Duas coisas fazem o CI funcionar, e as duas acontecem em A3:
   commitada, o CI reprova no passo "Conferir o motor de auditoria", no PR e na `main`, porque
   passar sem auditar seria um verde falso. Projeto sem `fuzkrigo.config.json` está fora do fluxo e
   não é auditado.
-- O `fuzkrigo.config.json` preenchido: o workflow lê o `testCommand` e o bloco `coverage` de lá,
-  então a configuração vive num lugar só e o CI acompanha se você trocar de runner.
+- O `fuzkrigo.config.json` preenchido: o workflow lê o `testCommand` e os blocos `coverage` e
+  `mutation` de lá, então a configuração vive num lugar só e o CI acompanha se você trocar de
+  runner.
 
 Em projeto Python, o CI instala o `requirements.txt` e, só quando há pacote declarado (`setup.py`,
 ou `[project]` ou `[build-system]` no `pyproject.toml`), o próprio projeto com `pip install -e .`.
@@ -301,6 +302,15 @@ medir: sem a ferramenta, sem o bloco ou com a lista de pastas vazia. Em projeto 
 números ficam também no `vitest.config`. Excluir um trecho da medição só vale com um comentário
 `coverage-justification:` logo acima, e o `code-reviewer` recusa justificativa como "difícil de
 testar". Detalhes em `references/cobertura.md`, na skill `iniciar-projeto`.
+
+**E a mutação confere se os testes conferem.** Cobertura prova que a linha rodou; o teste de
+mutação altera a lógica de negócio de propósito (troca `<=` por `<`, `0.01` por `1.01`) e vê se
+algum teste percebe. O bloco `mutation` do `fuzkrigo.config.json` declara 80%, sobre as mesmas
+pastas do `businessLogicPaths`; Python usa o mutmut e Node o StrykerJS, com as pastas e o limite
+espelhados na configuração da ferramenta, que o CI confere. Roda só no pull request. Todo
+sobrevivente nos arquivos do PR é triado, mesmo com a nota acima do limite: borda que a spec não
+previu vira critério de aceite novo, teste fraco é reforçado, e mutante equivalente só se desliga
+com `mutation-justification:`. Detalhes em `references/mutacao.md`, na skill `iniciar-projeto`.
 
 No pull request a auditoria é informativa, e na `main` ela bloqueia. O motivo é o mesmo do
 `--feature`: auditar o projeto inteiro num PR reprovaria por causa de uma spec de outra feature
