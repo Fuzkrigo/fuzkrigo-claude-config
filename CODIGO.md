@@ -205,6 +205,42 @@ Critério de coerência, aplicado pelo agente `code-reviewer`:
 
 Exclusão sem justificativa, ou com justificativa incoerente, é achado crítico do `code-reviewer`.
 
+**Exclusões de mutação:**
+
+Mutante desligado sai da nota do teste de mutação. Toda exclusão de mutação precisa de justificativa: um comentário na linha imediatamente acima da exclusão, começando com `mutation-justification:`, com o motivo em PT-BR e EN.
+
+- **Python (mutmut):** `# pragma: no mutate` no fim da linha. A linha deixa de gerar mutante, de qualquer tipo; numa linha que abre cláusula (`if`), o corpo continua mutado.
+- **JavaScript/TypeScript (StrykerJS):** `// Stryker disable next-line <Mutador>: motivo`, com o `mutation-justification:` na linha acima dele. `<Mutador>` é o nome que o Stryker imprime no log ao lado do sobrevivente (`EqualityOperator`, `CallExpression`); vários vão separados por vírgula. O mutante desligado fica como ignorado no relatório.
+
+A exclusão pega todos os mutantes da linha (no Stryker, todos os do mutador nomeado), então a justificativa precisa valer para cada um deles. Exemplo: `if (cache.has(code))` gera `if (false)`, equivalente, e `if (true)`, que um teste mata; desligar `ConditionalExpression` ali levaria os dois.
+
+```python
+def gap(expected_cents, actual_cents):
+    diff = actual_cents - expected_cents
+    # mutation-justification: com diff igual a 0 os dois ramos devolvem 0; trocar ">= 0" por "> 0" ou ">= 1" não muda nada em centavos inteiros. / With diff equal to 0 both branches return 0; swapping ">= 0" for "> 0" or ">= 1" changes nothing for integer cents.
+    if diff >= 0:  # pragma: no mutate
+        return diff
+    return -diff
+```
+
+```js
+export function factor(code) {
+  if (cache.has(code)) return cache.get(code);
+  const value = computeFactor(code);
+  // mutation-justification: o cache só evita recalcular; sem gravar nele, a próxima chamada calcula o mesmo valor. / The cache only saves recomputing; without storing, the next call computes the same value.
+  // Stryker disable next-line CallExpression: gravar no cache não muda o resultado
+  cache.set(code, value);
+  return value;
+}
+```
+
+Critério de coerência, aplicado pelo agente `code-reviewer`:
+
+- **Aceito:** mutante equivalente, em que a alteração não muda nada observável, com o porquê explicado (código que só serve ao desempenho, como gravar num cache; limite que os dois ramos tratam igual).
+- **Não aceitos:** "difícil de testar"; "sem tempo"; qualquer mutante que mude o resultado de uma regra de negócio, que pede teste, não exclusão; justificativa genérica que serviria para qualquer linha.
+
+Exclusão de mutação sem justificativa, ou com justificativa incoerente, é achado crítico do `code-reviewer`, como a de cobertura.
+
 ---
 
 ## 9. Conferência de Fechamento

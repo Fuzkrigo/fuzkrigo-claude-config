@@ -113,6 +113,8 @@ Ao iniciar projeto novo ou refatoração grande, carregar `/iniciar-projeto`. Co
 
 Cobertura e prova são coisas diferentes: o audit garante que todo critério tem um teste que passou; a cobertura mede quanto do código os testes exercitam. Um não substitui o outro. Os números e as pastas de lógica de negócio são declarados no bloco `coverage` do `fuzkrigo.config.json`. O CI provisionado em A3 (`.github/workflows/ci.yml`) os aplica à ferramenta de teste e reprova o build abaixo deles, inclusive quando não consegue medir. Exclusão de cobertura só com justificativa (`CODIGO.md`, seção 8).
 
+O teste de mutação cobra 80% de mutantes detectados nas mesmas pastas de lógica de negócio, com o limite no bloco `mutation` do `fuzkrigo.config.json`, medido pelo CI em todo pull request; mutante desligado só com justificativa (`CODIGO.md`, seção 8).
+
 Camadas de teste, estratégia de mocks e detalhamento operacional: `CODIGO.md` (carregado sempre, seção 10). O ciclo (teste que falha primeiro, implementação, prova) é conduzido pela skill `fuzkrigo-spec-driven` — `scaffold` gera o teste que falha, `verify` grava a prova, `audit` julga.
 
 ---
@@ -165,7 +167,7 @@ Ativado quando minha mensagem começar com `#tarefa`. Persiste pelo resto da ses
 - **"PRONTO" É EXIT CODE 0**, não opinião minha.
 - **SIMPLICIDADE PRIMEIRO**: KISS, YAGNI, só complique quando justificar.
 - **SNIPPETS CIRÚRGICOS**, não arquivos inteiros.
-- **95% COBERTURA GERAL, 98% EM LÓGICA DE NEGÓCIO, COM RAMOS.**
+- **95% COBERTURA GERAL, 98% EM LÓGICA DE NEGÓCIO, COM RAMOS; 80% DE MUTAÇÃO NA LÓGICA DE NEGÓCIO.**
 - **FUNÇÃO ≤ 50 LINHAS; ARQUIVOS ≤ 500 LINHAS.**
 - **SEGURANÇA É TRANSVERSAL:** invoque o agente `security-reviewer` em C1 e em feature sensível; achado aceito vira princípio verificável da constituição. Alertas de segurança crítica valem sempre, mesmo sem o agente ter sido chamado.
 - **TODA ENTRADA EXTERNA É SUSPEITA. BACKEND VALIDA SEMPRE.**
