@@ -286,6 +286,9 @@ foi subdimensionada.
   quando não fecha; sem total a fechar, "Nenhuma.". Caso de borda descrito em
   prosa, ou só no código, o audit não cobra. Formato e exemplo:
   [escrevendo-specs.md](references/escrevendo-specs.md#casos-de-borda-viram-critérios-de-aceite).
+  As bordas que o catálogo não pegou voltam pelo teste de mutação do PR; o
+  caminho está em "Do mutante à borda", seção 6 do
+  [catálogo](references/casos-de-borda.md).
 - **Mudou a spec depois de `pronta`?** Registre uma linha no `## Histórico`
   (data, mudança, motivo): critério alterado, suposição invalidada, escopo
   mudado. O git guarda o que mudou no arquivo; o Histórico guarda o porquê.

@@ -45,7 +45,7 @@ Os dois passos de mutação do `.github/workflows/ci.yml` rodam **só no pull re
 | Medição | `mutmut run` e `mutmut export-cicd-stats`; o script calcula a nota e sai 1 abaixo do limite | `npm run mutation`; o próprio Stryker sai 1 abaixo de `thresholds.break` |
 | Sobreviventes no log | `mutmut results`: todo mutante não morto, com o estado | Reporter `clear-text`: cada sobrevivente com o mutador e o diff |
 
-Os sobreviventes saem no log mesmo com a nota acima do limite, porque todo sobrevivente nos arquivos alterados pelo PR é triado no Portão 3.
+Os sobreviventes saem no log mesmo com a nota acima do limite, porque todo sobrevivente nos arquivos alterados pelo PR é triado no Portão 3, pelo caminho de "Do mutante à borda" (skill `fuzkrigo-spec-driven`, `references/casos-de-borda.md`, seção 6).
 
 A ferramenta só aceita as pastas na própria configuração: o mutmut não aceita caminho pela linha de comando. A A3 espelha as pastas e o limite lá, e o CI confere o espelho.
 
