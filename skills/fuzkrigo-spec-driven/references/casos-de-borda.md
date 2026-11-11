@@ -212,7 +212,7 @@ de três tipos:
 |---|---|---|
 | Borda não prevista | A alteração muda um comportamento que nenhuma linha da spec decidiu (ex.: `<= tol` virou `< tol`: o que acontece quando a diferença é exatamente a tolerância?) | Linha nova na tabela `### Casos de borda`, com a categoria do catálogo; critério de aceite novo; teste pelo `scaffold`; `verify` e `audit --ci --feature` de novo; linha no `## Histórico` |
 | Teste fraco | O comportamento já está decidido na spec, mas o teste não confere (ex.: tolerância declarada de 0,01 e nenhum teste com valor logo acima dela) | Reforçar o teste do critério existente; a spec não muda |
-| Mutante equivalente | Nada observável muda | Desligar com `mutation-justification:` (`~/.claude/CODIGO.md`, seção 8) |
+| Mutante equivalente | Nada observável muda | Desligar com `mutation-justification:` (`~/.claude/CODIGO.md`, seção 8), quando o desligamento pega só mutantes equivalentes. Se a linha tem também um mutante detectável (ex.: `if (cache.has(code))` gera `if (false)`, equivalente, e `if (true)`, que um teste mata), reescrever o código para separá-los, quando for trivial; senão, manter o equivalente vivo e registrá-lo no PR como "equivalente mantido vivo", com o motivo. Ele continua contando contra a nota |
 
 **Do tipo de mutação à categoria.** Para a linha nova da tabela de bordas,
 a mutação indica a categoria da seção 3. O nome entre parênteses é o do

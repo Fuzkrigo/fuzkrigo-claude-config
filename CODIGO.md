@@ -212,7 +212,7 @@ Mutante desligado sai da nota do teste de mutação. Toda exclusão de mutação
 - **Python (mutmut):** `# pragma: no mutate` no fim da linha. A linha deixa de gerar mutante, de qualquer tipo; numa linha que abre cláusula (`if`), o corpo continua mutado.
 - **JavaScript/TypeScript (StrykerJS):** `// Stryker disable next-line <Mutador>: motivo`, com o `mutation-justification:` na linha acima dele. `<Mutador>` é o nome que o Stryker imprime no log ao lado do sobrevivente (`EqualityOperator`, `CallExpression`); vários vão separados por vírgula. O mutante desligado fica como ignorado no relatório.
 
-A exclusão pega todos os mutantes da linha (no Stryker, todos os do mutador nomeado), então a justificativa precisa valer para cada um deles. Exemplo: `if (cache.has(code))` gera `if (false)`, equivalente, e `if (true)`, que um teste mata; desligar `ConditionalExpression` ali levaria os dois.
+A exclusão pega todos os mutantes da linha (no Stryker, todos os do mutador nomeado), então a justificativa precisa valer para cada um deles. Exemplo: `if (cache.has(code))` gera `if (false)`, equivalente, e `if (true)`, que um teste mata; desligar `ConditionalExpression` ali levaria os dois. Nesse caso, nunca se desliga a linha (ou o mutador) para esconder o equivalente, porque o mutante detectável sairia junto. Há dois caminhos: reescrever o código para que a exclusão pegue só o equivalente, quando for trivial; ou manter o equivalente vivo e registrá-lo na triagem do PR como "equivalente mantido vivo", com o motivo. Ele continua contando contra a nota.
 
 ```python
 def gap(expected_cents, actual_cents):
