@@ -96,6 +96,39 @@ jobs:
         if: hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
         run: bash .github/scripts/coverage-python.sh
 
+      # Teste de mutacao: altera a logica de negocio de proposito e confere se
+      # algum teste percebe. Muta as pastas do coverage.businessLogicPaths e
+      # reprova abaixo do mutation.break, os dois do fuzkrigo.config.json,
+      # lidos com .github/scripts/mutation-config.sh. Roda so no pull request,
+      # nao no push da main. Os sobreviventes impressos no log alimentam a
+      # triagem do PR. A ferramenta so aceita as pastas na propria
+      # configuracao (Python: [tool.mutmut] no pyproject.toml; Node:
+      # stryker.config.json): a A3 as espelha la, e o CI confere o espelho.
+      # Mutation testing: changes the business logic on purpose and checks
+      # whether some test notices. It mutates the coverage.businessLogicPaths
+      # folders and fails below mutation.break, both from
+      # fuzkrigo.config.json, read through .github/scripts/mutation-config.sh.
+      # Runs only on pull requests, not on pushes to main. The survivors
+      # printed in the log feed the PR triage. The tool only takes the folders
+      # in its own config (Python: [tool.mutmut] in pyproject.toml; Node:
+      # stryker.config.json): A3 mirrors them there, and CI checks the mirror.
+      - name: Mutacao (Node)
+        if: github.event_name == 'pull_request' && hashFiles('package.json') != ''
+        run: |
+          source .github/scripts/mutation-config.sh
+          skip_without_config mutacao
+          if [ "$(node -p "Object.keys(require('./package.json').scripts || {}).includes('mutation')")" != true ]; then
+            echo "script 'mutation' ausente no package.json — ele e obrigatorio (ex.: stryker run); configure-o na etapa A3" >&2
+            exit 1
+          fi
+          read_mutation_config
+          check_stryker_config
+          npm run mutation
+
+      - name: Mutacao (Python)
+        if: github.event_name == 'pull_request' && hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
+        run: bash .github/scripts/mutation-python.sh
+
       # Projeto do fluxo sem o motor commitado reprova, no PR e na main. Fica
       # num passo proprio, fora do continue-on-error do audit informativo,
       # para a falta do motor nao passar verde no PR.

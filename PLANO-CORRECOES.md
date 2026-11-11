@@ -679,3 +679,61 @@ mesmo commit deste registro.
 O registro completo das opções e dos motivos está no log de decisões do projeto de desenho do
 ecossistema (`log-de-decisoes.md` do projeto "Ecosistema de Desenvolvimento", seção "Item 1 da F3:
 casos de borda e regras de fechamento").
+
+## F3, item 2 — teste de mutação junto com os casos de borda — 09/11/2026
+
+> Estado auditado: commit `87f79da`, o último antes deste registro (motor: 93 casos em 16 suítes;
+> hooks, lançador e status line: 44 testes, intocados).
+
+| # | Decisão | O que muda | Commit |
+| --- | --- | --- | --- |
+| 1 | Só nos projetos: Python com mutmut, Node/TypeScript com StrykerJS; outra stack sob demanda, quando um projeto usar | Modelo de CI em `references/github/`; A3 da `iniciar-projeto` e `references/mutacao.md` | `0d967c1` e `fe20bc7` |
+| 2 | Muta só as pastas de lógica de negócio do bloco `coverage` | O CI lê o `coverage.businessLogicPaths` e confere o espelho em `only_mutate` (mutmut) e `mutate` (Stryker) | `0d967c1` |
+| 3 | Roda em todo PR, no CI (Linux) | Passos "Mutacao (Node)" e "Mutacao (Python)" no `ci.yml`, só em `pull_request`, no job `verificar` | `0d967c1` |
+| 4 | Limite fixo de 80% que reprova o build; mutante desligado só com justificativa ao lado | Bloco `mutation` gravado pelo `init` (`9a5b527`); "Exclusões de mutação" no `CODIGO.md` e no `code-reviewer` (`fe20bc7`) | `9a5b527` e `fe20bc7` |
+| 5 | Sobrevivente vira borda por documentação: triagem em três tipos, origem no `## Histórico` da spec; motor sem mudança de gramática | Seção "Do mutante à borda" no `casos-de-borda.md` (a antiga seção 6 virou 7); ponte no passo Especificar da `fuzkrigo-spec-driven` | `cbb784e` |
+| 6 | Todo sobrevivente nos arquivos alterados pelo PR é triado, mesmo com nota acima de 80% | Seção "Mutantes sobreviventes" no modelo de PR; Portão 3 da `iniciar-projeto` | `cbb784e` |
+
+Commits da rodada: 1 = `9a5b527`, 2 = `0d967c1`, 3 = `fe20bc7`, 4 = `cbb784e`; fora do
+briefing, aprovado pelo usuário: `87f79da` (manual).
+
+**O mutmut só no CI.** Ele exige `fork` e, no Windows, só roda dentro do WSL; posto nas
+dependências do projeto, quebraria a instalação no Windows. O CI o instala na hora, sem versão fixa,
+para acompanhar as versões recentes. O custo: uma versão nova pode mudar o
+`mutmut-cicd-stats.json`, e o script reprova com mensagem quando falta um campo, em vez de
+calcular nota errada.
+
+**A nota no Python.** A mesma definição do Stryker: detectados / (detectados + não detectados) ×
+100, com nota igual ao limite passando (a conta é feita em inteiros). Detectados: `killed`,
+`timeout` e `segfault`. Não detectados: `survived`, `no_tests` e `suspicious`. A documentação do
+mutmut não define os estados; o significado veio do código da 3.8.1 (`stats.py` e
+`workers/isolation.py`): `segfault` é o processo de teste morto por SIGSEGV, ou por SIGKILL, que
+o próprio mutmut manda um segundo depois do SIGXCPU quando o limite de CPU estoura, então fica
+como detectado, perto do `timeout`; `suspicious` é qualquer código de saída que o mutmut não
+reconhece (nem falha nem sucesso da suíte), e fica como não detectado, porque a suíte não provou
+que percebeu o mutante. `skipped` fica fora; na 3.8.1 nada o produz, e a linha com
+`# pragma: no mutate` nem gera mutante (testado: 14 mutantes viraram 9). `caught by type check` e
+`not checked` não saem no arquivo de estatísticas e ficam fora. `check_was_interrupted_by_user`
+acima de zero, ou zero mutantes válidos, reprova.
+
+**Só no pull request.** A mutação não roda no push da `main` (decisão 3). Custo aceito: a `main`
+não reconfere a nota depois do merge.
+
+**O `mutate` do Stryker.** Testado na 10.1.1: `src/dominio/**` funciona, mas muta também o teste
+que mora dentro da pasta (`src/dominio/x.test.js`), o que derruba a nota. O CI aceita em `mutate`
+as pastas do `businessLogicPaths` mais as exclusões de arquivo de teste (`!**/*.test.*`,
+`!**/*.spec.*`, `!**/__tests__/**`), e reprova qualquer outra exclusão, que tiraria código de
+negócio da mutação sem justificativa.
+
+Achados da execução:
+
+| Achado | Decisão |
+| --- | --- |
+| O `MANUAL-DO-ECOSSISTEMA.md` explicava a cobertura e não o teste de mutação | Corrigido com aprovação do usuário (`87f79da`) |
+| A exclusão desliga todos os mutantes da linha (no Stryker, todos os do mutador nomeado): `if (cache.has(code))` gera `if (false)`, equivalente, e `if (true)`, detectável | Documentado no `CODIGO.md`: a justificativa vale para todos. Sem correção: o modelo de PR não tem destino para o equivalente que não dá para desligar sozinho |
+| `npm audit` acusa 5 vulnerabilidades moderadas nas dependências transitivas do Stryker 10.1.1 (`minimatch`; `qs`, via `typed-rest-client`) | Sem correção: dependência só de desenvolvimento; a 10.1.1 é a versão mais recente no npm, e o `npm audit` diz que parte delas pede revisão ou outra dependência |
+| A documentação do mutmut aponta `node_mutation.py` para a lista de mutadores; na 3.8.1 o arquivo é `mutation/mutators.py`, e os mutadores não têm nome na saída | Registrado; o catálogo de bordas usa os nomes do Stryker e o diff do `mutmut show` |
+
+O registro completo das opções e dos motivos está no log de decisões do projeto de desenho do
+ecossistema (`log-de-decisoes.md` do projeto "Ecosistema de Desenvolvimento", seções "Item 2 da
+F3: teste de mutação" e "mutantes e casos de borda").

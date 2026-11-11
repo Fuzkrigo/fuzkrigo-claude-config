@@ -33,7 +33,7 @@ exigido nem prova. É onde o defeito costuma morar.
    - `ASM-xxx`: a suposição desta spec que a assume, quando a borda depende
      de algo ainda não confirmado;
    - `P-xxx`: o princípio da constituição que já cobre a borda no projeto
-     inteiro (seção 6); quem prova é o teste do princípio;
+     inteiro (seção 7); quem prova é o teste do princípio;
    - `Não se aplica: <motivo>`: a borda não cabe nesta feature. **O motivo é
      obrigatório**; sem ele, o audit acusa caso de borda sem decisão
      (`BORDA_INCOMPLETA`).
@@ -88,7 +88,7 @@ projeto. Fora disso, o audit acusa referência a código que não existe
 
 Cada pacote acrescenta as bordas típicas de um tipo de projeto. Projetos de
 dados tabulares podem trazer os princípios correspondentes já na constituição:
-`fuzkrigo-spec init --preset base,dados-tabulares` (ver seção 6).
+`fuzkrigo-spec init --preset base,dados-tabulares` (ver seção 7).
 
 ### Dados tabulares (planilhas, CSV, bases)
 
@@ -167,7 +167,7 @@ Os dois critérios são obrigatórios e **diferentes entre si**. Só o primeiro
 prova o caminho feliz; é o segundo que garante que um fechamento quebrado não
 passa em silêncio. Mesmo critério nas duas colunas é `FECHAMENTO_INCOMPLETO`.
 As duas provas são sempre critérios desta spec (`AC-xxx`): princípio não vale
-ali, porque total que fecha no projeto inteiro mora na constituição (seção 6).
+ali, porque total que fecha no projeto inteiro mora na constituição (seção 7).
 
 **Nunca ajuste o resultado para fechar.** Linha de "ajuste", "arredondamento"
 ou "diferença" criada para forçar o total esconde o defeito que o fechamento
@@ -193,7 +193,57 @@ Exemplo, apuração do ICMS efetivo:
 Feature sem total que precise fechar: troque a tabela por uma linha com
 "Nenhuma.".
 
-## 6. Quando a borda sobe para a constituição
+## 6. Do mutante à borda
+
+O catálogo não pega toda borda. As que escapam voltam pelo teste de mutação
+do pull request: o CI altera a lógica de negócio de propósito, e o mutante
+que nenhum teste percebe mostra uma situação que a spec não decidiu ou que o
+teste não confere. Configuração e cálculo da nota: `references/mutacao.md`,
+na skill `iniciar-projeto`.
+
+**Quando.** Depois que o CI do PR roda a mutação. São triados **todos** os
+sobreviventes nos arquivos que o PR alterou, mesmo com a nota acima do limite.
+Sobrevivente, aqui, é todo mutante não detectado: `survived`, `no tests` e
+`suspicious` no mutmut (a lista do `mutmut results` no log); `Survived` e
+`NoCoverage` no Stryker (a saída do reporter `clear-text`). Cada um cai em um
+de três tipos:
+
+| Tipo | Como reconhecer | O que fazer |
+|---|---|---|
+| Borda não prevista | A alteração muda um comportamento que nenhuma linha da spec decidiu (ex.: `<= tol` virou `< tol`: o que acontece quando a diferença é exatamente a tolerância?) | Linha nova na tabela `### Casos de borda`, com a categoria do catálogo; critério de aceite novo; teste pelo `scaffold`; `verify` e `audit --ci --feature` de novo; linha no `## Histórico` |
+| Teste fraco | O comportamento já está decidido na spec, mas o teste não confere (ex.: tolerância declarada de 0,01 e nenhum teste com valor logo acima dela) | Reforçar o teste do critério existente; a spec não muda |
+| Mutante equivalente | Nada observável muda | Desligar com `mutation-justification:` (`~/.claude/CODIGO.md`, seção 8) |
+
+**Do tipo de mutação à categoria.** Para a linha nova da tabela de bordas,
+a mutação indica a categoria da seção 3. O nome entre parênteses é o do
+mutador no Stryker, impresso ao lado do sobrevivente. O mutmut não nomeia o
+mutador: o mutante aparece como `<modulo>.x_<funcao>__mutmut_<n>`, e
+`mutmut show <mutante>` mostra o diff.
+
+| Mutação | Exemplo | Categoria |
+|---|---|---|
+| Comparação trocada (`EqualityOperator`) | `<=` vira `<`; `==` vira `!=` | Limites |
+| Número trocado (só o mutmut; o Stryker não muta número) | `0.01` vira `1.01` | Limites, ou Unidade e escala |
+| Operação aritmética trocada (`ArithmeticOperator`) | `/` vira `*`; `-` vira `+` | Unidade e escala |
+| Texto trocado (`StringLiteral`) | `"total zero"` vira `""` | Formato e codificação; teste fraco, se o texto não faz parte do contrato |
+| Condição invertida ou removida (`ConditionalExpression`, `LogicalOperator`, `BooleanLiteral`) | `if (total === 0)` vira `if (false)`; `&&` vira `\|\|` | Limites, ou Vazio e ausente |
+| Valor padrão trocado | `tol=0.01` vira `tol=1.01` | Limites, ou Vazio e ausente |
+| Chamada ou retorno removido (`CallExpression`, `BlockStatement`) | `cache.set(...)` vira `;`; corpo da função esvaziado | Falha de dependência, ou Vazio e ausente |
+
+**Linha do `## Histórico`.** A data; em "Mudança", o critério criado; em
+"Motivo", "Borda acrescentada pelo mutante sobrevivente", com o identificador
+do mutante e o arquivo. No Stryker, que não numera mutantes, o identificador
+é o mutador com a posição.
+
+```markdown
+| 2026-11-09 | AC-008: diferença exatamente igual à tolerância fecha | Borda acrescentada pelo mutante sobrevivente `dominio.fechamento.x_closes__mutmut_6` (`src/dominio/fechamento.py`) |
+| 2026-11-09 | AC-009: total zero recusa com a mensagem "total zero" | Borda acrescentada pelo mutante sobrevivente `StringLiteral` em `src/dominio/fechamento.js:2:36` |
+```
+
+A regra da seção 7 continua: borda que aparece na spec de uma segunda feature
+sobe para a constituição.
+
+## 7. Quando a borda sobe para a constituição
 
 - **Borda repetida vira princípio.** Se a mesma borda aparece na spec de uma
   segunda feature, ela não é da feature: é do projeto. Proponha ao usuário um

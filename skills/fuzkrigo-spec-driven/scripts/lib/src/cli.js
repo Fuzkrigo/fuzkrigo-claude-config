@@ -182,17 +182,23 @@ function cmdInit(rootDir, flags) {
     // vazia de proposito: o CI reprova ate a A3 declarar a logica de negocio.
     // coverage: read only by CI, never by the engine. The folder list starts
     // empty on purpose: CI fails until A3 declares the business logic.
+    // mutation: lido so pelo CI, nunca pelo motor. Muta as mesmas pastas de
+    // coverage.businessLogicPaths e reprova o PR com nota abaixo de break.
+    // mutation: read only by CI, never by the engine. It mutates the same
+    // folders as coverage.businessLogicPaths and fails the PR below break.
     const cfg = {
       testCommand: 'node --test --test-reporter=tap',
       reporter: 'tap',
       testGlobs: DEFAULT_CONFIG.testGlobs,
       srcGlobs: DEFAULT_CONFIG.srcGlobs,
       coverage: { global: 95, businessLogic: 98, businessLogicPaths: [] },
+      mutation: { break: 80 },
     };
     writeFileSync(configPath, `${JSON.stringify(cfg, null, 2)}\n`);
     console.log('✔ fuzkrigo.config.json criado (testCommand: "node --test --test-reporter=tap" — ajuste à sua stack)');
     console.log('  Python: "pytest --junitxml=.spec/verification/raw.xml" com reporter "junit-xml" e reporterOutputFile no mesmo caminho');
     console.log('  cobertura: preencha coverage.businessLogicPaths — com a lista vazia, o CI reprova');
+    console.log('  mutação: usa as mesmas pastas de coverage.businessLogicPaths — nota abaixo de 80% reprova o PR');
   }
 
   const gitignorePath = path.join(specRoot, 'verification', '.gitkeep');

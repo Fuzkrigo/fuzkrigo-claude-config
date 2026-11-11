@@ -8,12 +8,13 @@
 // descartavel. O `new` reconhece o prefixo, sem exigi-lo, e grava no spec.md
 // a etapa, a issue e as secoes Historico e Resolucao. O `init` grava o bloco
 // coverage com a lista de pastas vazia, de proposito: o CI reprova ate a A3
-// declara-las.
+// declara-las. Ao lado, o bloco mutation com o limite de 80%.
 // The feature folder name tells where it came from: e<n>- for a CHECKLIST
 // stage, i<n>- for a standalone issue, no prefix for a throwaway project.
 // `new` recognizes the prefix without requiring it and writes stage, issue,
 // History and Resolution into spec.md. `init` writes the coverage block with
 // an empty folder list on purpose: CI fails until A3 declares the folders.
+// Next to it, the mutation block with the 80% threshold.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -148,6 +149,15 @@ test('init numa pasta vazia grava o bloco coverage com a lista de pastas vazia',
     assert.equal(proc.status, 0, `init saiu com ${proc.status}: ${proc.stderr}`);
     const config = JSON.parse(readFileSync(path.join(root, 'fuzkrigo.config.json'), 'utf-8'));
     assert.deepEqual(config.coverage, { global: 95, businessLogic: 98, businessLogicPaths: [] });
+  });
+});
+
+test('init numa pasta vazia grava o limite de mutacao igual a 80', () => {
+  withTempDir((root) => {
+    const proc = engine(root, 'init');
+    assert.equal(proc.status, 0, `init saiu com ${proc.status}: ${proc.stderr}`);
+    const config = JSON.parse(readFileSync(path.join(root, 'fuzkrigo.config.json'), 'utf-8'));
+    assert.equal(config.mutation?.break, 80);
   });
 });
 
