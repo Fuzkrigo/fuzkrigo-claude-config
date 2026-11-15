@@ -96,6 +96,24 @@ jobs:
         if: hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
         run: bash .github/scripts/coverage-python.sh
 
+      # Diagramas de classes e de pacotes gerados do codigo com o pyreverse,
+      # gravados entre marcadores no docs/ARCHITECTURE.md pelo modo generate,
+      # rodado na maquina no Portao 3. Aqui o script gera de novo e reprova
+      # quando o trecho nao bate com o codigo das pastas do
+      # coverage.businessLogicPaths. Roda em PR e em push: a conferencia e
+      # barata. Sem fuzkrigo.config.json ou sem docs/ARCHITECTURE.md, passa.
+      # Sem pylint no projeto, o script o instala.
+      # Class and package diagrams generated from the code with pyreverse,
+      # written between markers in docs/ARCHITECTURE.md by generate mode, run
+      # on the machine at Gate 3. Here the script generates them again and
+      # fails when the text does not match the code in the
+      # coverage.businessLogicPaths folders. Runs on PRs and pushes: the check
+      # is cheap. Without fuzkrigo.config.json or docs/ARCHITECTURE.md, it
+      # passes. Without pylint in the project, the script installs it.
+      - name: Diagramas do codigo (Python)
+        if: hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
+        run: bash .github/scripts/diagrams-code.sh check
+
       # Teste de mutacao: altera a logica de negocio de proposito e confere se
       # algum teste percebe. Muta as pastas do coverage.businessLogicPaths e
       # reprova abaixo do mutation.break, os dois do fuzkrigo.config.json,
