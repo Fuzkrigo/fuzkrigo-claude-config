@@ -114,6 +114,24 @@ jobs:
         if: hashFiles('requirements.txt', 'pyproject.toml', 'setup.py') != ''
         run: bash .github/scripts/diagrams-code.sh check
 
+      # Diagramas PlantUML: cada docs/uml/<nome>.puml tem ao lado o SVG
+      # versionado, gerado na maquina pelo modo render. Aqui o script confere
+      # o fonte embutido no SVG contra o .puml, sem desenhar: o GraphViz do
+      # Windows e o do Linux desenham diferente, e o runner nem tem GraphViz.
+      # O Java ja vem no ubuntu-latest (17 por padrao); o plantuml.jar e o da
+      # release mais recente. Roda em PR e em push, em qualquer stack.
+      # PlantUML diagrams: each docs/uml/<name>.puml has the versioned SVG
+      # next to it, generated on the machine by render mode. Here the script
+      # checks the source embedded in the SVG against the .puml, without
+      # drawing: Windows and Linux GraphViz draw differently, and the runner
+      # has no GraphViz at all. Java comes with ubuntu-latest (17 by default);
+      # plantuml.jar is the latest release. Runs on PRs and pushes, any stack.
+      - name: Diagramas PlantUML
+        if: hashFiles('docs/uml/*.puml', 'docs/uml/*.svg') != ''
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/plantuml.jar" https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
+          PLANTUML_JAR="$RUNNER_TEMP/plantuml.jar" bash .github/scripts/diagrams-uml.sh check
+
       # Teste de mutacao: altera a logica de negocio de proposito e confere se
       # algum teste percebe. Muta as pastas do coverage.businessLogicPaths e
       # reprova abaixo do mutation.break, os dois do fuzkrigo.config.json,
