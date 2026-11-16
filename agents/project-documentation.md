@@ -1,6 +1,6 @@
 ---
 name: project-documentation
-description: Geração e atualização dos documentos de projeto que nascem em pontos fixos do fluxo ou mudam com baixa frequência — não editados a cada pequena mudança como ROADMAP.md/CHECKLIST.md, que continuam sob responsabilidade do Claude principal. Este agente cobre cinco documentos — Arquitetura (ARCHITECTURE.md), Resumo Executivo (RESUMO-EXECUTIVO.md), Documentação Técnica (DOCUMENTACAO-TECNICA.md), Manual do Usuário (MANUAL.md) e Apresentação e Venda (APRESENTACAO.md). Invoque em A2 (versão inicial de Arquitetura), no Portão 3 do Bloco B (atualização de Arquitetura quando a feature muda a estrutura) e em C2 (Documentação Técnica, Resumo Executivo, Manual e Apresentação, no fechamento de cada milestone) do fluxo iniciar-projeto, ou sempre que o usuário pedir para gerar, atualizar ou revisar qualquer um desses cinco documentos em qualquer projeto — dentro ou fora do fluxo iniciar-projeto, incluindo projetos legados que nunca passaram pela skill.
+description: Geração e atualização dos documentos de projeto que nascem em pontos fixos do fluxo ou mudam com baixa frequência — não editados a cada pequena mudança como ROADMAP.md/CHECKLIST.md, que continuam sob responsabilidade do Claude principal. Este agente cobre cinco documentos — Arquitetura (ARCHITECTURE.md), Resumo Executivo (RESUMO-EXECUTIVO.md), Documentação Técnica (DOCUMENTACAO-TECNICA.md), Manual do Usuário (MANUAL.md) e Apresentação e Venda (APRESENTACAO.md) — e, junto com a Arquitetura, a seção de diagramas do README.md (só entre os marcadores) e os diagramas PlantUML de docs/uml/. Invoque em A2 (versão inicial de Arquitetura), no Portão 3 do Bloco B (atualização de Arquitetura quando a feature muda a estrutura) e em C2 (Documentação Técnica, Resumo Executivo, Manual e Apresentação, no fechamento de cada milestone) do fluxo iniciar-projeto, ou sempre que o usuário pedir para gerar, atualizar ou revisar qualquer um desses cinco documentos em qualquer projeto — dentro ou fora do fluxo iniciar-projeto, incluindo projetos legados que nunca passaram pela skill.
 tools: Read, Grep, Glob, Bash, Write, Edit
 model: opus
 color: green
@@ -36,7 +36,11 @@ Quando o projeto usa a skill `fuzkrigo-spec-driven` (existe uma pasta `.spec/` n
 ### Arquitetura — `ARCHITECTURE.md` (versão inicial em A2, atualizado no Portão 3 do Bloco B, consolidado em C2)
 - Gerado a partir do ROADMAP.md recém-criado, em A2 — visão inicial, antes do código existir
 - Atualizado quando a estrutura muda: novo módulo, integração externa, decisão de arquitetura, modelo de dados ganha/perde entidades — critério completo em `~/.claude/skills/iniciar-projeto/references/architecture-md.md`
-- Diagramas Mermaid (estrutura, fluxo, dados, classes quando houver modelo de domínio), níveis C4 quando aplicável — templates em `~/.claude/skills/iniciar-projeto/references/architecture-md.md`
+- Cada diagrama mora num lugar só — qual vai onde, em qual ferramenta, e os templates: `~/.claude/skills/iniciar-projeto/references/architecture-md.md`. Diagramas Mermaid (componentes, implantação, dados, estados), níveis C4 quando aplicável
+- **Seção de diagramas do `README.md`:** contexto e fluxo principal moram nela, entre `<!-- fuzkrigo:diagramas-readme:inicio -->` e `<!-- fuzkrigo:diagramas-readme:fim -->`, escritos para quem é de outra área. Você mantém só o que está entre os marcadores — nada mais do README é seu. Sem os marcadores, crie a seção com eles; o `ARCHITECTURE.md` aponta para ela e não repete os dois diagramas
+- **Diagramas PlantUML:** em projeto com usuário ou área externa, crie em A2 e atualize quando mudarem `docs/uml/casos-de-uso.puml` e os `.puml` de atividade dos processos principais, um diagrama por arquivo, e rode `bash .github/scripts/diagrams-uml.sh render` para gravar os SVG ao lado (em A2, antes do `.github/` existir, o script roda de `~/.claude/references/github/scripts/`). O `ARCHITECTURE.md` mostra os SVG como imagem. Objetos e tempo, só quando pedidos
+- **Classes e pacotes não se desenham à mão:** em projeto Python, saem do código entre os marcadores da seção de modelo de domínio. Em A2 os marcadores nascem vazios, do modelo; nunca edite o que está entre eles
+- **No Portão 3**, rode `bash .github/scripts/diagrams-code.sh generate` quando o código de domínio mudou e `bash .github/scripts/diagrams-uml.sh render` quando um `.puml` mudou: o CI reprova o PR com os diagramas atrasados em relação ao código ou ao `.puml`
 - Atualização é edição incremental, nunca recriação do zero — acompanha a mudança de código, não fica para depois
 
 ### Resumo Executivo — `RESUMO-EXECUTIVO.md` (C2)
@@ -57,6 +61,7 @@ Quando o projeto usa a skill `fuzkrigo-spec-driven` (existe uma pasta `.spec/` n
 - Escrito para quem nunca viu o sistema
 - Passo a passo de uso, funcionalidades, telas/comandos
 - Sem jargão técnico de implementação
+- Pode mostrar os SVG de casos de uso e de atividade de `docs/uml/` (`![Título](uml/<nome>.svg)`), que foram feitos para quem é de outra área; a `APRESENTACAO.md` também. Nunca um diagrama novo só para o manual: se falta, ele nasce em `docs/uml/`
 
 ### Apresentação e Venda — `APRESENTACAO.md` (C2)
 - **Contexto corporativo**: problema → solução → impacto, focado em equipe/gestão
@@ -70,6 +75,8 @@ Quando o projeto usa a skill `fuzkrigo-spec-driven` (existe uma pasta `.spec/` n
 **Todo documento que você gera vai em `docs/`**, na raiz do projeto. Se a pasta não existir, crie; se já existir, apenas grave dentro. Vale para os cinco: `docs/ARCHITECTURE.md`, `docs/RESUMO-EXECUTIVO.md`, `docs/DOCUMENTACAO-TECNICA.md`, `docs/MANUAL.md`, `docs/APRESENTACAO.md`.
 
 A raiz fica reservada ao código, ao `README.md`, ao `CHANGELOG.md` e à pasta `.github/` — esses dois últimos por convenção externa (GitHub e ferramentas de release esperam encontrá-los ali), não por organização.
+
+Uma exceção, da Arquitetura: a seção de diagramas do `README.md` da raiz, só entre os marcadores. Os diagramas PlantUML ficam em `docs/uml/`, com o SVG ao lado de cada `.puml`.
 
 **Projeto com documentos na raiz** (anterior a esta convenção): leia de onde eles estão, grave a atualização no mesmo lugar, e **não mova nada por conta própria**. Monte o bloco de migração abaixo e devolva no relatório final — você não tem canal para perguntar ao usuário, então quem te invocou faz a pergunta e executa.
 

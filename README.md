@@ -18,7 +18,7 @@ A `main` deste repositório é protegida: toda mudança entra por pull request, 
 ├── settings.json                    # Configuração do Claude Code (modelo, idioma, tema, effort level, hooks, status line)
 ├── references/                      # Referências globais, fora de qualquer skill (~/.claude/references/)
 │   ├── git-conventions.md           # Commits semânticos, branches, PRs, squash das faixas paralelas
-│   └── github/                      # Copiado para o .github/ do projeto: templates de issue e PR + workflow de CI + scripts de cobertura + .gitattributes (scripts em LF)
+│   └── github/                      # Copiado para o .github/ do projeto: templates de issue e PR + workflow de CI + scripts do CI (cobertura, mutação, diagramas) + .gitattributes (scripts em LF)
 ├── skills/                          # Skills empacotadas, extraídas para texto legível
 │   ├── iniciar-projeto/             # Abertura, documentação e gestão de projeto (Blocos A e C)
 │   ├── fuzkrigo-spec-driven/        # Desenvolvimento por feature com prova mecânica (Bloco B), motor node embarcado
@@ -172,3 +172,20 @@ cd ~/code/fuzkrigo-claude-config
 4. A status line aparece no rodapé da sessão.
 
 **Dois `~/.claude`:** o Claude Code do WSL tem o próprio `~/.claude`, separado do `~/.claude` do Windows. Uma instalação num não chega ao outro. Qual dos dois é o principal, e se os dois coexistem, ainda está em aberto (F5).
+
+## Ferramentas dos diagramas
+
+Dois scripts do `references/github/scripts/`, copiados para o `.github/scripts/` do projeto em A3, mantêm os diagramas fiéis ao que existe; o CI do projeto confere os dois a cada PR e a cada push na `main`. Modelos e regras: `skills/iniciar-projeto/references/architecture-md.md`.
+
+- **`diagrams-code.sh`** (projeto Python): `generate` roda o pyreverse sobre as pastas do `coverage.businessLogicPaths` e grava os diagramas de classes e de pacotes entre os marcadores do `docs/ARCHITECTURE.md`; `check` gera de novo e reprova quando o trecho não bate com o código.
+- **`diagrams-uml.sh`** (qualquer stack): `render` gera o SVG de cada `.puml` de `docs/uml/`, ao lado dele; `check` reprova SVG que não corresponde ao seu `.puml`, `.puml` sem SVG e SVG sem `.puml`, comparando o fonte embutido no SVG, não o desenho; `pdf <nome>` gera um PDF para apresentação, fora do repositório.
+
+**O que instalar no PC**, uma vez:
+
+```bash
+winget install --id EclipseAdoptium.Temurin.21.JRE --exact   # Java 21 (Windows); abra um terminal novo depois
+mkdir -p ~/plantuml && curl -fsSL -o ~/plantuml/plantuml.jar https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
+java -version && java -jar ~/plantuml/plantuml.jar --version
+```
+
+O jar pode ficar em outro caminho, apontado pela variável `PLANTUML_JAR`; o script não baixa nada sozinho. No Windows, o GraphViz que os casos de uso usam vem dentro do jar; no Linux e no macOS, instale também o GraphViz, porque sem ele o PlantUML avisa "Dot executable does not exist". O pylint não vai para o PC: entra nas dependências de desenvolvimento de cada projeto Python, e o `generate` roda com o ambiente virtual do projeto ativo. A instalação completa, inclusive no Linux, é revisada na F5.

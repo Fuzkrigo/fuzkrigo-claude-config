@@ -140,7 +140,12 @@ py -3 --version    # Windows: os tres hooks rodam com o lancador do Python
 python3 --version  # Linux/WSL: no lugar do py -3; o run-python.sh escolhe sozinho
 git --version
 gh auth status     # so se voce for criar repositorio, labels e issues no GitHub
+java -version      # diagramas PlantUML: Java 11 ou mais novo
+ls ~/plantuml/plantuml.jar  # o jar do PlantUML, ou o caminho que estiver em PLANTUML_JAR
 ```
+
+Java e `plantuml.jar` só fazem falta em projeto com diagramas PlantUML; como instalar está no
+`README.md` deste repositório, em "Ferramentas dos diagramas".
 
 ### O que é o `fspec` deste manual
 
@@ -311,6 +316,16 @@ espelhados na configuração da ferramenta, que o CI confere. Roda só no pull r
 sobrevivente nos arquivos do PR é triado, mesmo com a nota acima do limite: borda que a spec não
 previu vira critério de aceite novo, teste fraco é reforçado, e mutante equivalente só se desliga
 com `mutation-justification:`. Detalhes em `references/mutacao.md`, na skill `iniciar-projeto`.
+
+**E os diagramas acompanham o código.** Contexto e fluxo principal ficam no `README.md` do
+projeto, para quem é de outra área; os demais, no `docs/ARCHITECTURE.md`. Em projeto Python, os
+diagramas de classes e de pacotes não se desenham à mão: `.github/scripts/diagrams-code.sh
+generate` os gera do código das pastas do `businessLogicPaths` e grava entre marcadores do
+`ARCHITECTURE.md`. Casos de uso e atividade são PlantUML, em `docs/uml/`, com o SVG versionado ao
+lado de cada `.puml`, gerado por `.github/scripts/diagrams-uml.sh render`. O CI confere os dois e
+reprova quando o diagrama ficou para trás do código ou do `.puml`. O PlantUML é conferido pelo
+fonte embutido no SVG, não pelo desenho, porque o Windows e o Linux do CI desenham diferente.
+Detalhes em `references/architecture-md.md`, na skill `iniciar-projeto`.
 
 No pull request a auditoria é informativa, e na `main` ela bloqueia. O motivo é o mesmo do
 `--feature`: auditar o projeto inteiro num PR reprovaria por causa de uma spec de outra feature
@@ -530,6 +545,10 @@ depois da sua aprovação.
 
 PR seguindo `~/.claude/references/git-conventions.md`. Se a feature rodou em faixas paralelas, o
 histórico sai por squash.
+
+Antes do PR, os diagramas: se o código de domínio mudou, `bash .github/scripts/diagrams-code.sh
+generate`; se um `.puml` mudou, `bash .github/scripts/diagrams-uml.sh render`. O que eles gravarem
+entra no PR, porque o CI confere os dois.
 
 **[terminal]** — aqui vale a política de sempre: eu monto o bloco completo e pergunto se você
 digita ou se eu executo. Nunca decido isso sozinho.
