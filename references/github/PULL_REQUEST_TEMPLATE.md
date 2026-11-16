@@ -17,7 +17,7 @@
 
 | Mutante | Tipo | Destino |
 | --- | --- | --- |
-| [identificador e arquivo] | [borda nao prevista, teste fraco ou equivalente] | [AC-xxx novo, teste reforcado ou desligado com justificativa] |
+| [identificador e arquivo] | [borda nao prevista, teste fraco ou equivalente] | [AC-xxx novo, teste reforcado, desligado com justificativa ou equivalente mantido vivo: motivo] |
 
 ## Checklist
 
