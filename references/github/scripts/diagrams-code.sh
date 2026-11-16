@@ -56,8 +56,20 @@ for (const [name, mmdFile] of DIAGRAMS) {
       " — modelo na skill iniciar-projeto, references/architecture-md.md");
   }
   if (mode === "markers") continue;
-  const mmd = fs.readFileSync(dir + "/" + mmdFile, "utf-8").replace(/\r\n/g, "\n").trimEnd();
-  const block = [NOTICE, "```mermaid", ...mmd.split("\n"), "```"];
+  // Nada a desenhar: sem classe, o pyreverse grava so o cabecalho, e com um
+  // modulo so (pasta so com __init__.py) nem grava o de pacotes (pylint
+  // 4.1.3). O Mermaid recusa o diagrama vazio como erro de sintaxe (mermaid
+  // 12.3.0), entao vai uma frase no lugar.
+  // Nothing to draw: without classes, pyreverse writes only the header, and
+  // with a single module (folder with only __init__.py) it does not even
+  // write the package one (pylint 4.1.3). Mermaid rejects the empty diagram
+  // as a syntax error (mermaid 12.3.0), so a sentence goes in its place.
+  const mmdPath = dir + "/" + mmdFile;
+  const diagram = fs.existsSync(mmdPath) ?
+    fs.readFileSync(mmdPath, "utf-8").replace(/\r\n/g, "\n").trimEnd().split("\n") : [];
+  const body = diagram.length > 1 ? ["```mermaid", ...diagram, "```"] :
+    ["Diagrama vazio: nada a desenhar nas pastas do modelo de dominio ainda."];
+  const block = [NOTICE, ...body];
   const current = lines.slice(starts[0] + 1, ends[0]);
   if (current.join("\n") !== block.join("\n")) {
     stale.push(name);
