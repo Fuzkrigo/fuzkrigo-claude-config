@@ -737,3 +737,67 @@ Achados da execução:
 O registro completo das opções e dos motivos está no log de decisões do projeto de desenho do
 ecossistema (`log-de-decisoes.md` do projeto "Ecosistema de Desenvolvimento", seções "Item 2 da
 F3: teste de mutação" e "mutantes e casos de borda").
+
+## F3, item 3 — diagramas UML — 10/11/2026
+
+> Estado auditado: commit `85c5041`, o último antes deste registro (motor: 93 casos em 16 suítes;
+> hooks, lançador e status line: 44 testes, intocados).
+
+| # | Decisão | O que muda | Commit |
+| --- | --- | --- | --- |
+| 0 | Mutante equivalente que divide a linha com um detectável: quarto destino da triagem, "equivalente mantido vivo", com o motivo; reescrever o código quando for trivial. Ele continua contando contra a nota | Modelo de PR; seção 6 do `casos-de-borda.md`; seção 8 do `CODIGO.md`, que proíbe desligar a linha para esconder o equivalente | `3b11229` |
+| 1 | O README do projeto traz contexto e fluxo principal; o `ARCHITECTURE.md` traz os demais e o link de volta. Cada diagrama mora num lugar só | Modelo do `ARCHITECTURE.md`, com a seção do README entre os marcadores `fuzkrigo:diagramas-readme`; agente `project-documentation` | `85c5041` |
+| 2 | Classes e pacotes gerados do código com o pyreverse, num trecho marcado do `ARCHITECTURE.md`; o CI reprova quando o trecho não bate com o código | `references/github/scripts/diagrams-code.sh` (`generate` e `check`); passo "Diagramas do codigo (Python)" no `ci.yml`, em PR e em push | `4b59b16` e `e82c600` |
+| 3 | PlantUML para casos de uso e atividade, padrão em projeto com usuário ou área externa; objetos e tempo sob demanda; componentes e implantação no Mermaid, que ganha o modelo de implantação | Modelos no `architecture-md.md`, com a tabela de onde mora cada diagrama e os tipos UML que ficam de fora; pasta `docs/uml/` | `85c5041` |
+| 4 | O `.puml` vira SVG por um script local, versionado ao lado do `.puml`; o CI reprova quando o SVG não corresponde ao `.puml` | `references/github/scripts/diagrams-uml.sh` (`render`, `check` e `pdf`); passo "Diagramas PlantUML" no `ci.yml`, em PR e em push, em qualquer stack | `e31052f` |
+| 5 | O ecossistema roda no PC pessoal do usuário, que ganha o Java | "Ferramentas dos diagramas" no `README.md`; seções 4, 5 e 6 (Portão 3) do `MANUAL-DO-ECOSSISTEMA.md` | `85c5041` |
+
+Commits da rodada: 1 = `3b11229`, 2 = `4b59b16`, 3 = `e31052f`, 4 = `85c5041`; fora do
+briefing, aprovado pelo usuário: `e82c600` (diagrama vazio do domínio sem classes).
+
+**O PlantUML é conferido pelo fonte, não pelo desenho.** O SVG traz o `.puml` codificado em
+`<?plantuml-src ...?>`, e o `-computeurl` codifica o `.puml` atual do mesmo jeito; o `check`
+compara os dois. Comparar o desenho reprovaria por diferença de GraphViz entre o Windows, onde o
+SVG é gerado (GraphViz 2.44.1 embutido no jar), e o Linux do CI, que nem tem GraphViz: o
+`ubuntu-latest` (Ubuntu 24.04, imagem 20261101) traz Java 17 como padrão, e também o 21, mas não
+o GraphViz. A conferência não desenha e não precisa dele, por isso o passo não usa
+`actions/setup-java`. Testado no PlantUML 1.2026.9: a codificação é a mesma com o `.puml` em CRLF
+ou em LF, no Windows e no Linux, com Java 17 e 21; e os SVG gerados pelo 1.2026.9 passaram na
+conferência do 1.2026.10, que o passo do CI baixou durante o teste. Por isso a `docs/uml/` não
+ganhou `.gitattributes`. O `--check-syntax` diz que há erro, mas não a linha; o script redesenha
+numa pasta temporária para o PlantUML imprimir "Error line N in file", sem gravar SVG do diagrama
+quebrado. O nome do SVG vem do arquivo (`--ignore-startuml-filename`), e um `.puml` com dois
+diagramas reprova, porque o segundo viraria `<nome>_001.svg`.
+
+**O limite do pyreverse são as anotações de tipo.** No pylint 4.1.3, `notas: list[Nota]` virou
+relação; `itens: list[Item] = field(default_factory=list)` numa dataclass, `ultima: Nota | None` e
+`por_serie: dict[str, list[Nota]]` não viraram. O diagrama de pacotes usa só o último nome do
+módulo, então dois `modelo.py` em subpacotes diferentes saem com o mesmo nome. Pasta sem
+`__init__.py` ou arquivo com erro de sintaxe fazem o pyreverse sair 0 com o diagrama vazio: o
+script barra os dois. Para achar o pacote, o caminho a partir da raiz (`src/dominio`) basta, com o
+mesmo resultado de `--source-roots src` e de rodar de dentro de `src`. A saída é a mesma no
+Windows e no Linux depois de tirar o CR, inclusive na ordem, testada com dez módulos. O CI
+instala o pylint sem versão fixa quando o projeto não o traz, e o script imprime a versão: se ela
+diferir da local, o diagrama pode diferir.
+
+**O diagrama vazio.** Domínio sem classe faz o pyreverse gravar só o cabeçalho `classDiagram`, que
+o Mermaid recusa como erro de sintaxe (mermaid 12.3.0); com um módulo só, ele nem grava o de
+pacotes. Os dois casos aparecem logo depois da A3, com o pacote ainda vazio. O script grava uma
+frase no lugar do bloco (`e82c600`).
+
+Achados da execução:
+
+| Achado | Decisão |
+| --- | --- |
+| Sem GraphViz, o `plantuml --version` sai 16, e o script morria calado na substituição de comando, no Linux do CI | Corrigido antes do commit 3: a versão ficou só informativa |
+| Domínio sem classe deixava o `ARCHITECTURE.md` com um diagrama que o Mermaid recusa; pacote só com `__init__.py` quebrava o script com a pilha do Node | Corrigido com aprovação do usuário (`e82c600`) |
+| Projeto Python que já tem `docs/ARCHITECTURE.md` sem os marcadores passa a reprovar quando recebe o `ci.yml` novo | Pelo desenho da decisão 2: a mensagem cita o modelo, e a A3 provisiona os marcadores. Projeto existente precisa acrescentá-los |
+| O destino que faltava para o equivalente que não dá para desligar sozinho (achado do item 2) | Resolvido pela decisão 0 (`3b11229`) |
+| Os passos novos do `ci.yml` nunca rodaram num runner do GitHub | Não verificado: o CI deste repositório não executa o modelo dos projetos; os dois foram simulados no WSL, sem GraphViz, com o bloco `run:` tirado do próprio `ci.yml` |
+| O desenho dos blocos gerados foi conferido no mermaid-cli 12.0.0 (mermaid 12.3.0), não no GitHub | Não verificado no GitHub, que pode usar outra versão do Mermaid |
+| No Linux sem GraphViz, o `render` de casos de uso sai 0 e o SVG traz os textos, mas o desenho não foi conferido | Registrado; o README manda instalar o GraphViz no Linux e no macOS. Os SVG deste ecossistema saem do Windows |
+| O passo do CI baixa o `plantuml.jar` mais recente sem conferir checksum | Sem correção: a URL `latest` não tem checksum fixo; o download é HTTPS da release oficial, como o `pip install` sem versão do mutmut e do pylint |
+
+O registro completo das opções e dos motivos está no log de decisões do projeto de desenho do
+ecossistema (`log-de-decisoes.md` do projeto "Ecosistema de Desenvolvimento", seções "Merge do PR
+#13 e mutante equivalente na mesma linha" e "Item 3 da F3: diagramas UML").
