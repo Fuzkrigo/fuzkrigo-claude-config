@@ -801,3 +801,51 @@ Achados da execução:
 O registro completo das opções e dos motivos está no log de decisões do projeto de desenho do
 ecossistema (`log-de-decisoes.md` do projeto "Ecosistema de Desenvolvimento", seções "Merge do PR
 #13 e mutante equivalente na mesma linha" e "Item 3 da F3: diagramas UML").
+
+## Hooks — linha de comando no sh do Linux — 21/11/2026
+
+> Estado auditado: commit `9718aeb` (`main`), o último antes desta rodada (motor: 93 casos em 16
+> suítes; hooks, lançador e status line: 44 testes).
+
+**O problema.** Os três hooks (`arm_modo_tarefa.py`, `check_planning_docs.py`,
+`check_style_prohibitions.py`) rodavam com saída 0 e não faziam nada no Linux e no WSL. O
+`settings.json` chamava o lançador com `.` (`. "$HOME/.claude/hooks/run-python.sh" "<hook>.py"`,
+com `"shell": "bash"`), e o Claude Code roda o comando num `sh -c` no macOS e no Linux (Hooks
+reference, "Exec form and shell form"). No dash do Ubuntu, `. arquivo argumentos` não repassa os
+argumentos: o `run-python.sh` chegava ao `exec python3 "$@"` com `$@` vazio, o Python lia o JSON
+da entrada padrão como código (um dicionário válido), saía 0 e não imprimia nada.
+
+Evidência de 18/11, no passo 3.5 do Bloco 0: log de depuração com `Hook output does not start
+with {` nos três hooks, `$*` vazio num hook de medição, marcador do Modo Tarefa não criado e
+arquivo com emoji gravado sem bloqueio. No Windows funcionava, porque o Git Bash é bash e aceita
+`.` com argumentos; por isso a perna Windows do CI e o uso no Windows nunca mostraram o defeito. Os
+testes também não pegavam: os dos hooks chamavam o `.py` direto, e os do lançador o carregavam com
+`.` por um `bash -c`, nunca pela linha real do `settings.json` num `sh`.
+
+| Opção | Resultado |
+| --- | --- |
+| A. `bash "$HOME/.claude/hooks/run-python.sh" "$HOME/.claude/hooks/<hook>.py"` (forma shell) | Funciona no `sh -c` do Linux e no Git Bash do Windows; não depende da permissão de execução (o arquivo é argumento do `bash`); o `exec` do lançador continua passando o código de saída. É a forma que roda na máquina desde 18/11 e a que o plugin `security-guidance` usa. **Escolhida** |
+| B. Forma exec (`"command": "bash"`, `"args": [...]`) | Descartada: sem shell, só marcadores como `${CLAUDE_PLUGIN_ROOT}` são substituídos; o `$HOME` ficaria literal |
+| C. `python3 "$HOME/.claude/hooks/<hook>.py"` direto | Descartada: perde a escolha de `py -3` no Windows, a razão de existir do lançador |
+
+`"shell": "bash"` ficou como estava: no Windows força o Git Bash, pré-requisito do README; no Linux
+não muda nada.
+
+| # | Decisão | O que muda | Commit |
+| --- | --- | --- | --- |
+| 1 | Teste de regressão primeiro, vermelho no Linux | `hooks/tests/test_settings_hooks.py` (4 casos): forma da linha, conjunto de scripts igual ao de `hooks/`, as três linhas rodadas no shell real com HOME falso, e o controle da forma antiga no dash | `e9e0598` |
+| 2 | Opção A | `settings.json`: só as três linhas `command`; `run-python.sh`: só os comentários do topo; `test_run_python.py`: chama `bash "<lançador>"`, como o `settings.json`, com os mesmos cinco casos | `c6a7fa2` |
+| 3 | Registro | Contagem de casos no `MANUAL-DO-ECOSSISTEMA.md` e no `README.md` (44 para 48); esta entrada | o commit deste registro |
+
+Na saída vermelha do commit 1, no WSL, reprovaram a forma da linha (3 subtestes) e a execução da
+linha real (3 subtestes, "o hook não imprimiu nada"); o conjunto de scripts e o controle
+passaram. Na mutação manual, voltar uma linha para `. ` reprovou os mesmos dois casos; foi
+desfeita antes do commit.
+
+**Não verificado.**
+
+- A perna Windows dos testes novos (HOME com barras normais no Git Bash) só o CI do PR confirma.
+- O comportamento num macOS, onde o `sh` é bash: o controle da forma antiga fica pulado ali, e o
+  restante vale pela forma `bash "..."`, que é a mesma nos dois.
+- A máquina do usuário não foi tocada: o `~/.claude/settings.json` do WSL já rodava com
+  `bash "..."` desde 18/11, e a cópia do lançador atualiza só os comentários.
