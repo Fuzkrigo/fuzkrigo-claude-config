@@ -742,10 +742,16 @@ py -3 -m unittest discover -s hooks/tests -v      # Windows
 python3 -m unittest discover -s hooks/tests -v    # Linux/WSL
 ```
 
-São 44 casos. Três deles comparam o hook de planejamento com o próprio motor e precisam do `node`
+São 48 casos. Três deles comparam o hook de planejamento com o próprio motor e precisam do `node`
 no PATH, e os três da status line e os cinco do lançador `run-python.sh` precisam do `bash`; sem
 eles, ficam pulados (skip), não reprovados. No WSL, sem `node` instalado no Linux, os três de
 paridade com o motor ficam pulados.
+
+Os quatro de `test_settings_hooks.py` conferem a linha de comando que o `settings.json` grava para
+os hooks. Dois leem o arquivo e não precisam de nada. O terceiro roda as três linhas como estão,
+no shell que o Claude Code usa (`sh` no Linux, `bash` no Windows), e precisa desse shell e de `py`
+ou `python3` no PATH. O quarto, que prova por que a forma com `.` é proibida, roda só onde o `sh`
+não é bash (o dash do Ubuntu, por exemplo); no Windows e onde o `sh` é bash, fica pulado.
 
 No GitHub, o workflow `.github/workflows/testes.yml` roda as duas suítes a cada push na `main` e
 a cada pull request, em Linux e em Windows, com `node` e `bash` presentes, então nenhum caso fica
