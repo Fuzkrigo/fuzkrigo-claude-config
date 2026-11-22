@@ -1,16 +1,17 @@
 """Testes do lancador do Python dos hooks (run-python.sh).
 Tests for the hooks' Python launcher (run-python.sh).
 
-O lancador e chamado como o settings.json chama: carregado com "." por um
-bash -c, com o PATH do subprocesso controlado pelo teste. Os interpretadores
-sao falsos: scripts chamados py e python3 que imprimem o proprio nome e os
-argumentos, um por linha, e saem com 3. O PATH tem so a pasta deles, para o
-py real da maquina (ou do runner do Windows) nao interferir.
-The launcher is called the way settings.json calls it: sourced with "." by a
-bash -c, with the subprocess PATH controlled by the test. The interpreters
-are fakes: scripts named py and python3 that print their own name and their
-arguments, one per line, and exit with 3. PATH holds only their folder, so
-the machine's real py (or the Windows runner's) cannot interfere.
+O lancador e chamado como o settings.json chama: como argumento do bash
+(bash "<lancador>" <args>), com o PATH do subprocesso controlado pelo teste.
+Os interpretadores sao falsos: scripts chamados py e python3 que imprimem o
+proprio nome e os argumentos, um por linha, e saem com 3. O PATH tem so a
+pasta deles, para o py real da maquina (ou do runner do Windows) nao
+interferir.
+The launcher is called the way settings.json calls it: as an argument of bash
+(bash "<launcher>" <args>), with the subprocess PATH controlled by the test.
+The interpreters are fakes: scripts named py and python3 that print their own
+name and their arguments, one per line, and exit with 3. PATH holds only their
+folder, so the machine's real py (or the Windows runner's) cannot interfere.
 
 Rodar da raiz / Run from the repository root:
     py -3 -m unittest discover -s hooks/tests -v      (Windows)
@@ -53,7 +54,9 @@ class RunPythonTest(unittest.TestCase):
                     handle.write(FAKE_INTERPRETER.format(name=name, code=FAKE_EXIT_CODE))
                 os.chmod(path, 0o755)
             env = dict(os.environ, PATH=folder)
-            command = f'. "{LAUNCHER}" "{HOOK_SCRIPT}" {args}'.rstrip()
+            # O bash vai pelo caminho absoluto: o PATH do teste so tem os falsos.
+            # bash goes by absolute path: the test PATH holds only the fakes.
+            command = f'"{BASH}" "{LAUNCHER}" "{HOOK_SCRIPT}" {args}'.rstrip()
             proc = subprocess.run(
                 [BASH, "-c", command], capture_output=True,
                 env=env, timeout=60, check=False,

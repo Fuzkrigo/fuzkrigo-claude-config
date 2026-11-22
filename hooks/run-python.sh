@@ -1,16 +1,23 @@
 # Lancador do Python dos hooks, o mesmo no Windows e no Linux/WSL.
-# O settings.json o carrega com "." (comando do hook com "shell": "bash"):
-#   . "$HOME/.claude/hooks/run-python.sh" "$HOME/.claude/hooks/<hook>.py"
-# Carregado, e nao executado, ele nao depende da permissao de execucao, que se
-# perde ao copiar entre Windows e WSL; o "." com argumentos e recurso do bash.
+# O settings.json o executa como argumento do bash:
+#   bash "$HOME/.claude/hooks/run-python.sh" "$HOME/.claude/hooks/<hook>.py"
+# Nao use ". run-python.sh <hook>.py": o Claude Code roda o comando dos hooks
+# num "sh -c" no Linux e no macOS, e ali o "." nao repassa os argumentos; o
+# Python recebe "$@" vazio, le o JSON da entrada como codigo e sai 0 sem fazer
+# nada. Como e argumento do bash, o arquivo nao depende da permissao de
+# execucao, que se perde ao copiar entre Windows e WSL.
 # Termina em exec: o Python substitui o shell, sem processo extra, e o codigo
 # de saida do hook chega intacto ao Claude Code.
 # Python launcher for the hooks, the same on Windows and on Linux/WSL.
-# settings.json sources it with "." (hook command with "shell": "bash").
-# Sourced, not executed, it does not depend on the execute permission, which
-# is lost when copying between Windows and WSL; "." with arguments is a bash
-# feature. It ends in exec: Python replaces the shell, with no extra process,
-# and the hook's exit code reaches Claude Code untouched.
+# settings.json runs it as an argument of bash:
+#   bash "$HOME/.claude/hooks/run-python.sh" "$HOME/.claude/hooks/<hook>.py"
+# Do not use ". run-python.sh <hook>.py": Claude Code runs the hook command in
+# an "sh -c" on Linux and macOS, where "." does not pass the arguments; Python
+# gets an empty "$@", reads the JSON input as code and exits 0 doing nothing.
+# Being an argument of bash, the file does not depend on the execute
+# permission, which is lost when copying between Windows and WSL.
+# It ends in exec: Python replaces the shell, with no extra process, and the
+# hook's exit code reaches Claude Code untouched.
 
 # Windows: o lancador py. No WSL ele so responde como py.exe, e nao e achado.
 # Windows: the py launcher. In WSL it only answers as py.exe, so it is not found.
