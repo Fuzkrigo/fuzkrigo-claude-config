@@ -1,9 +1,9 @@
 # CI do proprio ecossistema (fuzkrigo-claude-config): roda as suites do motor
-# da skill fuzkrigo-spec-driven e as dos hooks, em Linux e em Windows.
+# da skill fuzkrigo-spec-driven, as dos hooks e as da maquina, em Linux e em Windows.
 # Nao confundir com references/github/workflows/ci.yml: aquele e o MODELO que
 # a A3 copia para cada projeto, e nunca roda neste repositorio.
 # CI of the ecosystem itself (fuzkrigo-claude-config): runs the test suites of
-# the fuzkrigo-spec-driven engine and of the hooks, on Linux and on Windows.
+# the fuzkrigo-spec-driven engine, of the hooks and of the machine config, on Linux and on Windows.
 # Not to be confused with references/github/workflows/ci.yml: that one is the
 # TEMPLATE that A3 copies into each project, and it never runs here.
 
@@ -60,3 +60,6 @@ jobs:
 
       - name: Suites dos hooks
         run: python -m unittest discover -s hooks/tests -v
+
+      - name: Suites da maquina
+        run: python -m unittest discover -s maquina/tests -v
