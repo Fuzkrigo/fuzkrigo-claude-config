@@ -74,6 +74,8 @@ Ao iniciar projeto novo ou refatoração grande, carregar `/iniciar-projeto`. Co
 
 **O Bloco A é obrigatório quando o que estou construindo vai para o portfólio, tem usuário final ou vai ganhar release.** Experimento, prova de conceito e script de uso próprio são exceção: rodam só com `/fuzkrigo-spec-driven`, mantendo especificação e gate, sem a camada de gestão. Se um experimento virar projeto, o Bloco A é executado retroativamente, antes do primeiro release. Critério completo e falas de bloqueio: seção 4.1 da skill `iniciar-projeto`.
 
+**Cofre de notas não é projeto de software.** Num cofre do Obsidian (como o `brain`), os Blocos A/B/C, o TDD e as skills `iniciar-projeto` e `fuzkrigo-spec-driven` não se aplicam: vale o `CLAUDE.md` do próprio cofre. Valem sempre as regras gerais: idioma, honestidade técnica, anti-alucinação e segurança.
+
 **QUANDO CARREGAR CADA SKILL OU ARQUIVO DE REFERÊNCIA:**
 
 | Arquivo/Skill/Agente          | Quando usar                                                                            |

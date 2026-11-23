@@ -1,0 +1,4 @@
+# Modo automatico fora da caixa; dentro dela o jcodex passa -s danger-full-access.
+# Automatic mode outside the jail; inside it jcodex passes -s danger-full-access.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
