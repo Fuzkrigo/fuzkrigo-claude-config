@@ -12,137 +12,27 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'child_process';
-import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import path from 'path';
+import { existsSync } from 'fs';
 import { runInNewContext } from 'vm';
 import { parseEventos, renderPainelHtml } from '../lib/src/core/painel.js';
-import { ENGINE, withTempDir } from './fixture-projeto.mjs';
-
-const FEATURE = 'demo';
-const MANUAL_HEADING = '## Faixas manuais (Dev Principal e Dev Secundario)';
-const posix = (p) => p.split(path.sep).join('/');
-
-// ── projeto temporario / temporary project ─────────────────────────────────
-
-function tasksMd(tasks) {
-  const blocks = tasks.map(({ id, model, file, effort }) =>
-    [
-      `## ${id} — Tarefa ${id} [pendente]`,
-      '',
-      '- Refs: US-001, AC-001',
-      ...(file ? [`- Arquivos: ${file}`] : []),
-      ...(model ? [`- Modelo: ${model}`] : []),
-      ...(effort ? [`- Esforço: ${effort}`] : []),
-    ].join('\n')
-  );
-  return `# Tasks: Demo\n\n> feature: ${FEATURE}\n\n${blocks.join('\n\n')}\n`;
-}
-
-function run(cmd, args, cwd, env = process.env) {
-  const proc = spawnSync(cmd, args, { cwd, env, encoding: 'utf-8' });
-  return { status: proc.status, out: `${proc.stdout ?? ''}${proc.stderr ?? ''}` };
-}
-
-function git(cwd, ...args) {
-  const proc = spawnSync('git', args, { cwd, encoding: 'utf-8' });
-  assert.equal(proc.status, 0, proc.stderr);
-  return proc.stdout.trim();
-}
-
-function featureFile(repo, name) {
-  return path.join(repo, '.spec', 'features', FEATURE, name);
-}
-
-const readFeature = (repo, name) => readFileSync(featureFile(repo, name), 'utf-8');
-
-// Repositorio numa subpasta, na branch da issue, com a spec commitada; os
-// worktrees nascem ao lado dele, dentro da pasta temporaria.
-// Repository in a subfolder, on the issue branch, with the spec committed; the
-// worktrees are created next to it, inside the temporary folder.
-function projectWith(root, tasks) {
-  const repo = path.join(root, 'repo');
-  mkdirSync(repo);
-  assert.equal(run(process.execPath, [ENGINE, 'init'], repo).status, 0);
-  assert.equal(run(process.execPath, [ENGINE, 'new', FEATURE], repo).status, 0);
-  writeFileSync(featureFile(repo, 'tasks.md'), tasksMd(tasks));
-  git(repo, 'init', '-q', '-b', 'main');
-  git(repo, 'config', 'user.name', 'Teste');
-  git(repo, 'config', 'user.email', 'teste@example.com');
-  git(repo, 'add', '-A');
-  git(repo, 'commit', '-q', '-m', 'inicial');
-  git(repo, 'switch', '-q', '-c', 'feat/1-demo');
-  return repo;
-}
-
-const generatePlan = (repo) => run(process.execPath, [ENGINE, 'plano', FEATURE, '--agents', 'claude'], repo);
-
-function plannedProject(root, tasks) {
-  const repo = projectWith(root, tasks);
-  const plan = generatePlan(repo);
-  assert.equal(plan.status, 0, plan.out);
-  return repo;
-}
-
-// ── execucao do script / script execution ──────────────────────────────────
-
-const pathKey = () => Object.keys(process.env).find((k) => k.toUpperCase() === 'PATH') || 'PATH';
-
-function writeExecutable(file, content) {
-  mkdirSync(path.dirname(file), { recursive: true });
-  writeFileSync(file, content);
-  chmodSync(file, 0o755);
-}
-
-// `claude` falso na frente do PATH: registra os argumentos e sai com o codigo
-// pedido. / Fake `claude` in front of PATH: records its arguments and exits
-// with the requested code.
-function fakeClaude(root, exitCode = 0) {
-  const bin = path.join(root, 'bin');
-  const log = path.join(root, 'claude-calls.log');
-  writeExecutable(
-    path.join(bin, 'claude'),
-    `#!/bin/sh\nprintf 'CALL\\n%s\\n' "$*" >> '${posix(log)}'\nexit ${exitCode}\n`
-  );
-  const env = { ...process.env, [pathKey()]: `${bin}${path.delimiter}${process.env[pathKey()]}` };
-  return { env, calls: () => (existsSync(log) ? readFileSync(log, 'utf-8') : '') };
-}
-
-// PATH sem nenhum `claude`: tira as pastas que o tem e repoe o node por um
-// atalho, caso more na mesma pasta.
-// PATH without any `claude`: drops the folders holding it and restores node
-// through a shim, in case it lives in the same folder.
-function envWithoutClaude(root) {
-  const bin = path.join(root, 'shim');
-  writeExecutable(path.join(bin, 'node'), `#!/bin/sh\nexec '${posix(process.execPath)}' "$@"\n`);
-  const names = ['claude', 'claude.exe', 'claude.cmd', 'claude.bat'];
-  const kept = process.env[pathKey()]
-    .split(path.delimiter)
-    .filter((dir) => !names.some((name) => existsSync(path.join(dir, name))));
-  const env = { ...process.env, [pathKey()]: [bin, ...kept].join(path.delimiter) };
-  assert.notEqual(run('bash', ['-c', 'command -v claude'], root, env).status, 0, 'o PATH ainda tem claude');
-  return env;
-}
-
-const runScript = (repo, env) => run('bash', [`.spec/features/${FEATURE}/executar-tarefas.sh`], repo, env);
-
-const worktreeOf = (root, lane) => path.join(root, 'fuzkrigo-worktrees', `repo-${FEATURE}-${lane}`);
-
-// Eventos sem o carimbo de hora. / Events without the timestamp.
-function eventsOf(root) {
-  const file = path.join(root, 'fuzkrigo-worktrees', `repo-${FEATURE}-logs`, 'plano-eventos.log');
-  return readFileSync(file, 'utf-8')
-    .split('\n')
-    .filter(Boolean)
-    .map((line) => line.slice(line.indexOf('|') + 1));
-}
-
-const gateEvents = (events) => events.filter((e) => e.startsWith('gate|'));
-
-const CLAUDE_AND_CODEX = [
-  { id: 'T-001', model: 'sonnet', file: 'src/a.js' },
-  { id: 'T-002', model: 'codex', file: 'src/b.js' },
-];
+import { withTempDir } from './fixture-projeto.mjs';
+import {
+  CLAUDE_AND_CODEX,
+  envWithoutClaude,
+  eventsOf,
+  fakeClaude,
+  FEATURE,
+  featureFile,
+  gateEvents,
+  generatePlan,
+  git,
+  MANUAL_HEADING,
+  plannedProject,
+  projectWith,
+  readFeature,
+  runScript,
+  worktreeOf,
+} from './fixture-faixas.mjs';
 
 // ── plano / plan ───────────────────────────────────────────────────────────
 
