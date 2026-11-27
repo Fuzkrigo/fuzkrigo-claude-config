@@ -1,4 +1,7 @@
 # Configuracao global do ai-jail 3.3. / Global ai-jail 3.3 configuration.
+# Worktree ligado usa a politica salva do repositorio principal (decisao de 23/11).
+# A linked worktree uses the main repository's saved policy (decision of Nov 23).
+project_strategy = "repo-root"
 mask = [".env", ".env.*", "*.pem", "*.key", "credentials*.json"]
 # Pasta do Maestri e ignore global do git (decisao de 22/11), so leitura.
 # Maestri folder and global git ignore (decision of Nov 22), read-only.
