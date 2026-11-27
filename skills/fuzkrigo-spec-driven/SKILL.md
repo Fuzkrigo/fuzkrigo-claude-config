@@ -1,6 +1,6 @@
 ---
 name: fuzkrigo-spec-driven
-description: Desenvolvimento spec-anchored — a especificação continua verdadeira porque é auditada mecanicamente contra o código. Fluxo Especificar → Projetar → Tarefas → Plano → Executar → Auditar → Aprender, com rastreabilidade história→critério de aceite→tarefa→teste, definição de pronto executável (cada critério de aceite vira teste anotado), suposições e perguntas como cidadãs de primeira classe, casos de borda e regras de fechamento registrados na spec, constituição de princípios verificáveis (presets LGPD/educação e dados tabulares, combináveis), lições aprendidas com lastro mecânico (o motor recusa lição sem sinal real de audit/verify; promoção por recorrência entre features) e plano de execução PARALELA (tarefas de arquivos disjuntos viram faixas em git worktrees, executadas por claude headless com modelo e esforço por tarefa — inclui script pronto e artefato visual com botão). Motor mecânico EMBARCADO na skill (zero instalação — roda com o node do ambiente). Use ao planejar features, implementar com verificação, ou auditar uma implementação contra a spec. Gatilhos "especificar feature", "nova feature", "implementar", "auditar spec", "verificar", "plano de execução", "executar em paralelo", "o que não tem teste", "lições aprendidas". NÃO use para abertura de projeto, briefing, roadmap, documentação de gestão, board ou release — isso é da skill `iniciar-projeto`.
+description: Desenvolvimento spec-anchored — a especificação continua verdadeira porque é auditada mecanicamente contra o código. Fluxo Especificar → Projetar → Tarefas → Plano → Executar → Auditar → Aprender, com rastreabilidade história→critério de aceite→tarefa→teste, definição de pronto executável (cada critério de aceite vira teste anotado), suposições e perguntas como cidadãs de primeira classe, casos de borda e regras de fechamento registrados na spec, constituição de princípios verificáveis (presets LGPD/educação e dados tabulares, combináveis), lições aprendidas com lastro mecânico (o motor recusa lição sem sinal real de audit/verify; promoção por recorrência entre features) e plano de execução PARALELA (tarefas de arquivos disjuntos viram faixas em git worktrees, executadas pelo Claude headless ou por Codex e Antigravity, com modelo e esforço por tarefa — inclui script pronto e artefato visual com botão). Motor mecânico EMBARCADO na skill (zero instalação — roda com o node do ambiente). Use ao planejar features, implementar com verificação, ou auditar uma implementação contra a spec. Gatilhos "especificar feature", "nova feature", "implementar", "auditar spec", "verificar", "plano de execução", "executar em paralelo", "o que não tem teste", "lições aprendidas". NÃO use para abertura de projeto, briefing, roadmap, documentação de gestão, board ou release — isso é da skill `iniciar-projeto`.
 license: MIT
 metadata:
   author: "Bruno Krieger [Fuzkrigo] (adaptação)"
@@ -312,28 +312,38 @@ produto).
   critério de outra feature) e `Arquivos:` (separados por VÍRGULA; espaços em
   caminhos são permitidos). Campos opcionais por tarefa: `Modelo:` e
   `Esforço:` (baixo|medio|alto|xalto|max) — o plano de execução usa os dois.
-- **Classifique cada tarefa pela complexidade** ao escrever o `tasks.md`; é
-  esse critério que preenche `Modelo:` e `Esforço:`:
-  - **Simples: `Modelo: sonnet`, `Esforço: baixo` ou `medio`.** Até 2
-    arquivos, sem regra de negócio nova, mudança mecânica: renomear,
-    configuração, texto, fixture de teste, ajuste que segue um padrão já
-    existente no código.
-  - **Complexa: `Modelo: opus`, `Esforço: alto`.** Qualquer um destes: 3 ou
-    mais arquivos ou mudança que atravessa camadas; regra de negócio ou
-    cálculo novo; toca autenticação, permissão, dinheiro ou dado pessoal;
-    decisão de design não registrada; migração de dados ou integração
-    externa.
-  - **Na dúvida: complexa.** Errar para o Opus custa cota; errar para o
-    Sonnet custa qualidade.
-  - Tarefa sem `Modelo:` usa o padrão `opus`.
+- **Escolha o executor e o esforço de cada tarefa** ao escrever o `tasks.md`; é
+  esse critério que preenche `Modelo:` e `Esforço:`. Ele vale enquanto o Claude
+  estiver no plano Pro; com o Max, a distribuição é revista.
+
+  | Executor (`Modelo:`) | Quando | `Esforço:` |
+  |---|---|---|
+  | Dev Secundario, `agy` | todos: até 2 arquivos; nenhuma lógica nova (segue padrão que já existe no código); nenhum ponto de risco. Exemplos: texto, configuração, fixture, renomear, teste de caso simples | `baixo`, ou `medio` se houver teste novo |
+  | Dev Principal, `codex` | nenhum ponto de risco, até 4 arquivos numa mesma camada, e: lógica nova contida (uma função ou regra local, com critérios de aceite claros) ou mudança mecânica que passa de 2 arquivos | `medio`; `alto` se a lógica tiver mais de um caminho de erro |
+  | Engenheiro, `sonnet` | qualquer um: atravessa camadas ou 5 ou mais arquivos; regra de negócio ou cálculo central; um ponto de risco | `alto` |
+  | Opus em faixa, `opus` | super complexa: dois ou mais pontos de risco, ou regra de negócio com muitos casos de borda. Roda como faixa headless (`claude -p --model opus`, janela limpa), nunca na sessão do Arquiteto, que continua orquestrando e julgando | `alto` |
+
+  - **Pontos de risco:** autenticação, permissão, dinheiro, dado pessoal,
+    migração de dados, integração externa, decisão de design não registrada.
+  - **Na dúvida, suba um nível.**
+  - Tarefas que dividem arquivo caem na mesma faixa e vão para o mesmo executor,
+    o mais alto entre elas; o `plano` recusa faixa que mistura executores.
+  - Tarefa de `codex` ou `agy` precisa listar `Arquivos:` (executor externo só
+    trabalha em faixa).
+  - Decisão de design faltando não é tarefa de faixa: volte ao passo 2
+    (Projetar), que é do Arquiteto, antes de escrevê-la no `tasks.md`.
+  - Janela do Claude esgotada: as tarefas de `sonnet` e `opus` ainda não
+    executadas passam para `codex`, com esforço `alto` (ou `xalto` nas que eram
+    `opus`). O Astra do Codex continua de reserva.
+  - Tarefa sem `Modelo:` usa o padrão `sonnet`.
   - O critério só vale na execução paralela. Quando o Claude da sessão
     implementa tarefa por tarefa, quem trabalha é o modelo da sessão.
 - Status entre colchetes: `[pendente]`, `[em-andamento]`, `[concluida]`
   (acentos e maiúsculas são tolerados; token desconhecido é erro).
 - **Fechou o tasks.md? Anuncie o paralelismo.** Rode `fuzkrigo-spec plano <feature>`
   e conte ao usuário, sem ele pedir: *"X destas Y tarefas podem rodar EM
-  PARALELO, em N faixas — quer que eu execute? Dá para acompanhar tudo ao
-  vivo no navegador."* Nunca deixe o paralelismo como segredo do motor.
+  PARALELO, em N faixas — quer que eu execute?"* Nunca deixe o paralelismo
+  como segredo do motor.
 
 ### 4. Plano de execução (2+ tarefas pendentes)
 
@@ -345,22 +355,34 @@ produto).
     atual) e recusa a `main`; roda `claude -p` por faixa, em paralelo, com
     `--model` e `--effort` já definidos por tarefa, mescla as faixas de volta
     na branch da issue, marca as tarefas e fecha com o gate da feature
-    (verify + `audit --ci --feature`);
-  - `plano-execucao.html` — visual do plano com o botão **"Executar todas as
-    tarefas em janelas limpas e paralelas"** (copia o comando do script).
+    (verify + `audit --ci --feature`). Faixa de `codex` ou `agy` ele só
+    prepara (ver "Faixas manuais", abaixo);
+  - `plano-execucao.html` — visual do plano, com um botão que só copia o
+    comando do script.
 - **Apresente o plano ao usuário antes de executar**: resuma as faixas,
-  incluindo o modelo e o esforço de cada tarefa (para o usuário revisar a
-  classificação antes de rodar), diga onde estão os arquivos e ofereça as
-  rotas — automática
-  (`bash .spec/features/<feature>/executar-tarefas.sh` ou o botão do html) ou
-  manual (você mesmo implementa faixa a faixa, seguindo branches e commits do
-  plano).
-- **Acompanhamento ao vivo (ofereça sempre)**: rode `fuzkrigo-spec painel <feature>`
-  em background (Bash com run_in_background) e entregue a URL ao usuário —
-  abre um painel local no navegador com as faixas em tempo real, o log de
-  cada janela rolando, as provas e o gate; o botão **"Executar todas as
-  tarefas em janelas limpas e paralelas"** de lá dispara o script DE VERDADE.
-  É assim que o usuário acompanha sem digitar comando nenhum.
+  incluindo o executor, o modelo e o esforço de cada tarefa (para o usuário
+  validar a escolha antes de rodar), diga onde estão os arquivos e ofereça as
+  rotas — automática (o Arquiteto roda
+  `bash .spec/features/<feature>/executar-tarefas.sh` no `jarq`, na caixa; o
+  usuário não roda o script fora dela) ou manual (você mesmo implementa faixa a
+  faixa, seguindo branches e commits do plano).
+- **Faixas manuais** (`Modelo: codex` ou `agy`): quem executa é o agente
+  externo, aberto pelo usuário. A seção "Faixas manuais" do `plano-execucao.md`
+  traz o passo a passo.
+  - O script cria o worktree e a branch de cada uma e roda só as faixas do
+    Claude. Havendo faixa manual, ele não roda as tarefas sem `Arquivos:` nem o
+    gate, e sai com código 2 (1 se alguma faixa ou tarefa falhar).
+  - O usuário abre o atalho do executor (`jcodex` ou `jagy`) no worktree, ajusta
+    o esforço e cola o prompt da faixa.
+  - Quando o executor responder, o Arquiteto confere os arquivos tocados,
+    mescla, marca as tarefas e roda o gate (com tarefas sequenciais, regenera o
+    plano e roda o script, que as executa e fecha o gate).
+  - Não regenere o plano com faixa manual por integrar. Se uma faixa parou e vai
+    trocar de executor, integre antes as manuais, aproveite ou descarte a branch
+    da que parou e só então regenere.
+- **Painel** (`fuzkrigo-spec painel <feature>`): dentro da caixa (ai-jail), não
+  abra — o endereço não chega ao navegador. Fora dela, o usuário pode abri-lo só
+  para acompanhar; o botão de executar roda o script fora da caixa e não se usa.
 - Mudou tasks.md ou a config (`paralelo` no fuzkrigo.config.json)? **Regenere
   o plano** — nunca edite os artefatos à mão.
 
@@ -459,7 +481,8 @@ especificação sem história (`SPEC_SEM_US`), critério fora de história
   (`ARQUIVO_ORFAO`).
 - **"O que estamos assumindo?"** → `fuzkrigo-spec assumptions`.
 - **"O que dá pra fazer em paralelo?"** → `fuzkrigo-spec plano <feature>`.
-- **"Como acompanho a execução ao vivo?"** → `fuzkrigo-spec painel <feature>`.
+- **"Como acompanho a execução ao vivo?"** → `fuzkrigo-spec painel <feature>`,
+  fora da caixa e só para olhar.
 - **"Onde estamos?"** → `fuzkrigo-spec status`.
 
 ## Carregamento de contexto

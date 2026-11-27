@@ -8,13 +8,34 @@
 // O CÁLCULO do plano é agnóstico de agente. Os ARTEFATOS variam:
 //   claude      → plano-execucao.md + executar-tarefas.sh (claude -p headless,
 //                 com --model e --effort por tarefa) + plano-execucao.html
-//                 (visual, com o botão "Executar todas as tarefas...")
+//                 (visual, com o botão que copia o comando do script)
 //   antigravity → plano-execucao.md com comandos de worktree e um PROMPT
 //                 pronto por faixa, para os agentes paralelos nativos do
 //                 Antigravity (nunca depende do CLI do Claude)
+//
+// No modo claude, a tarefa de `Modelo: codex` ou `agy` vira faixa manual (ver
+// faixas-externas.js): o script prepara o worktree e não a executa.
+// In claude mode, a `Modelo: codex` or `agy` task becomes a manual lane (see
+// faixas-externas.js): the script prepares the worktree and does not run it.
 
 import path from 'path';
 import { foldStatus } from '../util/text.js';
+import {
+  executorDoModelo,
+  faixasClaude,
+  faixasManuais,
+  linhasFimManual,
+  linhasPreparoManual,
+  linhasRecusaSobras,
+  notaExecucaoHtml,
+  secaoFaixasManuais,
+  temTarefaClaude,
+  validarExecutores,
+} from './faixas-externas.js';
+import { promptFaixa, promptTarefa } from './plano-prompts.js';
+import { linhasWorktree, shq, sufixoVar } from './plano-shell.js';
+
+export { promptFaixa, promptTarefa };
 
 // esforço aceito em PT ou EN → nível do CLI (`claude --effort <nível>`)
 export const ESFORCO_CLI = {
@@ -84,10 +105,12 @@ export function montarPlano(project, featureName, opts = {}) {
     if (!esforcoCli) {
       avisos.push(`${t.id}: esforço "${esforcoRaw}" desconhecido — usando "medium" (aceitos: baixo|medio|alto|xalto|max)`);
     }
+    const model = t.model || cfg.model;
     pendentes.push({
       ...t,
       files: t.files.map(normFile),
-      model: t.model || cfg.model,
+      model,
+      executor: executorDoModelo(model),
       esforcoCli: esforcoCli || 'medium',
       acs: t.refs.filter((r) => r.startsWith('AC-')),
     });
@@ -131,6 +154,9 @@ export function montarPlano(project, featureName, opts = {}) {
     fx.branch = `spec/${featureName}-faixa-${i + 1}`;
     fx.worktree = `../fuzkrigo-worktrees/${repoName}-${featureName}-faixa-${i + 1}`;
   });
+  const erroExecutor = validarExecutores(faixas, sequenciais);
+  if (erroExecutor) return { erro: erroExecutor };
+  for (const fx of faixas) fx.executor = fx.tasks[0].executor;
 
   // ondas: no máximo maxParalelas faixas simultâneas
   const max = Math.max(1, cfg.maxParalelas | 0 || 3);
@@ -164,65 +190,6 @@ export function montarPlano(project, featureName, opts = {}) {
   };
 }
 
-// ── prompts ────────────────────────────────────────────────────────────────
-
-function linhasRegras(plan) {
-  const teste = plan.testCommand
-    ? `Rode os testes localmente com \`${plan.testCommand}\` até passarem.`
-    : 'Rode os testes do projeto localmente até passarem.';
-  return [
-    'Regras inegociáveis:',
-    '- Todo critério de aceite referenciado vira teste com @spec:AC-xxx no título.',
-    '- NUNCA enfraqueça, pule (skip/todo) ou apague um teste para passar — teste pulado não é prova e o audit acusa.',
-    `- ${teste}`,
-    '- NÃO edite tasks.md, NÃO rode fuzkrigo-spec verify/audit e NÃO toque em outras tarefas — o orquestrador cuida disso.',
-    '- Ao final de CADA tarefa: `git add` só no que você tocou e um commit próprio.',
-  ];
-}
-
-function descreveTarefa(plan, t) {
-  const acs = t.acs.map((id) => (plan.acTitulo[id] ? `${id} (${plan.acTitulo[id]})` : id));
-  const refs = acs.length ? acs.join(', ') : t.refs.join(', ') || '—';
-  const arquivos = t.files.length ? t.files.join(', ') : '(a definir pela tarefa)';
-  return [
-    `${t.id} — "${t.title}"`,
-    `  critérios/refs: ${refs}`,
-    `  arquivos permitidos (e seus testes): ${arquivos}`,
-    `  mensagem de commit: "${t.id} ${plan.feature}: ${t.title}"`,
-  ];
-}
-
-// prompt de UMA tarefa (script claude headless e tarefas sequenciais)
-export function promptTarefa(plan, t) {
-  return [
-    `Você executa UMA tarefa da feature "${plan.feature}" (fluxo fuzkrigo-spec, spec-anchored).`,
-    `Leia primeiro: ${plan.baseDir}/spec.md, ${plan.baseDir}/tasks.md e .spec/constituicao.md.`,
-    '',
-    'Sua tarefa (somente ela):',
-    ...descreveTarefa(plan, t),
-    '',
-    ...linhasRegras(plan),
-  ].join('\n');
-}
-
-// prompt de uma FAIXA inteira (uma janela limpa executa as tarefas em ordem)
-export function promptFaixa(plan, fx, { worktree = true } = {}) {
-  const onde = worktree
-    ? `Trabalhe SOMENTE dentro do worktree ${fx.worktree} (branch ${fx.branch}) — já preparado.`
-    : 'Trabalhe na árvore principal do repositório.';
-  return [
-    `Você executa as tarefas da ${fx.id} da feature "${plan.feature}" (fluxo fuzkrigo-spec, spec-anchored).`,
-    onde,
-    `Leia primeiro: ${plan.baseDir}/spec.md, ${plan.baseDir}/tasks.md e .spec/constituicao.md.`,
-    '',
-    `Execute NESTA ORDEM (1 tarefa = 1 commit):`,
-    ...fx.tasks.flatMap((t) => descreveTarefa(plan, t)),
-    '',
-    ...linhasRegras(plan),
-    'Quando a última tarefa estiver commitada, PARE e informe o resultado — a mesclagem é do orquestrador.',
-  ].join('\n');
-}
-
 // ── artefato: plano.json (leitura de máquina — alimenta o painel ao vivo) ──
 
 export function renderPlanoJson(plan) {
@@ -230,6 +197,7 @@ export function renderPlanoJson(plan) {
     id: t.id,
     titulo: t.title,
     modelo: t.model,
+    executor: t.executor,
     esforco: t.esforcoCli,
     arquivos: t.files,
     refs: t.refs,
@@ -247,6 +215,7 @@ export function renderPlanoJson(plan) {
       ondas: plan.ondas.map((onda) => onda.map((fx) => fx.id)),
       faixas: plan.faixas.map((fx) => ({
         id: fx.id,
+        executor: fx.executor,
         branch: fx.branch,
         worktree: fx.worktree,
         tarefas: fx.tasks.map(tarefa),
@@ -328,28 +297,30 @@ export function renderPlanoMd(plan) {
   if (plan.agent === 'claude') {
     L.push('### ▶ Automático — Claude Code headless (recomendado)');
     L.push('');
+    L.push('Quem roda é o Arquiteto, no `jarq`, dentro da caixa, a partir da raiz do repositório:');
+    L.push('');
     L.push('```bash');
     L.push(`bash ${plan.baseDir}/executar-tarefas.sh`);
     L.push('```');
     L.push('');
-    L.push(`Ou abra \`${plan.baseDir}/plano-execucao.html\` no navegador e use o botão`);
-    L.push('**“Executar todas as tarefas em janelas limpas e paralelas”** (copia o comando acima).');
+    L.push('Não rode o script fora da caixa: o `claude -p` ficaria sem a barreira.');
     L.push('');
-    L.push('Cada faixa roda `claude -p` com **janela de contexto limpa**, `--model` e `--effort` já');
+    const sujeito = faixasManuais(plan).length ? 'Cada faixa do Claude' : 'Cada faixa';
+    L.push(`${sujeito} roda \`claude -p\` com **janela de contexto limpa**, \`--model\` e \`--effort\` já`);
     L.push(`definidos por tarefa, permissões \`${plan.cfg.permissionMode}\`. Os prompts exatos estão`);
     L.push('embutidos no script — quer rodar uma faixa na mão, é só copiá-los de lá.');
     L.push(`Logs: \`../fuzkrigo-worktrees/${plan.repoName}-${plan.feature}-logs/\`.`);
     L.push('');
-    L.push('### Acompanhe ao vivo, sem digitar comandos');
+    L.push('### Acompanhe ao vivo (fora da caixa, só para olhar)');
     L.push('');
     L.push('```bash');
     L.push(`fuzkrigo-spec painel ${plan.feature}`);
     L.push('```');
     L.push('');
-    L.push('Abre um painel no navegador com as faixas em tempo real, o log de cada uma');
-    L.push('rolando ao vivo, o veredito do gate — e o botão **"Executar todas as tarefas');
-    L.push('em janelas limpas e paralelas"** que aqui executa DE VERDADE (o servidor é');
-    L.push('local, então pode disparar o script por você).');
+    L.push('Só fora da caixa (dentro dela o endereço não chega ao navegador) e só para');
+    L.push('acompanhar: faixas, logs e o veredito do gate em tempo real. Não use o botão');
+    L.push('Executar do painel: ele roda o script fora da caixa.');
+    if (faixasManuais(plan).length) L.push(...secaoFaixasManuais(plan));
   } else {
     L.push('### ▶ Paralelo nativo no Antigravity (janelas limpas, sem Claude CLI)');
     L.push('');
@@ -402,17 +373,15 @@ export function renderPlanoMd(plan) {
     L.push(`node ${plan.engine} audit --ci --feature ${plan.feature}`);
     L.push('```');
     L.push('');
-    L.push(`6. **Acompanhe ao vivo** (opcional): \`fuzkrigo-spec painel ${plan.feature}\` abre um`);
-    L.push('   painel no navegador refletindo tasks.md, as provas do verify e o gate em');
-    L.push('   tempo real enquanto os agentes trabalham — sem digitar mais nada.');
+    L.push('6. **Acompanhe ao vivo** (opcional, fora da caixa, só para olhar):');
+    L.push(`   \`fuzkrigo-spec painel ${plan.feature}\` abre um painel no navegador refletindo`);
+    L.push('   tasks.md, as provas do verify e o gate em tempo real enquanto os agentes trabalham.');
   }
   L.push('');
   return `${L.join('\n')}\n`;
 }
 
 // ── artefato: executar-tarefas.sh (só claude) ──────────────────────────────
-
-const shq = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;
 
 function allowedTools(plan) {
   if (plan.cfg.allowedTools) return plan.cfg.allowedTools;
@@ -447,6 +416,7 @@ function linhasBranchAtual() {
 
 export function renderPlanoSh(plan) {
   const L = [];
+  const manual = faixasManuais(plan).length > 0;
   L.push('#!/usr/bin/env bash');
   L.push(`# executar-tarefas.sh — gerado por \`fuzkrigo-spec plano ${plan.feature}\` em ${plan.geradoEm}`);
   L.push('# NÃO edite à mão: mudou tasks.md ou a config, regenere o plano.');
@@ -460,6 +430,10 @@ export function renderPlanoSh(plan) {
   L.push('#   4. mescla cada faixa de volta (--no-ff) e marca as tarefas [concluida]');
   L.push('#   5. tarefas sem Arquivos: rodam uma a uma na árvore principal');
   L.push(`#   6. gate final: fuzkrigo-spec verify ${plan.feature} + fuzkrigo-spec audit --ci --feature ${plan.feature}`);
+  if (manual) {
+    L.push('# Faixas de codex e agy só ganham worktree e branch. Com elas, os passos 5 e 6');
+    L.push('# ficam para depois da integração, e o script sai 2 (1 se algo falhar).');
+  }
   L.push('set -u');
   L.push('set -o pipefail');
   L.push('');
@@ -478,10 +452,13 @@ export function renderPlanoSh(plan) {
   L.push('# ── 1. ambiente ──────────────────────────────────────────────────');
   L.push('command -v git >/dev/null 2>&1 || falhar "git não encontrado"');
   L.push('command -v node >/dev/null 2>&1 || falhar "node não encontrado"');
-  L.push('command -v claude >/dev/null 2>&1 || falhar "Claude Code CLI (claude) não encontrado — instale-o ou siga o modo manual em plano-execucao.md"');
+  if (temTarefaClaude(plan)) {
+    L.push('command -v claude >/dev/null 2>&1 || falhar "Claude Code CLI (claude) não encontrado — instale-o ou siga o modo manual em plano-execucao.md"');
+  }
   L.push('TOPLEVEL=$(git rev-parse --show-toplevel 2>/dev/null) || falhar "fora de um repositório git"');
   L.push('cd "$TOPLEVEL" || exit 1');
   L.push(...linhasBranchAtual());
+  if (manual) L.push(...linhasRecusaSobras());
   L.push('# artefatos recém-gerados pelo `fuzkrigo-spec plano` são sujeira esperada:');
   L.push('# se forem a ÚNICA sujeira, o script mesmo commita; qualquer outra, aborta');
   L.push('if [ -n "$(git status --porcelain)" ]; then');
@@ -503,7 +480,7 @@ export function renderPlanoSh(plan) {
   L.push('evento "branch|$BASE_BRANCH"');
   L.push('info "branch de trabalho: $BASE_BRANCH"');
   L.push('info "logs por faixa em: $LOG_DIR"');
-  L.push(`info "acompanhe ao vivo: fuzkrigo-spec painel ${plan.feature}"`);
+  L.push(`info "acompanhe ao vivo: fuzkrigo-spec painel ${plan.feature} (fora da caixa, só para olhar)"`);
   L.push('');
   L.push('mesclar_faixa() { # $1=faixa $2=branch $3=worktree $4=exit-da-faixa');
   L.push('  if [ "$4" -ne 0 ]; then');
@@ -523,34 +500,35 @@ export function renderPlanoSh(plan) {
   L.push('    FALHAS="$FALHAS $1"; return 1');
   L.push('  fi');
   L.push('}');
+  if (manual) L.push(...linhasPreparoManual(plan));
 
-  plan.ondas.forEach((onda, oi) => {
+  plan.ondas.forEach((todas, oi) => {
+    const onda = faixasClaude(todas);
+    if (!onda.length) return;
     L.push('');
     L.push(`# ── onda ${oi + 1}: ${onda.map((fx) => `${fx.id} (${fx.tasks.map((t) => t.id).join(', ')})`).join(' ∥ ')} ──`);
     L.push(`evento "onda|${oi + 1}|inicio"`);
     L.push(`info "onda ${oi + 1}: ${onda.map((fx) => fx.id).join(' ∥ ')} — janelas limpas em paralelo"`);
     for (const fx of onda) {
-      const wt = `WT_${fx.id.replace('-', '_').toUpperCase()}`;
-      L.push(`${wt}="$(dirname "$TOPLEVEL")/fuzkrigo-worktrees/${plan.repoName}-${plan.feature}-${fx.id}"`);
-      L.push(`git worktree add "$${wt}" -b ${shq(fx.branch)} >/dev/null || falhar "worktree da ${fx.id} (sobrou de uma execução anterior? git worktree prune + apague ${fx.worktree})"`);
+      L.push(...linhasWorktree(plan, fx));
       L.push(`evento "faixa|${fx.id}|executando"`);
       L.push('(');
-      L.push(`  cd "$${wt}" || exit 9`);
+      L.push(`  cd "$WT_${sufixoVar(fx)}" || exit 9`);
       fx.tasks.forEach((t, ti) => {
         L.push(`  ${ti > 0 ? '&& ' : ''}${chamadaClaude(plan, t)} \\`);
       });
       // fecha o encadeamento (a última linha termina sem \)
       L[L.length - 1] = L[L.length - 1].replace(/ \\$/, '');
       L.push(`) > "$LOG_DIR/${fx.id}.log" 2>&1 &`);
-      L.push(`PID_${fx.id.replace('-', '_').toUpperCase()}=$!`);
+      L.push(`PID_${sufixoVar(fx)}=$!`);
     }
     for (const fx of onda) {
-      const up = fx.id.replace('-', '_').toUpperCase();
+      const up = sufixoVar(fx);
       L.push(`wait "$PID_${up}"; ST_${up}=$?`);
       L.push(`evento "faixa|${fx.id}|exit|$ST_${up}"`);
     }
     for (const fx of onda) {
-      const up = fx.id.replace('-', '_').toUpperCase();
+      const up = sufixoVar(fx);
       L.push(`if mesclar_faixa ${shq(fx.id)} ${shq(fx.branch)} "$WT_${up}" "$ST_${up}"; then`);
       for (const t of fx.tasks) {
         L.push(`  node "$ENGINE" tarefa "$FEATURE" ${t.id} concluida || true`);
@@ -560,7 +538,7 @@ export function renderPlanoSh(plan) {
     }
   });
 
-  if (plan.sequenciais.length) {
+  if (plan.sequenciais.length && !manual) {
     L.push('');
     L.push('# ── tarefas sequenciais (árvore principal) ───────────────────────');
     for (const t of plan.sequenciais) {
@@ -581,6 +559,12 @@ export function renderPlanoSh(plan) {
     }
   }
 
+  L.push(...(manual ? linhasFimManual(plan) : linhasGate(plan)));
+  return `${L.join('\n')}\n`;
+}
+
+function linhasGate(plan) {
+  const L = [];
   L.push('');
   L.push('# ── gate final: quem decide é a máquina ──────────────────────────');
   L.push('echo');
@@ -608,7 +592,7 @@ export function renderPlanoSh(plan) {
   L.push('evento "fim|1"');
   L.push('vermelho "plano terminou com pendências — leia a saída do audit acima e os logs em $LOG_DIR"');
   L.push('exit 1');
-  return `${L.join('\n')}\n`;
+  return L;
 }
 
 // ── artefato: plano-execucao.html (só claude) ──────────────────────────────
@@ -704,14 +688,13 @@ export function renderPlanoHtml(plan) {
   </div>
   ${avisosHtml}
   <div class="executor">
-    <button onclick="copiar()">▶ Executar todas as tarefas em janelas limpas e paralelas</button>
-    <span id="toast">comando copiado ✔ — cole no terminal</span>
+    <button onclick="copiar()">Copiar o comando do script</button>
+    <span id="toast">comando copiado ✔ — para o Arquiteto rodar na caixa</span>
     <div><code id="cmd">${esc(cmd)}</code></div>
-    <p class="nota">Este arquivo é estático: o botão copia o comando; cole no terminal, na raiz
-    do projeto. Cada faixa roda <code>claude -p</code> num worktree próprio, com contexto limpo,
-    modelo e esforço já definidos. O gate final (verify + audit) roda sozinho.
-    <b>Quer acompanhar ao vivo e executar com um clique de verdade?</b> Rode
-    <code>fuzkrigo-spec painel ${esc(plan.feature)}</code> — abre a versão viva deste painel.</p>
+    <p class="nota">Este arquivo é estático: o botão só copia o comando, que é para o Arquiteto rodar na caixa
+    (<code>jarq</code>), na raiz do projeto. Não rode o script fora da caixa. ${notaExecucaoHtml(plan)}
+    <b>Painel ao vivo:</b> <code>fuzkrigo-spec painel ${esc(plan.feature)}</code>, fora da caixa e só para
+    acompanhar; o botão Executar dele roda o script fora da caixa e não se usa.</p>
   </div>
   ${ondasHtml}
   ${seqHtml}

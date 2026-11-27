@@ -58,7 +58,7 @@ Nada aqui impede você de trabalhar rápido. O que ele impede é você **achar**
 | Peça | O que é | Quem dispara |
 | ---- | ------- | ------------ |
 | `CLAUDE.md` | As regras que valem em toda sessão: persona, idioma, TDD, anti-alucinação, proibições. Importa o `CODIGO.md` (padrões de código), que entra junto em toda sessão | Carregado automaticamente, sempre |
-| `references/` | Padrões consultáveis: convenções de Git, templates de issue e PR, workflow de CI | Lido quando o assunto aparece; o `github/` é copiado para o projeto em A3 |
+| `references/` | Padrões consultáveis: convenções de Git, protocolo de orquestração dos agentes, templates de issue e PR, workflow de CI | Lido quando o assunto aparece; o `github/` é copiado para o projeto em A3 |
 | `skills/` | Fluxos completos: abertura de projeto, desenvolvimento de feature, ambiente corporativo | Você chama (`/iniciar-projeto`) ou o gatilho da descrição dispara |
 | `agents/` | Especialistas que rodam isolados e devolvem um relatório: revisão de código, segurança, documentação, gestão de projeto, docstrings | Chamados em pontos fixos do fluxo, ou quando você pede |
 | `hooks/` | Três scripts: um a cada mensagem sua, dois antes de cada escrita de arquivo | Automático, você não controla |
@@ -482,18 +482,25 @@ Se houver duas ou mais tarefas pendentes, dá para paralelizar:
 
 ```bash
 fspec plano e2-recuperacao-senha  # agrupa tarefas de arquivos disjuntos em faixas
-fspec painel e2-recuperacao-senha # painel ao vivo no navegador, com botao de executar
+fspec painel e2-recuperacao-senha # acompanhar ao vivo no navegador (fora da caixa, so para olhar)
 ```
 
-Cada tarefa recebe `Modelo:` e `Esforço:` pelo critério da skill: tarefa simples usa `sonnet`,
-tarefa complexa usa `opus`, e na dúvida ela é complexa (tarefa sem `Modelo:` também fica com o
-`opus`). O resumo do plano mostra essa classificação para você revisar antes de executar. Isso só
-vale na execução paralela: quando eu implemento tarefa por tarefa na conversa, quem trabalha é o
-modelo da sessão.
+Cada tarefa recebe `Modelo:` e `Esforço:` pelo critério da skill, que escolhe quem executa: `agy`
+(Antigravity) para o trabalho pequeno e sem lógica nova, `codex` para lógica contida numa camada,
+`sonnet` para o que atravessa camadas, mexe em regra de negócio central ou tem um ponto de risco, e
+`opus` para dois ou mais pontos de risco ou muitos casos de borda. Na dúvida, sobe um nível; tarefa
+sem `Modelo:` fica com o `sonnet`. O resumo do plano mostra executor e esforço para você validar
+antes de executar. Isso só vale na execução paralela: quando eu implemento tarefa por tarefa na
+conversa, quem trabalha é o modelo da sessão.
 
 Cada faixa roda em um worktree próprio, com contexto limpo. O executor trabalha na branch da issue
 e recusa a `main`: as faixas saem dela e voltam para ela, e o gate final é o
 `audit --ci --feature` da feature.
+
+As faixas de `codex` e `agy` são manuais: o script só prepara o worktree, e você abre ali o atalho
+do agente (`jcodex` ou `jagy`) e cola o prompt do `plano-execucao.md`. Nesse caso o script sai com
+código 2, e o gate fica para depois da integração. O passo a passo entre os quatro agentes está em
+`~/.claude/references/orquestracao.md`.
 
 ### Passo 5 — Portão 1: a máquina decide
 
@@ -629,7 +636,7 @@ fspec new <feature>                        # cria spec.md e tasks.md
 fspec scaffold <feature>                   # acrescenta os testes que falham
 fspec tarefa <feature> <T-xxx> <status>    # pendente | em-andamento | concluida
 fspec plano <feature>                      # agrupa tarefas em faixas paralelas
-fspec painel <feature>                     # acompanhamento ao vivo no navegador
+fspec painel <feature>                     # acompanhar ao vivo (fora da caixa)
 
 # prova
 fspec verify <feature>                     # roda os testes, grava a prova
@@ -719,20 +726,21 @@ instalação de uma status line chegou a sobrescrever o `settings.json` global, 
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são catorze conjuntos de ajustes no motor — o suporte a Python, o
+**patches locais** no `README.md`: são quinze conjuntos de ajustes no motor — o suporte a Python, o
 audit com escopo de feature, os nomes próprios, o modelo padrão por alias, o preset LGPD para
 Python e JavaScript, as mensagens e a saída do motor, a spec rastreável, a numeração contínua no
 `new`, a prova do princípio com a unicidade das tarefas, o princípio repetido na constituição, o
 executor na branch da issue com o gate por feature, o scaffold que acrescenta com o `new` que
-mostra o rastreio, os casos de borda e regras de fechamento na spec, e os presets de constituição
-combináveis. As dezesseis suítes que os protegem rodam assim:
+mostra o rastreio, os casos de borda e regras de fechamento na spec, os presets de constituição
+combináveis e as faixas externas de Codex e Antigravity. As dezenove suítes que os protegem rodam
+assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
 node --test test/*.test.mjs
 ```
 
-O glob pega suíte nova sem mudar o comando. São 93 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+O glob pega suíte nova sem mudar o comando. São 119 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:
