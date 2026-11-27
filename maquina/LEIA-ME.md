@@ -13,6 +13,7 @@ O script de instalação (Bloco 6) vai ler esta pasta. Até lá, a máquina é a
 | `codex-config.toml` | topo de `~/.codex/config.toml` | Mesclar: acrescentar as duas chaves, nunca sobrescrever o arquivo |
 | `antigravity-settings.json` | `~/.gemini/antigravity-cli/settings.json` | Mesclar: a chave `agentMode` entra no JSON existente |
 | `gitignore-global` | ignore global do git (`~/.config/git/ignore`) | Acrescentar a linha, se ainda não estiver lá |
+| `agents-executor.md` | `~/.codex/AGENTS.md` e `~/.gemini/AGENTS.md` | Copiar; se já existir um arquivo seu, mesclar à mão |
 
 O arquivo de shell vai para `~/.config/fuzkrigo/`, **nunca para dentro de `~/.claude/`**: o ai-jail monta `~/.claude` com escrita dentro da caixa, e um arquivo lido pelo `~/.bashrc` dentro dele deixaria um agente injetar comando no shell do usuário, fora da caixa.
 
