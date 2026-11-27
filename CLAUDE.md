@@ -91,6 +91,7 @@ Ao iniciar projeto novo ou refatoração grande, carregar `/iniciar-projeto`. Co
 | `~/.claude/DESIGN.md`          | Trabalho que produz interface ou gráfico: consultar antes de escolher cor, espaçamento ou tipografia |
 | `~/.claude/CODIGO.md`          | Carregado sempre via import (seção 10)                                                  |
 | `~/.claude/references/git-conventions.md` | Qualquer commit, branch, PR ou release                                       |
+| `~/.claude/references/orquestracao.md` | Distribuir tarefas entre os quatro agentes, executar faixas paralelas ou integrar o trabalho delas |
 
 ---
 
