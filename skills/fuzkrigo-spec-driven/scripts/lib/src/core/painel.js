@@ -49,7 +49,7 @@ export function parseEventos(texto) {
         // exit != 0 vira "falhou" no evento seguinte; exit 0 aguarda merge
         if ((parseInt(extra, 10) || 0) === 0) ex.faixas[id] = ex.faixas[id] === 'executando' ? 'mesclando' : ex.faixas[id];
       } else {
-        ex.faixas[id] = st; // executando | mesclada | conflito | falhou
+        ex.faixas[id] = st; // manual | executando | mesclada | conflito | falhou
       }
     } else if (tipo === 'tarefa') ex.tarefas[resto[0]] = resto[1];
     else if (tipo === 'seq') ex.seq[resto[0]] = resto[1];
@@ -231,6 +231,7 @@ export function renderPainelHtml({ feature, token, podeExecutar }) {
     if (st === 'executando' || st === 'mesclando') return '<span class="chip executando">' + esc(st) + '</span>';
     if (st === 'mesclada') return '<span class="chip ok">mesclada</span>';
     if (st === 'conflito' || st === 'falhou') return '<span class="chip erro">' + esc(st) + '</span>';
+    if (st === 'manual') return '<span class="chip">manual</span>';
     return '<span class="chip">aguardando</span>';
   }
   function stTarefa(e, id) {
@@ -244,6 +245,7 @@ export function renderPainelHtml({ feature, token, podeExecutar }) {
     if (e.rodando) { fase.textContent = 'executando'; fase.className = 'chip executando'; }
     else if (ex && ex.fim === 0) { fase.textContent = 'concluído ✔'; fase.className = 'chip ok'; }
     else if (ex && ex.fim === 1) { fase.textContent = 'com pendências'; fase.className = 'chip erro'; }
+    else if (ex && ex.fim === 2) { fase.textContent = 'aguardando faixas manuais'; fase.className = 'chip'; }
     else { fase.textContent = 'pronto para executar'; fase.className = 'chip'; }
     document.getElementById('hora').textContent = new Date(e.atualizado).toLocaleTimeString();
     document.getElementById('provas').textContent =
@@ -267,8 +269,9 @@ export function renderPainelHtml({ feature, token, podeExecutar }) {
     var btn = document.getElementById('btn');
     if (btn) {
       btn.disabled = !!e.rodando;
-      document.getElementById('btn-nota').textContent =
-        e.rodando ? ' executando — acompanhe abaixo' : (ex && ex.fim != null ? ' reexecutar' : '');
+      var depois = ex && ex.fim === 2 ? ' integre as faixas manuais antes de rodar de novo'
+        : (ex && ex.fim != null ? ' reexecutar' : '');
+      document.getElementById('btn-nota').textContent = e.rodando ? ' executando — acompanhe abaixo' : depois;
     }
 
     document.getElementById('avisos').innerHTML = (e.plan.avisos || []).length

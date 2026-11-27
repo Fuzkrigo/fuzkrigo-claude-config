@@ -11,10 +11,10 @@
     é o que decide o que `fuzkrigo-spec plano` roda em PARALELO (arquivos
     disjuntos) e o que roda em sequência.
   - Campos opcionais por tarefa, usados pelo plano de execução:
-    `- Modelo: sonnet` com `- Esforço: medio` (tarefa simples) ou
-    `- Modelo: opus` com `- Esforço: alto` (tarefa complexa); esforços aceitos:
-    baixo|medio|alto|xalto|max. Sem `Modelo:`, vale o padrão `opus`.
-    Critério de classificação: passo "3. Tarefas" da SKILL.md da skill
+    `- Modelo:` (agy, codex, sonnet ou opus) e `- Esforço:`
+    (baixo|medio|alto|xalto|max). Sem `Modelo:`, vale o padrão `sonnet`.
+    Tarefa de codex ou agy precisa listar `Arquivos:`.
+    Critério de escolha: passo "3. Tarefas" da SKILL.md da skill
     fuzkrigo-spec-driven.
   - Uma tarefa só pode virar [concluida] quando os critérios de aceite dela
     tiverem prova PASS registrada por `fuzkrigo-spec verify`.
