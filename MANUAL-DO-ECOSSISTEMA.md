@@ -753,8 +753,8 @@ no shell que o Claude Code usa (`sh` no Linux, `bash` no Windows), e precisa des
 ou `python3` no PATH. O quarto, que prova por que a forma com `.` é proibida, roda só onde o `sh`
 não é bash (o dash do Ubuntu, por exemplo); no Windows e onde o `sh` é bash, fica pulado.
 
-A configuração da máquina versionada (`maquina/`) tem a suíte própria, com 36 casos, rodada a partir
-da raiz com `python3 -m unittest discover -s maquina/tests -v` (`py -3` no Windows). Os 28 do
+A configuração da máquina versionada (`maquina/`) tem a suíte própria, com 37 casos, rodada a partir
+da raiz com `python3 -m unittest discover -s maquina/tests -v` (`py -3` no Windows). Os 29 do
 `agentes.bash` (atalhos e `gitc`) usam o `git` e precisam do `bash`; sem o `bash`, ficam pulados.
 
 No GitHub, o workflow `.github/workflows/testes.yml` roda as três suítes a cada push na `main` e

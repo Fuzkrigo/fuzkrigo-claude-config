@@ -125,6 +125,15 @@ class AgentesBashTest(ShellSandbox):
             with self.subTest(place=place):
                 self.assertEqual(self.run_shortcut("jeng", cwd=cwd), ["--"] + CLAUDE_SONNET)
 
+    def replace_git_file(self, lane, content):
+        """Apaga e recria o .git da faixa / Deletes and recreates the lane's .git."""
+        # O Git for Windows marca o .git como oculto, e o Python nao abre arquivo
+        # oculto para sobrescrever no Windows.
+        # Git for Windows marks .git as hidden, and Python cannot open a hidden
+        # file for overwriting on Windows.
+        (lane / ".git").unlink()
+        (lane / ".git").write_bytes(content)
+
     def forge_git_dir(self, lane, target):
         """Pasta git falsa dentro da faixa, com commondir no repositorio alvo.
         Fake git dir inside the lane, with commondir in the target repository."""
@@ -136,13 +145,13 @@ class AgentesBashTest(ShellSandbox):
             ("HEAD", "ref: refs/heads/lane"),
         ):
             (fake / name).write_text(content + "\n", encoding="utf-8", newline="\n")
-        (lane / ".git").write_text(f"gitdir: {fake.as_posix()}\n", encoding="utf-8", newline="\n")
+        self.replace_git_file(lane, f"gitdir: {fake.as_posix()}\n".encode())
 
     def borrow_git_file(self, lane, target):
         """.git da faixa copiado de um worktree de outro repositorio.
         Lane .git copied from another repository's worktree."""
         other = self.add_worktree(target, f"other-of-{lane.name}")
-        (lane / ".git").write_bytes((other / ".git").read_bytes())
+        self.replace_git_file(lane, (other / ".git").read_bytes())
 
     def link_git_file(self, lane, target):
         """.git da faixa como link para o de um worktree de outro repositorio.

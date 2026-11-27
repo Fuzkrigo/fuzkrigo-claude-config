@@ -240,6 +240,8 @@ _gitc_confirm_push() {
   IFS= read -r answer || answer=""
   # Sem terminal a resposta nao ecoa; quebra a linha. / No echo without a terminal; end the line.
   [ -t 0 ] || echo >&2
+  # Resposta vinda do Windows pode terminar em CR. / A Windows answer may end in CR.
+  answer="${answer%$'\r'}"
   case "$answer" in
     s | S) return 0 ;;
   esac

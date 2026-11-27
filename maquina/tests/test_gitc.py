@@ -143,7 +143,7 @@ class GitcLocalRemoteTest(GitcSandbox):
         """--confere e push recusam, e nada chega ao destino.
         --confere and push refuse, and nothing reaches the destination."""
         for command in ("gitc --confere", "gitc push origin main"):
-            proc = self.run_bash(command, cwd=repo / "sub", stdin="s\n", merge_stderr=True)
+            proc = self.run_bash(command, cwd=repo / "sub", stdin=b"s\n", merge_stderr=True)
             self.assertEqual(proc.returncode, 1, f"{command}: {proc.stdout}")
             self.assertIn(finding.lower(), proc.stdout.lower())
         if bare is not None:
@@ -250,7 +250,7 @@ class GitcLocalRemoteTest(GitcSandbox):
         bare = self.evil_remote()
         repo = self.make_repo("repo-0")
         proc = self.run_bash(
-            "gitc push ../evil.git main", cwd=repo, stdin="s\n", merge_stderr=True,
+            "gitc push ../evil.git main", cwd=repo, stdin=b"s\n", merge_stderr=True,
         )
         self.assertEqual(proc.returncode, 1, proc.stdout)
         self.assertIn("post-receive", proc.stdout)
@@ -281,7 +281,7 @@ class GitcPushTest(GitcSandbox):
                 self.setUp()
                 repo, remotes = self.push_setup()
                 url = remotes[target].as_posix()
-                proc = self.run_bash(command, cwd=repo, stdin="s\n", merge_stderr=True)
+                proc = self.run_bash(command, cwd=repo, stdin=b"s\n", merge_stderr=True)
                 self.assertEqual(proc.returncode, 0, proc.stdout)
                 # "To <url>" abre o relatorio do push. / "To <url>" opens the push report.
                 shown, asked, sent = (
@@ -294,11 +294,24 @@ class GitcPushTest(GitcSandbox):
                     self.git(repo, "rev-parse", "main"),
                 )
 
+    def test_push_accepts_answer_with_carriage_return(self):
+        """Resposta terminada em CR LF, como no Windows, tambem envia.
+        An answer ending in CR LF, as on Windows, sends too."""
+        repo, remotes = self.push_setup()
+        proc = self.run_bash(
+            "gitc push origin main", cwd=repo, stdin=b"s\r\n", merge_stderr=True,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stdout)
+        self.assertEqual(
+            self.git(remotes["origin"], "rev-parse", "main"),
+            self.git(repo, "rev-parse", "main"),
+        )
+
     def test_push_without_yes_sends_nothing(self):
         """Resposta diferente de s, vazia ou sem entrada: nada e enviado.
         Any answer but s, empty or no input: nothing is sent."""
         repo, remotes = self.push_setup()
-        for label, answer in {"no": "n\n", "enter": "\n", "no input": ""}.items():
+        for label, answer in {"no": b"n\n", "enter": b"\n", "no input": b""}.items():
             with self.subTest(answer=label):
                 proc = self.run_bash(
                     "gitc push origin main", cwd=repo, stdin=answer, merge_stderr=True,

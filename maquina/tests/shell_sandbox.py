@@ -26,6 +26,13 @@ BASH = shutil.which("bash")
 FAKE_AI_JAIL = '#!/bin/sh\nfor arg in "$@"; do echo "$arg"; done\n'
 
 
+def as_text(output):
+    """Saida em texto, com fim de linha LF / Output as text, with LF line endings."""
+    if output is None:
+        return None
+    return output.decode("utf-8", errors="replace").replace("\r\n", "\n")
+
+
 @unittest.skipUnless(BASH, "bash nao esta no PATH / bash is not on PATH")
 class ShellSandbox(unittest.TestCase):
     """HOME temporario, ai-jail falso e git isolado.
@@ -61,16 +68,21 @@ class ShellSandbox(unittest.TestCase):
         env.update(extra or {})
         return env
 
-    def run_bash(self, command, cwd=None, extra_env=None, merge_stderr=False, stdin=""):
+    def run_bash(self, command, cwd=None, extra_env=None, merge_stderr=False, stdin=b""):
         """Carrega o agentes.bash e roda o comando / Loads agentes.bash and runs the command."""
         # Quebra de linha, nao ";": o alias so vale na linha seguinte ao source.
         # Newline, not ";": the alias only applies from the line after source.
         script = f'shopt -s expand_aliases\n. "{AGENTES.as_posix()}"\n{command}\n'
-        return subprocess.run(
+        # Binario: em modo texto o Windows troca \n por \r\n na entrada.
+        # Binary: in text mode Windows turns \n into \r\n on the input.
+        proc = subprocess.run(
             [BASH, "-c", script], cwd=cwd or self.work, env=self.env(extra_env),
             input=stdin, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT if merge_stderr else subprocess.PIPE,
-            text=True, check=False,
+            check=False,
+        )
+        return subprocess.CompletedProcess(
+            proc.args, proc.returncode, as_text(proc.stdout), as_text(proc.stderr),
         )
 
     def git(self, repo, *args):
