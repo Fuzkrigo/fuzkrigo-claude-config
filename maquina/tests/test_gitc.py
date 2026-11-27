@@ -198,6 +198,65 @@ class GitcLocalRemoteTest(GitcSandbox):
         self.assert_destination_refused(repo, evil, "post-receive")
 
 
+    def evil_remote(self, parent=None):
+        """Bare com hook de recebimento, na raiz ou em outra pasta.
+        Bare repository with a receive hook, in the root or another folder."""
+        bare = self.make_bare("evil.git") if parent is None else parent / "evil.git"
+        if parent is not None:
+            self.git(parent, "init", "-q", "--bare", "-b", "main", "evil.git")
+        self.add_hook(bare, "post-receive")
+        return bare
+
+    def test_refuses_path_in_branch_remote(self):
+        """branch.<nome>.remote aceita um caminho no lugar do nome do remoto.
+        branch.<name>.remote takes a path in place of the remote name."""
+        bare = self.evil_remote()
+        repo = self.make_repo("repo-0")
+        (repo / "sub").mkdir()
+        self.git(repo, "config", "branch.main.remote", "../evil.git")
+        self.assert_destination_refused(repo, bare, "post-receive")
+
+    def test_refuses_legacy_remote_files(self):
+        """.git/remotes e .git/branches definem destino fora da configuracao.
+        .git/remotes and .git/branches define a destination outside the config."""
+        files = {"remotes": "URL: ../evil.git\n", "branches": "../evil.git\n"}
+        bare = self.evil_remote()
+        for number, (folder, content) in enumerate(files.items()):
+            with self.subTest(folder=folder):
+                repo = self.make_repo(f"repo-{number}")
+                (repo / "sub").mkdir()
+                legacy = repo / ".git" / folder / "origin"
+                legacy.parent.mkdir(exist_ok=True)
+                legacy.write_text(content, encoding="utf-8", newline="\n")
+                self.assert_destination_refused(repo, bare, f"{folder}/origin")
+
+    def test_refuses_hook_in_home_relative_destination(self):
+        """O git expande ~/ no caminho do remoto / git expands ~/ in the remote path."""
+        bare = self.evil_remote(parent=self.home)
+        repo = self.repo_pushing_to(0, "~/evil.git")
+        self.assert_destination_refused(repo, bare, "post-receive")
+
+    def test_refuses_percent_encoded_file_url(self):
+        """O git decodifica %XX em file://; a gitc recusa o URL.
+        git decodes %XX in file://; gitc refuses the URL."""
+        bare = self.evil_remote()
+        url = bare.as_uri().replace("evil.git", "%65vil.git")
+        repo = self.repo_pushing_to(0, url)
+        self.assert_destination_refused(repo, bare, "%65vil.git")
+
+    def test_refuses_destination_given_on_command_line(self):
+        """Destino passado no push, fora da configuracao, tambem e conferido.
+        A destination given to push, outside the config, is checked too."""
+        bare = self.evil_remote()
+        repo = self.make_repo("repo-0")
+        proc = self.run_bash(
+            "gitc push ../evil.git main", cwd=repo, stdin="s\n", merge_stderr=True,
+        )
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        self.assertIn("post-receive", proc.stdout)
+        self.assertEqual(self.git(bare, "for-each-ref"), "")
+
+
 class GitcPushTest(GitcSandbox):
     def push_setup(self):
         """Repositorio com dois remotos locais limpos / Repository with two clean local remotes."""
