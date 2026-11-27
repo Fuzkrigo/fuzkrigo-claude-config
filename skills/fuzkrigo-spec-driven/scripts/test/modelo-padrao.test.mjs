@@ -5,10 +5,10 @@
 //
 // O executor paralelo roda cada tarefa num `claude -p --model <modelo>`. Sem
 // `Modelo:` na tarefa, vale paralelo.model da configuracao. O padrao e o
-// alias `opus`, que acompanha sempre o Opus mais recente; a configuracao do
-// projeto continua vencendo o padrao.
+// alias `sonnet`, que acompanha sempre o Sonnet mais recente; a configuracao
+// do projeto continua vencendo o padrao.
 // The parallel executor runs each task in `claude -p --model <model>`. The
-// default is the `opus` alias, which always tracks the latest Opus; the
+// default is the `sonnet` alias, which always tracks the latest Sonnet; the
 // project configuration still wins over the default.
 
 import { test } from 'node:test';
@@ -22,10 +22,10 @@ function makeTempDir() {
   return mkdtempSync(path.join(tmpdir(), 'fspec-modelo-'));
 }
 
-test('sem fuzkrigo.config.json, o modelo padrao e o alias opus', () => {
+test('sem fuzkrigo.config.json, o modelo padrao e o alias sonnet', () => {
   const root = makeTempDir();
   try {
-    assert.equal(loadConfig(root).paralelo.model, 'opus');
+    assert.equal(loadConfig(root).paralelo.model, 'sonnet');
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -34,9 +34,9 @@ test('sem fuzkrigo.config.json, o modelo padrao e o alias opus', () => {
 test('paralelo.model do projeto vence o padrao', () => {
   const root = makeTempDir();
   try {
-    writeFileSync(path.join(root, 'fuzkrigo.config.json'), JSON.stringify({ paralelo: { model: 'sonnet' } }));
+    writeFileSync(path.join(root, 'fuzkrigo.config.json'), JSON.stringify({ paralelo: { model: 'opus' } }));
     const { paralelo } = loadConfig(root);
-    assert.equal(paralelo.model, 'sonnet');
+    assert.equal(paralelo.model, 'opus');
     // A mescla e rasa por chave: os outros padroes de paralelo continuam.
     // The merge is shallow per key: the other paralelo defaults remain.
     assert.equal(paralelo.maxParalelas, 3);
