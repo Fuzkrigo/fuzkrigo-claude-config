@@ -14,7 +14,7 @@ on:
     branches: [main]
   pull_request:
 
-# O workflow so le o codigo; o resto do GITHUB_TOKEN fica sem acesso.
+# O workflow so le o código; o resto do GITHUB_TOKEN fica sem acesso.
 # The workflow only reads the code; the rest of GITHUB_TOKEN gets no access.
 permissions:
   contents: read
