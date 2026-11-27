@@ -102,9 +102,10 @@ fuzkrigo-spec plano e1-entrega-dever-casa
 - Sai sempre `plano-execucao.md` (faixas, ondas, gestão de branches/commits,
   ordem de merge e gate final). Na skill do **Claude Code**, saem também
   `executar-tarefas.sh` (claude headless em paralelo, com `--model`/`--effort`
-  por tarefa) e `plano-execucao.html` (visual, com o botão "Executar todas as
-  tarefas em janelas limpas e paralelas"). Na skill do **Antigravity**, o
-  plano traz um prompt pronto por faixa para os agentes paralelos nativos.
+  por tarefa; quem roda é o Arquiteto, no `jarq`, na caixa) e
+  `plano-execucao.html` (visual, com um botão que só copia o comando do
+  script). Na skill do **Antigravity**, o plano traz um prompt pronto por faixa
+  para os agentes paralelos nativos.
 - Faixa de `codex` ou `agy` é **manual**: o script cria o worktree e não a
   executa, deixa o gate para depois e sai 2. O `plano-execucao.md` traz o
   atalho, o prompt e os comandos de integração.

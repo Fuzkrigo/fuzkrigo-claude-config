@@ -81,15 +81,16 @@ comandos:
                       limpa por faixa) e gera os artefatos de execução
                       · sempre: plano-execucao.md (faixas, branches, commits)
                       · claude: executar-tarefas.sh (claude -p headless com
-                        --model/--effort por tarefa) + plano-execucao.html
-                        (visual, botão "Executar todas as tarefas...")
+                        --model/--effort por tarefa; quem roda é o Arquiteto,
+                        no jarq, na caixa) + plano-execucao.html (visual, com
+                        botão que copia o comando do script)
                       · antigravity: prompts prontos por faixa p/ os agentes
                         paralelos nativos (não depende do CLI do Claude)
   painel <feature> [--porta N] [--sem-abrir]
                       painel AO VIVO no navegador (servidor local, zero deps,
-                      só 127.0.0.1): faixas em tempo real, logs rolando, gate
-                      — e o botão "Executar todas as tarefas..." que executa
-                      de verdade. Acompanhe sem digitar mais nada.
+                      só 127.0.0.1): faixas em tempo real, logs rolando, gate.
+                      Use fora da caixa e só para acompanhar: o botão Executar
+                      roda o script fora da caixa.
   tarefa <feature> <T-xxx> <status>
                       atualiza o status da tarefa no tasks.md
                       (pendente | em-andamento | concluida)
@@ -404,14 +405,14 @@ function cmdPlano(project, positional, flags) {
     console.log(`  · visual com botão:      ${plan.baseDir}/plano-execucao.html`);
   }
   for (const a of plan.avisos) console.log(`  ⚠ ${a}`);
-  console.log('\npróximo passo (escolha um):');
-  console.log(`  · acompanhar AO VIVO e executar com um clique: fuzkrigo-spec painel ${featureName}`);
+  console.log('\npróximo passo:');
   if (plan.agent === 'claude') {
-    console.log(`  · direto no terminal: bash ${plan.baseDir}/executar-tarefas.sh`);
+    console.log(`  · o Arquiteto, no jarq, na caixa: bash ${plan.baseDir}/executar-tarefas.sh`);
   } else {
     console.log(`  · abra um agente novo (janela limpa) por faixa e cole o prompt correspondente`);
     console.log(`    do plano-execucao.md — depois merge + verify + audit, como descrito lá`);
   }
+  console.log(`  · acompanhar ao vivo (fora da caixa, só para olhar): fuzkrigo-spec painel ${featureName}`);
   return 0;
 }
 

@@ -8,7 +8,7 @@
 // O CÁLCULO do plano é agnóstico de agente. Os ARTEFATOS variam:
 //   claude      → plano-execucao.md + executar-tarefas.sh (claude -p headless,
 //                 com --model e --effort por tarefa) + plano-execucao.html
-//                 (visual, com o botão "Executar todas as tarefas...")
+//                 (visual, com o botão que copia o comando do script)
 //   antigravity → plano-execucao.md com comandos de worktree e um PROMPT
 //                 pronto por faixa, para os agentes paralelos nativos do
 //                 Antigravity (nunca depende do CLI do Claude)
@@ -297,12 +297,13 @@ export function renderPlanoMd(plan) {
   if (plan.agent === 'claude') {
     L.push('### ▶ Automático — Claude Code headless (recomendado)');
     L.push('');
+    L.push('Quem roda é o Arquiteto, no `jarq`, dentro da caixa, a partir da raiz do repositório:');
+    L.push('');
     L.push('```bash');
     L.push(`bash ${plan.baseDir}/executar-tarefas.sh`);
     L.push('```');
     L.push('');
-    L.push(`Ou abra \`${plan.baseDir}/plano-execucao.html\` no navegador e use o botão`);
-    L.push('**“Executar todas as tarefas em janelas limpas e paralelas”** (copia o comando acima).');
+    L.push('Não rode o script fora da caixa: o `claude -p` ficaria sem a barreira.');
     L.push('');
     const sujeito = faixasManuais(plan).length ? 'Cada faixa do Claude' : 'Cada faixa';
     L.push(`${sujeito} roda \`claude -p\` com **janela de contexto limpa**, \`--model\` e \`--effort\` já`);
@@ -310,16 +311,15 @@ export function renderPlanoMd(plan) {
     L.push('embutidos no script — quer rodar uma faixa na mão, é só copiá-los de lá.');
     L.push(`Logs: \`../fuzkrigo-worktrees/${plan.repoName}-${plan.feature}-logs/\`.`);
     L.push('');
-    L.push('### Acompanhe ao vivo, sem digitar comandos');
+    L.push('### Acompanhe ao vivo (fora da caixa, só para olhar)');
     L.push('');
     L.push('```bash');
     L.push(`fuzkrigo-spec painel ${plan.feature}`);
     L.push('```');
     L.push('');
-    L.push('Abre um painel no navegador com as faixas em tempo real, o log de cada uma');
-    L.push('rolando ao vivo, o veredito do gate — e o botão **"Executar todas as tarefas');
-    L.push('em janelas limpas e paralelas"** que aqui executa DE VERDADE (o servidor é');
-    L.push('local, então pode disparar o script por você).');
+    L.push('Só fora da caixa (dentro dela o endereço não chega ao navegador) e só para');
+    L.push('acompanhar: faixas, logs e o veredito do gate em tempo real. Não use o botão');
+    L.push('Executar do painel: ele roda o script fora da caixa.');
     if (faixasManuais(plan).length) L.push(...secaoFaixasManuais(plan));
   } else {
     L.push('### ▶ Paralelo nativo no Antigravity (janelas limpas, sem Claude CLI)');
@@ -373,9 +373,9 @@ export function renderPlanoMd(plan) {
     L.push(`node ${plan.engine} audit --ci --feature ${plan.feature}`);
     L.push('```');
     L.push('');
-    L.push(`6. **Acompanhe ao vivo** (opcional): \`fuzkrigo-spec painel ${plan.feature}\` abre um`);
-    L.push('   painel no navegador refletindo tasks.md, as provas do verify e o gate em');
-    L.push('   tempo real enquanto os agentes trabalham — sem digitar mais nada.');
+    L.push('6. **Acompanhe ao vivo** (opcional, fora da caixa, só para olhar):');
+    L.push(`   \`fuzkrigo-spec painel ${plan.feature}\` abre um painel no navegador refletindo`);
+    L.push('   tasks.md, as provas do verify e o gate em tempo real enquanto os agentes trabalham.');
   }
   L.push('');
   return `${L.join('\n')}\n`;
@@ -480,7 +480,7 @@ export function renderPlanoSh(plan) {
   L.push('evento "branch|$BASE_BRANCH"');
   L.push('info "branch de trabalho: $BASE_BRANCH"');
   L.push('info "logs por faixa em: $LOG_DIR"');
-  L.push(`info "acompanhe ao vivo: fuzkrigo-spec painel ${plan.feature}"`);
+  L.push(`info "acompanhe ao vivo: fuzkrigo-spec painel ${plan.feature} (fora da caixa, só para olhar)"`);
   L.push('');
   L.push('mesclar_faixa() { # $1=faixa $2=branch $3=worktree $4=exit-da-faixa');
   L.push('  if [ "$4" -ne 0 ]; then');
@@ -688,13 +688,13 @@ export function renderPlanoHtml(plan) {
   </div>
   ${avisosHtml}
   <div class="executor">
-    <button onclick="copiar()">▶ Executar todas as tarefas em janelas limpas e paralelas</button>
-    <span id="toast">comando copiado ✔ — cole no terminal</span>
+    <button onclick="copiar()">Copiar o comando do script</button>
+    <span id="toast">comando copiado ✔ — para o Arquiteto rodar na caixa</span>
     <div><code id="cmd">${esc(cmd)}</code></div>
-    <p class="nota">Este arquivo é estático: o botão copia o comando; cole no terminal, na raiz
-    do projeto. ${notaExecucaoHtml(plan)}
-    <b>Quer acompanhar ao vivo e executar com um clique de verdade?</b> Rode
-    <code>fuzkrigo-spec painel ${esc(plan.feature)}</code> — abre a versão viva deste painel.</p>
+    <p class="nota">Este arquivo é estático: o botão só copia o comando, que é para o Arquiteto rodar na caixa
+    (<code>jarq</code>), na raiz do projeto. Não rode o script fora da caixa. ${notaExecucaoHtml(plan)}
+    <b>Painel ao vivo:</b> <code>fuzkrigo-spec painel ${esc(plan.feature)}</code>, fora da caixa e só para
+    acompanhar; o botão Executar dele roda o script fora da caixa e não se usa.</p>
   </div>
   ${ondasHtml}
   ${seqHtml}

@@ -70,4 +70,4 @@ Recusa da `gitc` é parada obrigatória: nada de trocar para o `git` direto ante
 
 ## 7. Quando não usar faixas
 
-Menos de duas tarefas, ou tarefas sem `Arquivos:`: o Engenheiro implementa na sessão.
+Menos de duas tarefas, ou todas as tarefas sem `Arquivos:`: o Engenheiro implementa na sessão.

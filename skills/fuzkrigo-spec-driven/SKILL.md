@@ -357,15 +357,15 @@ produto).
     na branch da issue, marca as tarefas e fecha com o gate da feature
     (verify + `audit --ci --feature`). Faixa de `codex` ou `agy` ele só
     prepara (ver "Faixas manuais", abaixo);
-  - `plano-execucao.html` — visual do plano com o botão **"Executar todas as
-    tarefas em janelas limpas e paralelas"** (copia o comando do script).
+  - `plano-execucao.html` — visual do plano, com um botão que só copia o
+    comando do script.
 - **Apresente o plano ao usuário antes de executar**: resuma as faixas,
   incluindo o executor, o modelo e o esforço de cada tarefa (para o usuário
   validar a escolha antes de rodar), diga onde estão os arquivos e ofereça as
-  rotas — automática
-  (`bash .spec/features/<feature>/executar-tarefas.sh` ou o botão do html) ou
-  manual (você mesmo implementa faixa a faixa, seguindo branches e commits do
-  plano).
+  rotas — automática (o Arquiteto roda
+  `bash .spec/features/<feature>/executar-tarefas.sh` no `jarq`, na caixa; o
+  usuário não roda o script fora dela) ou manual (você mesmo implementa faixa a
+  faixa, seguindo branches e commits do plano).
 - **Faixas manuais** (`Modelo: codex` ou `agy`): quem executa é o agente
   externo, aberto pelo usuário. A seção "Faixas manuais" do `plano-execucao.md`
   traz o passo a passo.

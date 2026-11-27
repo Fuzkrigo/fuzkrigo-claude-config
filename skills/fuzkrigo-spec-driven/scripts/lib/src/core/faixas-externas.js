@@ -195,6 +195,8 @@ export function secaoFaixasManuais(plan) {
     ...manuais.flatMap((fx) => blocoAbertura(plan, fx)),
     '### Integração (na árvore principal, depois que os executores responderem)',
     '',
+    'Quem integra é o Arquiteto, no `jarq`, na caixa.',
+    '',
     ...blocoConferencia(manuais),
     '**2. Mescle faixa por faixa.** Se o `git worktree remove` recusar, sobrou arquivo sem commit no worktree: olhe antes de apagar.',
     '',

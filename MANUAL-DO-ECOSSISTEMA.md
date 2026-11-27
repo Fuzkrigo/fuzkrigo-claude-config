@@ -732,7 +732,7 @@ Python e JavaScript, as mensagens e a saída do motor, a spec rastreável, a num
 `new`, a prova do princípio com a unicidade das tarefas, o princípio repetido na constituição, o
 executor na branch da issue com o gate por feature, o scaffold que acrescenta com o `new` que
 mostra o rastreio, os casos de borda e regras de fechamento na spec, os presets de constituição
-combináveis e as faixas externas de Codex e Antigravity. As dezoito suítes que os protegem rodam
+combináveis e as faixas externas de Codex e Antigravity. As dezenove suítes que os protegem rodam
 assim:
 
 ```bash
@@ -740,7 +740,7 @@ cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
 node --test test/*.test.mjs
 ```
 
-O glob pega suíte nova sem mudar o comando. São 112 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+O glob pega suíte nova sem mudar o comando. São 119 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:
