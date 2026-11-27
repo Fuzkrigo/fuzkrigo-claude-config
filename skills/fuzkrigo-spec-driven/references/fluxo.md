@@ -93,10 +93,11 @@ fuzkrigo-spec plano e1-entrega-dever-casa
   1 git worktree + 1 branch (`spec/<feature>-faixa-N`) + 1 janela de contexto
   limpa. Tarefas que compartilham arquivo caem na mesma faixa, em sequência;
   tarefa sem `Arquivos:` roda sozinha ao final.
-- Campos opcionais por tarefa em tasks.md: `- Modelo: sonnet` (tarefa
-  simples) ou `- Modelo: opus` (tarefa complexa), e `- Esforço: alto`
-  (baixo|medio|alto|xalto|max) — o plano usa nos executores. Sem `Modelo:`,
-  vale o padrão `opus`. Critério de classificação: passo "3. Tarefas" da
+- Campos opcionais por tarefa em tasks.md: `- Modelo:` (`agy`, `codex`,
+  `sonnet` ou `opus`) e `- Esforço: alto` (baixo|medio|alto|xalto|max) — o
+  plano usa nos executores. Sem `Modelo:`, vale o padrão `sonnet`. Tarefa de
+  `codex` ou `agy` precisa de `Arquivos:` e não divide faixa com outro
+  executor. Critério de escolha: passo "3. Tarefas" da
   [SKILL.md](../SKILL.md).
 - Sai sempre `plano-execucao.md` (faixas, ondas, gestão de branches/commits,
   ordem de merge e gate final). Na skill do **Claude Code**, saem também
@@ -104,6 +105,9 @@ fuzkrigo-spec plano e1-entrega-dever-casa
   por tarefa) e `plano-execucao.html` (visual, com o botão "Executar todas as
   tarefas em janelas limpas e paralelas"). Na skill do **Antigravity**, o
   plano traz um prompt pronto por faixa para os agentes paralelos nativos.
+- Faixa de `codex` ou `agy` é **manual**: o script cria o worktree e não a
+  executa, deixa o gate para depois e sai 2. O `plano-execucao.md` traz o
+  atalho, o prompt e os comandos de integração.
 - A gestão de commits é do plano: **1 tarefa = 1 commit** (`T-003 <feature>:
   <título>`), merges `--no-ff` de volta na branch atual (a da issue), e o
   gate final da feature (verify + `audit --ci --feature`) roda depois de tudo
