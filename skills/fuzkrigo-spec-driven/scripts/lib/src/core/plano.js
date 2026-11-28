@@ -60,7 +60,9 @@ function intersecta(setA, arrB) {
   return arrB.some((f) => setA.has(f));
 }
 
-function normFile(f) {
+// Também usada pelo `conferir`, para comparar com o que o git informa.
+// Also used by `conferir`, to compare against what git reports.
+export function normFile(f) {
   return f.split('\\').join('/').replace(/^\.\//, '');
 }
 
@@ -486,6 +488,11 @@ export function renderPlanoSh(plan) {
   L.push('  if [ "$4" -ne 0 ]; then');
   L.push('    evento "faixa|$1|falhou"');
   L.push('    vermelho "✘ $1 falhou (log: $LOG_DIR/$1.log) — worktree mantido para inspeção: $3"');
+  L.push('    FALHAS="$FALHAS $1"; return 1');
+  L.push('  fi');
+  L.push('  if ! node "$ENGINE" conferir "$FEATURE" "$1"; then');
+  L.push('    evento "faixa|$1|reprovada"');
+  L.push('    vermelho "✘ $1 reprovada na conferência (motivo acima) — não mesclada; worktree mantido para inspeção: $3"');
   L.push('    FALHAS="$FALHAS $1"; return 1');
   L.push('  fi');
   L.push('  if git merge --no-ff "$2" -m "merge $1 ($FEATURE)"; then');

@@ -146,7 +146,10 @@ test('o juiz tem um conferir e os testes por faixa, e cada merge comeca por ele'
       const start = `node MOTOR conferir demo ${lane} &&\n  git merge --no-ff spec/demo-${lane} `;
       assert.ok(merges[i].startsWith(start), merges[i]);
     });
-    assert.doesNotMatch(readFeature(repo, 'plano-execucao.md'), /git diff/);
+    const md = readFeature(repo, 'plano-execucao.md');
+    assert.doesNotMatch(md, /git diff/);
+    // o conferir reprova antes do remove / conferir rejects before the removal
+    assert.doesNotMatch(md, /sobrou arquivo sem commit/);
   });
 });
 

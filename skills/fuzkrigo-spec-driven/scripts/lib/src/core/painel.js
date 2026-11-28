@@ -49,7 +49,7 @@ export function parseEventos(texto) {
         // exit != 0 vira "falhou" no evento seguinte; exit 0 aguarda merge
         if ((parseInt(extra, 10) || 0) === 0) ex.faixas[id] = ex.faixas[id] === 'executando' ? 'mesclando' : ex.faixas[id];
       } else {
-        ex.faixas[id] = st; // manual | executando | mesclada | conflito | falhou
+        ex.faixas[id] = st; // manual | executando | mesclada | reprovada | conflito | falhou
       }
     } else if (tipo === 'tarefa') ex.tarefas[resto[0]] = resto[1];
     else if (tipo === 'seq') ex.seq[resto[0]] = resto[1];
@@ -230,7 +230,7 @@ export function renderPainelHtml({ feature, token, podeExecutar }) {
   function chipFaixa(st) {
     if (st === 'executando' || st === 'mesclando') return '<span class="chip executando">' + esc(st) + '</span>';
     if (st === 'mesclada') return '<span class="chip ok">mesclada</span>';
-    if (st === 'conflito' || st === 'falhou') return '<span class="chip erro">' + esc(st) + '</span>';
+    if (st === 'reprovada' || st === 'conflito' || st === 'falhou') return '<span class="chip erro">' + esc(st) + '</span>';
     if (st === 'manual') return '<span class="chip">manual</span>';
     return '<span class="chip">aguardando</span>';
   }

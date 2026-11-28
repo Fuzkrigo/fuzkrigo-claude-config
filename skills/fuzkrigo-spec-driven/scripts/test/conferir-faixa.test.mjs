@@ -12,7 +12,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { appendFileSync, rmSync, writeFileSync } from 'fs';
+import { appendFileSync, mkdirSync, rmSync, writeFileSync } from 'fs';
 import path from 'path';
 import { ENGINE, withTempDir } from './fixture-projeto.mjs';
 import {
@@ -257,6 +257,50 @@ test('arquivo ignorado pelo git no worktree nao reprova a faixa', () => {
     commit(root, writeFiles('src/a.js'));
     writeFiles('cache/lixo.txt')(worktreeOf(root, LANE));
     assertPassed(checkLane(repo), 1);
+  });
+});
+
+// ── submódulo escondido / hidden submodule ─────────────────────────────────
+
+const GITMODULES = '[submodule "lib"]\n\tpath = lib\n\turl = ./lib\n\tignore = all\n';
+const gitlink = (digit) => `160000,${digit.repeat(40)},lib`;
+
+// Submódulo `lib` com `ignore = all`, que faz o git esconder as mudanças dele.
+// Submodule `lib` with `ignore = all`, which makes git hide its changes.
+function baseWithSubmodule(repo) {
+  writeFileSync(path.join(repo, '.gitmodules'), GITMODULES);
+  mkdirSync(path.join(repo, 'lib'));
+  git(repo, 'add', '.gitmodules');
+  git(repo, 'update-index', '--add', '--cacheinfo', gitlink('1'));
+  git(repo, 'commit', '-q', '-m', 'base: submódulo');
+}
+
+test('troca de submodulo fora da lista aparece, mesmo com ignore = all', () => {
+  withTempDir('fspec-conferir-', (root) => {
+    const repo = preparedLane(root, { base: baseWithSubmodule });
+    commit(root, (wt) => {
+      writeFiles('src/a.js')(wt);
+      git(wt, 'update-index', '--cacheinfo', gitlink('2'));
+    });
+    const proc = checkLane(repo);
+    assert.equal(proc.status, 1, proc.out);
+    assert.deepEqual(outsideLines(proc), ['fora da lista: lib']);
+  });
+});
+
+test('submodulo alterado sem commit no worktree aparece, mesmo com ignore = all', () => {
+  withTempDir('fspec-conferir-', (root) => {
+    const repo = preparedLane(root, { base: baseWithSubmodule });
+    commit(root, writeFiles('src/a.js'));
+    assertPassed(checkLane(repo), 1);
+    // o submódulo passa a apontar para outro commit, sem registro na faixa
+    // the submodule now points to another commit, not recorded in the lane
+    const sub = path.join(worktreeOf(root, LANE), 'lib');
+    git(sub, 'init', '-q');
+    git(sub, '-c', 'user.name=t', '-c', 'user.email=t@example.com', 'commit', '-q', '--allow-empty', '-m', 'sub');
+    const proc = checkLane(repo);
+    assert.equal(proc.status, 1, proc.out);
+    assert.match(proc.out, /sem commit no worktree: lib$/m);
   });
 });
 
