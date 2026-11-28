@@ -19,7 +19,7 @@ Tarefa `opus` também roda headless pelo script, em janela limpa, nunca na sess�
 2. **Tarefas**: `Modelo:` e `Esforço:` pelo critério do passo "3. Tarefas" da [skill](../skills/fuzkrigo-spec-driven/SKILL.md).
 3. **Plano**: `fuzkrigo-spec plano <feature>`.
 4. **Validação**: apresente as faixas ao usuário, que valida o executor e o esforço de cada tarefa. Mudou algo: ajuste o `tasks.md` e regenere o plano.
-5. **Execução**: o Arquiteto, na caixa (`jarq`), na branch da issue, roda `bash .spec/features/<feature>/executar-tarefas.sh`.
+5. **Execução**: o Arquiteto, na caixa (`jarq`), na branch da issue, roda `bash .spec/features/<feature>/executar-tarefas.sh`. O andamento das faixas do Claude aparece ao vivo em `../fuzkrigo-worktrees/<repo>-<feature>-logs/faixa-*.log` (por exemplo, `tail -F` num terminal comum).
 6. **Faixas manuais**: o usuário abre cada uma no worktree dela (`cd ../fuzkrigo-worktrees/<repo>-<feature>-faixa-N && jcodex`, ou `jagy`, a partir da raiz do repositório), ajusta o esforço se preciso e cola o prompt do `plano-execucao.md`.
 7. **Retorno**: o executor responde no formato da seção "Ao terminar" do `AGENTS.md` de executor (`~/.codex/AGENTS.md` e `~/.gemini/AGENTS.md`), e o usuário leva a resposta ao Arquiteto.
 8. **Juiz mecânico** (seção 4), **integração** pelos comandos da seção "Faixas manuais" do `plano-execucao.md` e **gate**.
@@ -42,13 +42,15 @@ O briefing é o prompt da faixa gerado pelo motor: tarefas, critérios de aceite
 
 ## 4. Juiz mecânico antes do julgamento
 
-Antes de mesclar uma faixa manual, na árvore principal:
+Antes de mesclar qualquer faixa, na árvore principal:
 
-1. `git diff --no-renames --name-only HEAD...spec/<feature>-faixa-N`: todo arquivo precisa estar entre os permitidos da faixa, ou ser teste deles. `--no-renames` mostra também a origem de um arquivo renomeado.
+1. `fuzkrigo-spec conferir <feature> faixa-N`: compara os arquivos que a faixa mudou (`git diff --no-renames --name-only HEAD...<branch>`) com o `Arquivos:` das tarefas dela, testes inclusos. Sai 1 com arquivo fora da lista, faixa sem commit ou sem arquivo alterado, tarefa sem um commit cuja mensagem comece pelo código dela (`T-xxx`), arquivo sem commit no worktree ou branch inexistente.
 2. Rode os testes do projeto dentro do worktree da faixa.
 3. Reprovou em um dos dois: não mescle; devolva ao executor com a saída.
 
-As faixas do Claude o script mescla sozinho. No fim, quem decide se está pronto é o `verify` seguido do `audit --ci --feature <feature>` com saída 0. Opinião vem depois da máquina.
+O projeto ignora no `.gitignore` o que o runner gera (por exemplo `__pycache__/`, `.pytest_cache/` e o arquivo do `reporterOutputFile`): sem isso, a faixa reprova por arquivo sem commit no worktree.
+
+O script faz o passo 1 sozinho antes de mesclar cada faixa do Claude: faixa reprovada não é mesclada, o worktree fica para inspeção e o script sai 1. No fim, quem decide se está pronto é o `verify` seguido do `audit --ci --feature <feature>` com saída 0. Opinião vem depois da máquina.
 
 ## 5. Caixa
 
