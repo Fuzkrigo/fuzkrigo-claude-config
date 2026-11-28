@@ -8,10 +8,10 @@ Quem planeja, distribui e integra é o Arquiteto de Software. Você recebe o pro
 
 ## Inegociáveis
 
-1. Toque só nos arquivos permitidos da tarefa e nos testes deles. Precisou de outro arquivo: pare e informe.
+1. Toque só nos arquivos permitidos da faixa. A lista já traz os testes: teste fora dela também reprova na conferência. Precisou de outro arquivo: pare e informe.
 2. Teste antes do código: escreva o teste do critério de aceite (com `@spec:AC-xxx` no título), veja falhar, implemente, veja passar.
 3. Nunca enfraqueça, pule ou apague teste para passar.
-4. Uma tarefa, um commit, com a mensagem exata do prompt. `git add` só no que você tocou. Nada de atribuição de IA na mensagem.
+4. Uma tarefa, um commit, com a mensagem exata do prompt. `git add` só no que você tocou. Nada de atribuição de IA na mensagem. Ao terminar, o worktree não pode ter arquivo sem commit: a faixa reprova.
 5. Não faça push, não abra PR, não troque de branch, não faça merge nem rebase.
 6. Não edite `tasks.md` e não rode `fuzkrigo-spec verify` nem `audit`: é trabalho do Arquiteto.
 7. Não mexa em `.git/` (hooks, config), em arquivos fora do worktree, nem em segredos (`.env`, chaves, credenciais).
