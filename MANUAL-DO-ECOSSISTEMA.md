@@ -443,7 +443,7 @@ No `tasks.md`, quebre em tarefas com os arquivos que cada uma toca:
 ## T-004 — Gerar e validar token de redefinição [pendente]
 
 - Refs: US-002, AC-003
-- Arquivos: src/auth/token.py, src/auth/rotas.py
+- Arquivos: src/auth/token.py, src/auth/rotas.py, tests/test_token.py
 ```
 
 O campo `Arquivos` decide o que pode rodar em paralelo. Capriche nele.
@@ -462,6 +462,9 @@ Gera o esqueleto de teste para cada critério sem teste — todos **falhando**. 
 pronto, executável desde o primeiro minuto. Se o arquivo de testes da feature já existe, o
 scaffold acrescenta no fim só os esqueletos que faltam e nunca reescreve o que você escreveu;
 rode de novo sempre que a spec ganhar um critério.
+
+Na execução por faixas, o `scaffold` não se usa: cada tarefa lista o próprio arquivo de teste no
+`Arquivos:` e escreve o teste nele, com o nome e a docstring da convenção abaixo.
 
 Em Python, a etiqueta vive em dois lugares e os dois importam:
 
@@ -502,14 +505,16 @@ do agente (`jcodex` ou `jagy`) e cola o prompt do `plano-execucao.md`. Nesse cas
 código 2, e o gate fica para depois da integração. O passo a passo entre os quatro agentes está em
 `~/.claude/references/orquestracao.md`.
 
-Nenhuma faixa é mesclada sem conferência. O `fspec conferir <feature> <faixa>` reprova arquivo fora
-do `Arquivos:` das tarefas da faixa (testes inclusos), faixa sem commit ou sem arquivo alterado,
-tarefa sem um commit cuja mensagem comece pelo código dela, arquivo sem commit no worktree e branch
-inexistente. Nas faixas do Claude o script roda a conferência sozinho: a faixa reprovada mantém o
-worktree para inspeção, e o script sai 1. Nas manuais, ela é o primeiro passo da integração no
-`plano-execucao.md`. Por isso cada tarefa lista o próprio arquivo de teste, o plano avisa quando
-falta, e o `.gitignore` do projeto precisa cobrir o que o runner gera (`__pycache__/`,
-`.pytest_cache/`, o arquivo de relatório).
+No modo `claude`, o script e os blocos de integração do `plano-execucao.md` não mesclam faixa sem
+conferência; no modo `antigravity`, a conferência não existe, e os comandos de merge do plano não a
+incluem. O `fspec conferir <feature> <faixa>` reprova arquivo fora do `Arquivos:` das tarefas da
+faixa (testes inclusos), faixa sem commit ou sem arquivo alterado, tarefa sem um commit cuja
+mensagem comece pelo código dela, arquivo sem commit no worktree e branch inexistente. Nas faixas do
+Claude o script roda a conferência sozinho: a faixa reprovada mantém o worktree para inspeção, e o
+script sai 1. Nas manuais, ela é o primeiro passo da integração no `plano-execucao.md`. Por isso
+cada tarefa lista o próprio arquivo de teste, o plano avisa quando falta, e o `.gitignore` do
+projeto precisa cobrir o que o runner gera (`__pycache__/`, `.pytest_cache/`, o arquivo de
+relatório).
 
 Para acompanhar as faixas do Claude ao vivo, num terminal comum, a partir da raiz do repositório:
 
