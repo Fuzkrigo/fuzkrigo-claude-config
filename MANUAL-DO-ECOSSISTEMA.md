@@ -443,7 +443,7 @@ No `tasks.md`, quebre em tarefas com os arquivos que cada uma toca:
 ## T-004 — Gerar e validar token de redefinição [pendente]
 
 - Refs: US-002, AC-003
-- Arquivos: src/auth/token.py, src/auth/rotas.py
+- Arquivos: src/auth/token.py, src/auth/rotas.py, tests/test_token.py
 ```
 
 O campo `Arquivos` decide o que pode rodar em paralelo. Capriche nele.
@@ -463,6 +463,9 @@ pronto, executável desde o primeiro minuto. Se o arquivo de testes da feature j
 scaffold acrescenta no fim só os esqueletos que faltam e nunca reescreve o que você escreveu;
 rode de novo sempre que a spec ganhar um critério.
 
+Na execução por faixas, o `scaffold` não se usa: cada tarefa lista o próprio arquivo de teste no
+`Arquivos:` e escreve o teste nele, com o nome e a docstring da convenção abaixo.
+
 Em Python, a etiqueta vive em dois lugares e os dois importam:
 
 ```python
@@ -472,7 +475,7 @@ def test_ac_003():
 
 O **nome** é o que o runner reporta (é por ele que a prova é casada); a **docstring** é o que o
 audit lê para saber que o critério tem teste. Renomear a função quebra a prova; apagar a docstring
-faz o critério parecer sem teste.
+faz o critério parecer sem teste. A skill detalha a convenção em `references/prova-por-stack.md`.
 
 ### Passo 4 — Implementar
 
@@ -501,6 +504,26 @@ As faixas de `codex` e `agy` são manuais: o script só prepara o worktree, e vo
 do agente (`jcodex` ou `jagy`) e cola o prompt do `plano-execucao.md`. Nesse caso o script sai com
 código 2, e o gate fica para depois da integração. O passo a passo entre os quatro agentes está em
 `~/.claude/references/orquestracao.md`.
+
+No modo `claude`, o script e os blocos de integração do `plano-execucao.md` não mesclam faixa sem
+conferência; no modo `antigravity`, a conferência não existe, e os comandos de merge do plano não a
+incluem. O `fspec conferir <feature> <faixa>` reprova arquivo fora do `Arquivos:` das tarefas da
+faixa (testes inclusos), faixa sem commit ou sem arquivo alterado, tarefa sem um commit cuja
+mensagem comece pelo código dela, arquivo sem commit no worktree e branch inexistente. Nas faixas do
+Claude o script roda a conferência sozinho: a faixa reprovada mantém o worktree para inspeção, e o
+script sai 1. Nas manuais, ela é o primeiro passo da integração no `plano-execucao.md`. Por isso
+cada tarefa lista o próprio arquivo de teste, o plano avisa quando falta, e o `.gitignore` do
+projeto precisa cobrir o que o runner gera (`__pycache__/`, `.pytest_cache/`, o arquivo de
+relatório).
+
+Para acompanhar as faixas do Claude ao vivo, num terminal comum, a partir da raiz do repositório:
+
+```bash
+tail -F ../fuzkrigo-worktrees/<repo>-<feature>-logs/faixa-*.log
+```
+
+O `.log` traz o texto legível, que o `fspec fluxo` produz a partir da saída do `claude -p`; o fluxo
+cru fica no `.jsonl` ao lado.
 
 ### Passo 5 — Portão 1: a máquina decide
 
@@ -637,6 +660,8 @@ fspec scaffold <feature>                   # acrescenta os testes que falham
 fspec tarefa <feature> <T-xxx> <status>    # pendente | em-andamento | concluida
 fspec plano <feature>                      # agrupa tarefas em faixas paralelas
 fspec painel <feature>                     # acompanhar ao vivo (fora da caixa)
+fspec conferir <feature> <faixa>           # confere a faixa antes do merge: exit 0, 1 ou 2
+fspec fluxo <rótulo>                       # stream do claude em texto legível (o script usa)
 
 # prova
 fspec verify <feature>                     # roda os testes, grava a prova
@@ -653,7 +678,7 @@ fspec licoes list | sugerir | add | status
 
 ## 10. O audit acusou algo. E agora?
 
-Os mais comuns:
+Os mais comuns (a lista completa está em `references/catalogo-audit.md`, na skill):
 
 | Mensagem | Significa | O que fazer |
 | -------- | --------- | ----------- |
@@ -726,21 +751,21 @@ instalação de uma status line chegou a sobrescrever o `settings.json` global, 
 hooks desligados por dias sem ninguém notar.
 
 Se você atualizar a skill `fuzkrigo-spec-driven` a partir do projeto de origem, releia a lista de
-**patches locais** no `README.md`: são quinze conjuntos de ajustes no motor — o suporte a Python, o
+**patches locais** no `README.md`: são dezesseis conjuntos de ajustes no motor — o suporte a Python, o
 audit com escopo de feature, os nomes próprios, o modelo padrão por alias, o preset LGPD para
 Python e JavaScript, as mensagens e a saída do motor, a spec rastreável, a numeração contínua no
 `new`, a prova do princípio com a unicidade das tarefas, o princípio repetido na constituição, o
 executor na branch da issue com o gate por feature, o scaffold que acrescenta com o `new` que
 mostra o rastreio, os casos de borda e regras de fechamento na spec, os presets de constituição
-combináveis e as faixas externas de Codex e Antigravity. As dezenove suítes que os protegem rodam
-assim:
+combináveis, as faixas externas de Codex e Antigravity e a conferência das faixas com o fluxo
+legível. As vinte e cinco suítes que os protegem rodam assim:
 
 ```bash
 cd ~/.claude/skills/fuzkrigo-spec-driven/scripts
 node --test test/*.test.mjs
 ```
 
-O glob pega suíte nova sem mudar o comando. São 119 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
+O glob pega suíte nova sem mudar o comando. São 165 casos. Se algum falhar depois de uma atualização, um patch se perdeu — o `README.md` diz
 qual e onde.
 
 Os hooks e a status line têm testes próprios, que rodam a partir da raiz deste repositório:

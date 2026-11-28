@@ -49,7 +49,7 @@ export function parseEventos(texto) {
         // exit != 0 vira "falhou" no evento seguinte; exit 0 aguarda merge
         if ((parseInt(extra, 10) || 0) === 0) ex.faixas[id] = ex.faixas[id] === 'executando' ? 'mesclando' : ex.faixas[id];
       } else {
-        ex.faixas[id] = st; // manual | executando | mesclada | conflito | falhou
+        ex.faixas[id] = st; // manual | executando | mesclada | reprovada | conflito | falhou
       }
     } else if (tipo === 'tarefa') ex.tarefas[resto[0]] = resto[1];
     else if (tipo === 'seq') ex.seq[resto[0]] = resto[1];
@@ -217,7 +217,7 @@ export function renderPainelHtml({ feature, token, podeExecutar }) {
   </div>
   ${podeExecutar ? `<button id="btn" onclick="executar()">▶ Executar todas as tarefas em janelas limpas e paralelas</button>
   <span id="btn-nota" class="sub"></span>` : `<p class="sub">Modo acompanhamento — a execução roda fora deste painel (agentes nativos do
-  Antigravity, ou o script no terminal); aqui você vê tasks.md, logs, provas e o gate ao vivo.</p>`}
+  Antigravity, ou o script rodado pelo Arquiteto no <code>jarq</code>, na caixa); aqui você vê tasks.md, logs, provas e o gate ao vivo.</p>`}
   <div id="banner" class="banner"></div>
   <div id="avisos"></div>
   <div id="conteudo"><p class="sub">carregando estado…</p></div>
@@ -230,7 +230,7 @@ export function renderPainelHtml({ feature, token, podeExecutar }) {
   function chipFaixa(st) {
     if (st === 'executando' || st === 'mesclando') return '<span class="chip executando">' + esc(st) + '</span>';
     if (st === 'mesclada') return '<span class="chip ok">mesclada</span>';
-    if (st === 'conflito' || st === 'falhou') return '<span class="chip erro">' + esc(st) + '</span>';
+    if (st === 'reprovada' || st === 'conflito' || st === 'falhou') return '<span class="chip erro">' + esc(st) + '</span>';
     if (st === 'manual') return '<span class="chip">manual</span>';
     return '<span class="chip">aguardando</span>';
   }

@@ -9,7 +9,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { runInNewContext } from 'vm';
 import { parseEventos, renderPainelHtml } from '../lib/src/core/painel.js';
@@ -17,15 +17,19 @@ import { withTempDir } from './fixture-projeto.mjs';
 import {
   CLAUDE_AND_CODEX,
   eventsOf,
+  executorCommits,
   fakeClaude,
   FEATURE,
   generatePlan,
   git,
   plannedProject,
+  projectWith,
   readFeature,
   run,
   runScript,
+  taskCommit,
   worktreeOf,
+  writeFiles,
 } from './fixture-faixas.mjs';
 
 const WITH_SEQUENTIAL = [...CLAUDE_AND_CODEX, { id: 'T-003', model: 'sonnet' }];
@@ -50,20 +54,6 @@ function runUntilManual(repo, env) {
   const proc = runScript(repo, env);
   assert.equal(proc.status, 2, proc.out);
 }
-
-// Faz o papel do executor externo: altera o worktree da faixa e commita.
-// Plays the external executor: changes the lane worktree and commits.
-function executorCommits(root, lane, change) {
-  const worktree = worktreeOf(root, lane);
-  change(worktree);
-  git(worktree, 'add', '-A');
-  git(worktree, 'commit', '-q', '-m', `trabalho da ${lane}`);
-}
-
-const createFile = (name) => (worktree) => {
-  mkdirSync(path.join(worktree, 'src'), { recursive: true });
-  writeFileSync(path.join(worktree, 'src', name), 'export default 1;\n');
-};
 
 const branches = (repo) => git(repo, 'branch', '--format=%(refname:short)').split('\n');
 
@@ -94,7 +84,7 @@ test('a integracao do .md, executada como esta, roda as sequenciais e o gate dep
     const repo = plannedProject(root, WITH_SEQUENTIAL);
     const claude = fakeClaude(root);
     runUntilManual(repo, claude.env);
-    executorCommits(root, 'faixa-2', createFile('b.js'));
+    executorCommits(root, 'faixa-2', writeFiles('src/b.js'), taskCommit('T-002'));
     const proc = integrate(repo, claude.env);
 
     assertIntegrated(root, repo, 'faixa-2');
@@ -112,7 +102,7 @@ test('sem sequenciais a integracao termina no gate e deixa a arvore limpa', () =
     const repo = plannedProject(root, CODEX_ONLY);
     const claude = fakeClaude(root);
     runUntilManual(repo, claude.env);
-    executorCommits(root, 'faixa-1', createFile('a.js'));
+    executorCommits(root, 'faixa-1', writeFiles('src/a.js'), taskCommit('T-001'));
     const proc = integrate(repo, claude.env);
 
     assertIntegrated(root, repo, 'faixa-1');
@@ -124,22 +114,74 @@ test('sem sequenciais a integracao termina no gate e deixa a arvore limpa', () =
 
 // ── juiz mecanico / mechanical judge ───────────────────────────────────────
 
-test('o diff do juiz mostra a origem de uma renomeacao, num bloco separado do merge', () => {
+const CODEX_AND_AGY = [
+  { id: 'T-001', model: 'codex', file: 'src/a.js' },
+  { id: 'T-002', model: 'agy', file: 'src/b.js' },
+];
+
+const JUDGE_TITLE =
+  '**1. Confira cada faixa:** o comando reprova arquivo fora da lista; os testes rodam no worktree. Reprovou: não mescle.';
+
+// Troca o caminho do motor por MOTOR, com ou sem aspas.
+// Replaces the engine path with MOTOR, quoted or not.
+const withoutEnginePath = (block) =>
+  block.replace(/node (?:'[^']*fuzkrigo-spec\.mjs'|\S*fuzkrigo-spec\.mjs)/g, 'node MOTOR');
+
+const laneDir = (lane) => `../fuzkrigo-worktrees/repo-demo-${lane}`;
+
+test('o juiz tem um conferir e os testes por faixa, e cada merge comeca por ele', () => {
+  withTempDir('fspec-manuais-', (root) => {
+    const repo = plannedProject(root, CODEX_AND_AGY);
+    assert.ok(readFeature(repo, 'plano-execucao.md').includes(JUDGE_TITLE));
+    const [judge, ...merges] = integrationBlocks(repo).map(withoutEnginePath);
+    const lanes = ['faixa-1', 'faixa-2'];
+    assert.deepEqual(
+      judge.split('\n'),
+      lanes.flatMap((lane) => [
+        `node MOTOR conferir demo ${lane}`,
+        `(cd ${laneDir(lane)} && node --test --test-reporter=tap)`,
+      ])
+    );
+    lanes.forEach((lane, i) => {
+      const start = `node MOTOR conferir demo ${lane} &&\n  git merge --no-ff spec/demo-${lane} `;
+      assert.ok(merges[i].startsWith(start), merges[i]);
+    });
+    const md = readFeature(repo, 'plano-execucao.md');
+    assert.doesNotMatch(md, /git diff/);
+    // o conferir reprova antes do remove / conferir rejects before the removal
+    assert.doesNotMatch(md, /sobrou arquivo sem commit/);
+  });
+});
+
+test('sem testCommand a linha dos testes vira comentario', () => {
+  withTempDir('fspec-manuais-', (root) => {
+    const repo = projectWith(root, CODEX_ONLY);
+    const config = path.join(repo, 'fuzkrigo.config.json');
+    const raw = JSON.parse(readFileSync(config, 'utf-8'));
+    writeFileSync(config, JSON.stringify({ ...raw, testCommand: null }));
+    git(repo, 'commit', '-q', '-am', 'sem testCommand');
+    assert.equal(generatePlan(repo).status, 0);
+    const [judge] = integrationBlocks(repo).map(withoutEnginePath);
+    assert.deepEqual(judge.split('\n'), [
+      'node MOTOR conferir demo faixa-1',
+      `# rode os testes do projeto no worktree ${laneDir('faixa-1')}`,
+    ]);
+  });
+});
+
+test('colar a integracao nao mescla faixa reprovada', () => {
   withTempDir('fspec-manuais-', (root) => {
     const repo = plannedProject(root, CODEX_ONLY);
-    createFile('proibido.js')(repo);
-    git(repo, 'add', 'src/proibido.js');
-    git(repo, 'commit', '-q', '-m', 'arquivo fora da faixa');
     const claude = fakeClaude(root);
     runUntilManual(repo, claude.env);
-    executorCommits(root, 'faixa-1', (worktree) => git(worktree, 'mv', 'src/proibido.js', 'src/a.js'));
+    executorCommits(root, 'faixa-1', writeFiles('src/a.js', 'src/outside.js'), taskCommit('T-001'));
+    const proc = integrate(repo, claude.env);
 
-    const [judge] = integrationBlocks(repo);
-    assert.doesNotMatch(judge, /git merge/);
-    const proc = run('bash', ['-c', judge], repo);
-    assert.equal(proc.status, 0, proc.out);
-    assert.match(proc.out, /src\/proibido\.js/);
-    assert.match(proc.out, /src\/a\.js/);
+    assert.ok(proc.out.includes('fora da lista: src/outside.js'), proc.out);
+    assert.doesNotMatch(git(repo, 'log', '--format=%s'), /merge faixa-1/);
+    assert.ok(existsSync(worktreeOf(root, 'faixa-1')), proc.out);
+    assert.ok(branches(repo).includes('spec/demo-faixa-1'));
+    assert.match(readFeature(repo, 'tasks.md'), /T-001 .*\[pendente\]/);
   });
 });
 

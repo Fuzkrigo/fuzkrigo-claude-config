@@ -120,13 +120,22 @@ function blocoAbertura(plan, fx) {
   ];
 }
 
-// O diff fica num bloco só dele: colar a integração não pode mesclar antes da
-// conferência. --no-renames mostra a origem de um arquivo renomeado.
-// The diff has its own block: pasting the integration must not merge before the
-// check. --no-renames shows the source of a renamed file.
-function blocoConferencia(manuais) {
+const comandoConferir = (plan, fx) => `node ${shqSePreciso(plan.engine)} conferir ${plan.feature} ${fx.id}`;
+
+// Sem testCommand a linha vira comentário, para o bloco continuar colável.
+// Without testCommand the line becomes a comment, so the block can still be
+// pasted.
+function linhaTestes(plan, fx) {
+  const wt = shqSePreciso(fx.worktree);
+  if (!plan.testCommand) return `# rode os testes do projeto no worktree ${wt}`;
+  return `(cd ${wt} && ${plan.testCommand})`;
+}
+
+// A conferência fica num bloco só dela, antes de qualquer merge.
+// The check has its own block, before any merge.
+function blocoConferencia(plan, manuais) {
   return [
-    '**1. Confira os arquivos tocados** contra os permitidos (e seus testes). Arquivo fora da lista: não mescle.',
+    '**1. Confira cada faixa:** o comando reprova arquivo fora da lista; os testes rodam no worktree. Reprovou: não mescle.',
     '',
     ...manuais.map((fx) => {
       const permitidos = [...new Set(fx.tasks.flatMap((t) => t.files))];
@@ -134,15 +143,19 @@ function blocoConferencia(manuais) {
     }),
     '',
     '```bash',
-    ...manuais.map((fx) => `git diff --no-renames --name-only HEAD...${fx.branch}`),
+    ...manuais.flatMap((fx) => [comandoConferir(plan, fx), linhaTestes(plan, fx)]),
     '```',
     '',
   ];
 }
 
+// A cadeia começa pela conferência: colar o bloco não mescla faixa reprovada.
+// The chain starts with the check: pasting the block never merges a rejected
+// lane.
 function blocoMesclagem(plan, fx) {
   const motor = shqSePreciso(plan.engine);
   const passos = [
+    comandoConferir(plan, fx),
     `git merge --no-ff ${fx.branch} -m "merge ${fx.id} (${plan.feature})"`,
     `git worktree remove ${shqSePreciso(fx.worktree)}`,
     `git branch -d ${fx.branch}`,
@@ -197,8 +210,8 @@ export function secaoFaixasManuais(plan) {
     '',
     'Quem integra é o Arquiteto, no `jarq`, na caixa.',
     '',
-    ...blocoConferencia(manuais),
-    '**2. Mescle faixa por faixa.** Se o `git worktree remove` recusar, sobrou arquivo sem commit no worktree: olhe antes de apagar.',
+    ...blocoConferencia(plan, manuais),
+    '**2. Mescle faixa por faixa.**',
     '',
     ...manuais.flatMap((fx) => blocoMesclagem(plan, fx)),
     ...blocoFechamento(plan),

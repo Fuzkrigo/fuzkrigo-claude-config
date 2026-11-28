@@ -146,7 +146,7 @@ node <dir-desta-skill>/scripts/fuzkrigo-spec.mjs <comando>
 
 Comandos: `init [--preset base|lgpd-educacao|dados-tabulares[,...]] [--agents claude]` · `new <feature> [--issue <n>]` ·
 `plano <feature> [--agents claude]` · `painel <feature> [--porta N] [--sem-abrir]` ·
-`tarefa <feature> <T-xxx> <status>` ·
+`tarefa <feature> <T-xxx> <status>` · `conferir <feature> <faixa>` · `fluxo <rótulo>` ·
 `scaffold <feature>` · `verify <feature>` ·
 `audit [--ci] [--json] [--md <arquivo>] [--feature <feature>]` · `status` · `assumptions` ·
 `licoes <add|list|sugerir|penalizar|status>`.
@@ -181,29 +181,19 @@ exigem também `reporterOutputFile` apontando para o MESMO caminho do comando.
 O `--test-reporter=tap` do Node não é opcional: do Node 20 em diante o padrão
 é o reporter `spec`, que o parser TAP não entende.
 
-### Python: a etiqueta vive no nome da função
+Ignore no `.gitignore` do projeto o que o runner gera (por exemplo
+`__pycache__/`, `.pytest_cache/` e o arquivo do `reporterOutputFile`): sem isso,
+a faixa do plano paralelo reprova por arquivo sem commit no worktree.
 
-`@` e `:` são inválidos num identificador Python, então a etiqueta não cabe no
-nome do teste. A convenção é dupla, e o `scaffold` já gera assim:
-
-```python
-def test_ac_001():
-    """AC-001: Entrega antes do prazo e "no prazo" @spec:AC-001"""
-```
-
-- A **docstring** com `@spec:AC-001` é o que o audit lê no arquivo para saber
-  que o critério tem teste.
-- O **nome** `test_ac_001` é o que o runner reporta, e é por ele que o verify
-  casa a prova.
-
-Renomear a função quebra a prova; apagar a docstring faz o critério parecer sem
-teste. Mantenha os dois. Vale o mesmo para princípios: `test_p_001`.
+Python tem convenção própria para a etiqueta (nome da função e docstring):
+leia [prova-por-stack.md](references/prova-por-stack.md) antes do primeiro teste
+Python.
 
 **Degradação graciosa** — se `node` não existir no ambiente: execute a
 auditoria manualmente (releia especificação/tarefas/testes cruzando cada
-problema do catálogo abaixo) e rotule o resultado, textualmente, como
-**`PROVA FRACA (auditoria manual)`**. Nunca apresente auditoria manual como se
-fosse o gate mecânico.
+problema do [catálogo](references/catalogo-audit.md)) e rotule o resultado,
+textualmente, como **`PROVA FRACA (auditoria manual)`**. Nunca apresente
+auditoria manual como se fosse o gate mecânico.
 
 ## Contrato de execução — inegociável
 
@@ -330,6 +320,10 @@ produto).
     o mais alto entre elas; o `plano` recusa faixa que mistura executores.
   - Tarefa de `codex` ou `agy` precisa listar `Arquivos:` (executor externo só
     trabalha em faixa).
+  - `Arquivos:` lista também o arquivo de teste da tarefa, um por tarefa (ex.:
+    `tests/test_validar.py`). Não use numa tarefa de faixa o arquivo de testes
+    do `scaffold` da feature: todas as que o listarem caem na mesma faixa. O
+    `plano` avisa nos dois casos.
   - Decisão de design faltando não é tarefa de faixa: volte ao passo 2
     (Projetar), que é do Arquiteto, antes de escrevê-la no `tasks.md`.
   - Janela do Claude esgotada: as tarefas de `sonnet` e `opus` ainda não
@@ -371,12 +365,14 @@ produto).
   traz o passo a passo.
   - O script cria o worktree e a branch de cada uma e roda só as faixas do
     Claude. Havendo faixa manual, ele não roda as tarefas sem `Arquivos:` nem o
-    gate, e sai com código 2 (1 se alguma faixa ou tarefa falhar).
+    gate, e sai com código 2 (1 se alguma faixa ou tarefa falhar); antes de
+    mesclar cada faixa do Claude, ele roda a mesma conferência.
   - O usuário abre o atalho do executor (`jcodex` ou `jagy`) no worktree, ajusta
     o esforço e cola o prompt da faixa.
-  - Quando o executor responder, o Arquiteto confere os arquivos tocados,
-    mescla, marca as tarefas e roda o gate (com tarefas sequenciais, regenera o
-    plano e roda o script, que as executa e fecha o gate).
+  - Quando o executor responder, o Arquiteto roda
+    `fuzkrigo-spec conferir <feature> <faixa>` e os testes no worktree, mescla,
+    marca as tarefas e roda o gate (com tarefas sequenciais, regenera o plano e
+    roda o script, que as executa e fecha o gate).
   - Não regenere o plano com faixa manual por integrar. Se uma faixa parou e vai
     trocar de executor, integre antes as manuais, aproveite ou descarte a branch
     da que parou e só então regenere.
@@ -397,9 +393,11 @@ produto).
   imports; arquivo existente recebe os esqueletos no fim e nunca é reescrito,
   então rodar o scaffold de novo depois de a spec ganhar critérios é seguro.
   A definição de pronto nasce executável.
+- Em execução por faixas, não rode o scaffold da feature: cada tarefa escreve
+  os testes no arquivo listado no próprio `Arquivos:`.
 - Implemente até os testes passarem. **1 tarefa = 1 commit atômico** (a
-  mensagem cita a tarefa: `T-003 <feature>: ...`). Marque `[concluida]` só
-  com prova PASS.
+  mensagem começa pelo código da tarefa: `T-003 <feature>: ...`). Marque
+  `[concluida]` só com prova PASS.
 - Um teste por critério de aceite no mínimo; o teste assere o resultado da
   especificação, não o formato do seu código.
 
@@ -412,6 +410,8 @@ produto).
   Exit 0 = alinhada. Exit 1 = leia cada problema e resolva. **Cole a saída
   final na conversa** e traduza em uma frase o que ela significa. O relatório
   avisa, em amarelo, que o escopo estava filtrado — não omita isso ao resumir.
+- Cada problema, com o nome legível e o código:
+  [catalogo-audit.md](references/catalogo-audit.md).
 - `fuzkrigo-spec audit --ci` (sem filtro) — o veredito do projeto. É o que vale
   no CI e antes de qualquer release. Rode também sempre que quiser saber se o
   projeto inteiro está íntegro, não só a feature da vez.
@@ -435,43 +435,6 @@ histórico de sinais (todo problema de audit e toda falha/skip de verify).
 - **Caminho limpo → nenhuma lição.** Isso é correto, não é omissão.
 - Fraseado, promoção, penalização e escala: [licoes.md](references/licoes.md).
 
-## Catálogo de problemas que o audit aponta
-
-O audit imprime cada problema com o nome legível na frente e o código estável
-entre parênteses (o código serve para CI e para `licoes add --sinal`). Ao
-conversar com o usuário, use o nome legível.
-
-| Problema (código) | O que significa | O que fazer |
-|---|---|---|
-| critério de aceite sem teste (AC_SEM_TESTE) | requisito sem prova | escreva o teste com `@spec:AC-xxx` no título |
-| critério de aceite sem prova (AC_SEM_PROVA) | teste existe, nunca passou (ou foi PULADO) | rode `verify`; skip não é prova |
-| teste órfão (TESTE_ORFAO) | teste aponta pra critério que sumiu (drift!) | a especificação mudou — atualize o teste |
-| referência quebrada (REF_QUEBRADA) | tarefa cita história/critério inexistente | corrija a referência |
-| tarefa concluída sem prova (TASK_CONCLUIDA_SEM_PROVA) | tarefa [concluida] sem critério provado | verifique ou reabra a tarefa |
-| status de tarefa inválido (TASK_STATUS_INVALIDO) | status não reconhecido | use pendente/em-andamento/concluida |
-| suposição em aberto (ASM_ABERTA) | suposição aberta numa feature "pronta" | confirme/invalide com o usuário |
-| seção obrigatória ausente (SECAO_AUSENTE) | spec sem seção Suposições, Perguntas ou Casos de borda e regras de fechamento | registre-as ou escreva "Nenhuma." (nas bordas, uma linha por borda) |
-| caso de borda sem decisão (BORDA_INCOMPLETA) | borda sem categoria, situação ou decisão válida, "Não se aplica" sem motivo, ou subseção de bordas vazia | decida: `AC-xxx`, `ASM-xxx`, `P-xxx` ou `Não se aplica: motivo` |
-| regra de fechamento incompleta (FECHAMENTO_INCOMPLETO) | total a fechar sem tolerância, sem os dois critérios ou com o mesmo critério nas duas provas; subseção sem regra e sem "Nenhuma." | declare a tolerância e escreva o critério que fecha e o que para |
-| referência a código que não existe (REF_SPEC_INEXISTENTE) | a seção de bordas cita critério ou suposição que não existe nesta spec (inclusive o de outra feature), ou princípio que não existe na constituição; erro mesmo em rascunho | corrija o código, ou crie o critério nesta spec |
-| princípio violado (PRINCIPIO_VIOLADO) | quebrou a constituição | conserte o código, não o princípio |
-| princípio sem prova (PRINCIPIO_SEM_PROVA) | o teste do princípio falhou, foi PULADO ou nunca rodou num verify | rode `verify`; conserte o código até o teste passar |
-| verificação não olha nenhum arquivo (GLOB_SEM_ARQUIVOS) | glob da constituição não casa nada | corrija o glob |
-| nível de princípio inválido (NIVEL_INVALIDO) | nível desconhecido | use [DEVE]/[RECOMENDADO]/[PODE] |
-| código órfão (ARQUIVO_ORFAO) | código que nenhuma tarefa mapeia | mapeie na tarefa ou questione o código |
-| nome da feature divergente (FEATURE_DIVERGENTE) | `> feature:` difere do diretório | alinhe os dois |
-| prova fraca (PROVA_FRACA) | prova só por exit code global | prefira reporter tap/vitest-json/jest-json |
-| código de rastreio curto/duplicado (ID_CURTO / ID_DUPLICADO) | fora da gramática / repetido | use 3+ dígitos, códigos únicos |
-
-Também: história sem critério (`US_SEM_AC`), critério incompleto
-(`AC_INCOMPLETO`), critério sem tarefa (`AC_SEM_TASK`), pergunta em aberto
-(`Q_ABERTA`), princípio sem verificação (`PRINCIPIO_SEM_VERIFICACAO`), prova
-desatualizada (`VERIFY_OBSOLETO`), verificação malformada
-(`VERIFICACAO_MALFORMADA`, inclui regex que excede o tempo limite), arquivo
-não existe (`ARQUIVO_INEXISTENTE`), status inválido (`STATUS_INVALIDO`),
-especificação sem história (`SPEC_SEM_US`), critério fora de história
-(`AC_FORA_DE_US`).
-
 ## Perguntas que o motor responde por você
 
 - **"Qual requisito não tem teste?"** → `fuzkrigo-spec audit` → critério de aceite
@@ -481,6 +444,8 @@ especificação sem história (`SPEC_SEM_US`), critério fora de história
   (`ARQUIVO_ORFAO`).
 - **"O que estamos assumindo?"** → `fuzkrigo-spec assumptions`.
 - **"O que dá pra fazer em paralelo?"** → `fuzkrigo-spec plano <feature>`.
+- **"Esta faixa tocou só o que podia?"** →
+  `fuzkrigo-spec conferir <feature> <faixa>`.
 - **"Como acompanho a execução ao vivo?"** → `fuzkrigo-spec painel <feature>`,
   fora da caixa e só para olhar.
 - **"Onde estamos?"** → `fuzkrigo-spec status`.

@@ -17,6 +17,16 @@ function detectStyle(config) {
   return 'node';
 }
 
+// Caminho, relativo à raiz e com barra normal, do arquivo de testes que o
+// scaffold grava para a feature. O `plano` usa a mesma regra nos avisos.
+// Root-relative path, with forward slashes, of the test file scaffold writes
+// for the feature. `plano` uses the same rule in its warnings.
+export function scaffoldTestFile(config, featureName) {
+  return detectStyle(config) === 'pytest'
+    ? `tests/test_spec_${featureName.replace(/-/g, '_')}.py`
+    : `test/${featureName}.spec.test.js`;
+}
+
 function jsHeader(style) {
   if (style === 'vitest') {
     return `import { test } from 'vitest';\n`;
@@ -119,10 +129,8 @@ export function scaffoldTests(project, featureName) {
   }
 
   const style = detectStyle(config);
-  const fileName =
-    style === 'pytest' ? `test_spec_${featureName.replace(/-/g, '_')}.py` : `${featureName}.spec.test.js`;
-  const outDir = path.join(config.rootDir, style === 'pytest' ? 'tests' : 'test');
-  const outPath = path.join(outDir, fileName);
+  const outPath = path.join(config.rootDir, scaffoldTestFile(config, featureName));
+  const outDir = path.dirname(outPath);
 
   const items = pendingItems(project, feature);
   const total = items.pending.length + items.principles.length;

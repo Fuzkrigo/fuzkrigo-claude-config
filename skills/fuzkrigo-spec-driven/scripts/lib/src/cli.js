@@ -5,6 +5,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { DEFAULT_CONFIG, loadConfig } from './config.js';
 import { auditProject } from './core/audit.js';
+import { conferirFaixa } from './core/conferir-faixa.js';
+import { runFluxo } from './core/fluxo.js';
 import {
   adicionarLicao,
   carregarLicoes,
@@ -94,6 +96,12 @@ comandos:
   tarefa <feature> <T-xxx> <status>
                       atualiza o status da tarefa no tasks.md
                       (pendente | em-andamento | concluida)
+  conferir <feature> <faixa>
+                      confere a faixa antes do merge: arquivos dentro da lista,
+                      um commit por tarefa e worktree sem arquivo solto
+                      (exit 0 pode mesclar · 1 reprovada · 2 uso errado)
+  fluxo <rótulo>      lê da entrada o stream-json do claude -p e escreve linhas
+                      legíveis (usado pelo executar-tarefas.sh)
   audit [--ci] [--json] [--md <arquivo>] [--feature <feature>]
                       audita especificação ↔ tarefas ↔ testes ↔ código ↔ constituição
                       exit 1 se houver erro (use no CI)
@@ -461,6 +469,23 @@ async function cmdPainel(project, positional, flags) {
   return new Promise(() => {});
 }
 
+function cmdConferir(config, positional) {
+  const [featureName, laneId] = positional;
+  if (!featureName || !laneId) {
+    console.error('uso: fuzkrigo-spec conferir <feature> <faixa>');
+    return 2;
+  }
+  return conferirFaixa(config, featureName, laneId);
+}
+
+function cmdFluxo([label]) {
+  if (!label) {
+    console.error('uso: fuzkrigo-spec fluxo <rótulo>');
+    return 2;
+  }
+  return runFluxo(label);
+}
+
 function cmdTarefa(config, positional) {
   const [featureName, taskId, statusRaw] = positional;
   if (!featureName || !taskId || !statusRaw) {
@@ -723,6 +748,9 @@ export async function run(argv) {
 
   if (command === 'init') return cmdInit(rootDir, flags);
   if (command === 'new') return cmdNew(rootDir, positional[0], flags);
+  // fluxo roda dentro do worktree da faixa e não lê nada do projeto
+  // fluxo runs inside the lane worktree and reads nothing from the project
+  if (command === 'fluxo') return cmdFluxo(positional);
 
   const config = loadConfig(rootDir);
 
@@ -731,6 +759,8 @@ export async function run(argv) {
   if (command === 'licoes') return cmdLicoes(config, positional, flags);
   // tarefa idem: edição pontual de status no tasks.md (usada pelo executor)
   if (command === 'tarefa') return cmdTarefa(config, positional);
+  // conferir só lê o plano.json e o git / conferir only reads plano.json and git
+  if (command === 'conferir') return cmdConferir(config, positional);
 
   const project = loadProject(config);
 

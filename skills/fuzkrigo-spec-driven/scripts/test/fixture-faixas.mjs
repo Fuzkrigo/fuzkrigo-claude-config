@@ -9,10 +9,12 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'child_process';
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { ENGINE } from './fixture-projeto.mjs';
 
 export const FEATURE = 'demo';
 export const MANUAL_HEADING = '## Faixas manuais (Dev Principal e Dev Secundario)';
+const FAKE_CLAUDE = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fake-claude.mjs');
 const posix = (p) => p.split(path.sep).join('/');
 
 // ── projeto temporario / temporary project ─────────────────────────────────
@@ -86,17 +88,39 @@ function writeExecutable(file, content) {
   chmodSync(file, 0o755);
 }
 
-// `claude` falso na frente do PATH: registra os argumentos e sai com o codigo
-// pedido. / Fake `claude` in front of PATH: records its arguments and exits
-// with the requested code.
-// `failOn` restringe a falha as chamadas cujo prompt cita o texto.
+// `claude` falso na frente do PATH (ver fake-claude.mjs): registra os
+// argumentos, commita um arquivo permitido da tarefa e sai com o código pedido.
+// Fake `claude` in front of PATH (see fake-claude.mjs): records its arguments,
+// commits one allowed file of the task and exits with the requested code.
+// `failOn` restringe a falha às chamadas cujo prompt cita o texto.
 // `failOn` limits the failure to calls whose prompt mentions the text.
-export function fakeClaude(root, exitCode = 0, { failOn = '' } = {}) {
+// Opções: `commit: false` não commita nada; `skipCommit` lista as tarefas sem
+// commit; `extraFiles` e `leftovers` ({ 'T-001': 'arquivo' }) acrescentam um
+// arquivo ao commit ou o deixam sem commit; `events` vai para o stdout, uma
+// linha cada, e `stderr` para o stderr.
+// Options: `commit: false` commits nothing; `skipCommit` lists tasks left
+// without commit; `extraFiles` and `leftovers` add a file to the commit or leave
+// it uncommitted; `events` goes to stdout, one line each, `stderr` to stderr.
+export function fakeClaude(root, exitCode = 0, options = {}) {
   const bin = path.join(root, 'bin');
   const log = path.join(root, 'claude-calls.log');
+  const configFile = path.join(root, 'fake-claude.json');
+  const config = {
+    exitCode,
+    log,
+    failOn: '',
+    commit: true,
+    skipCommit: [],
+    extraFiles: {},
+    leftovers: {},
+    events: [],
+    stderr: '',
+    ...options,
+  };
+  writeFileSync(configFile, JSON.stringify(config));
   writeExecutable(
     path.join(bin, 'claude'),
-    `#!/bin/sh\nprintf 'CALL\\n%s\\n' "$*" >> '${posix(log)}'\ncase "$*" in *'${failOn}'*) exit ${exitCode} ;; esac\nexit 0\n`
+    `#!/bin/sh\nexec '${posix(process.execPath)}' '${posix(FAKE_CLAUDE)}' '${posix(configFile)}' "$@"\n`
   );
   const env = { ...process.env, [pathKey()]: `${bin}${path.delimiter}${process.env[pathKey()]}` };
   return { env, calls: () => (existsSync(log) ? readFileSync(log, 'utf-8') : '') };
@@ -122,9 +146,39 @@ export const runScript = (repo, env) => run('bash', [`.spec/features/${FEATURE}/
 
 export const worktreeOf = (root, lane) => path.join(root, 'fuzkrigo-worktrees', `repo-${FEATURE}-${lane}`);
 
+export const logsDirOf = (root) => path.join(root, 'fuzkrigo-worktrees', `repo-${FEATURE}-logs`);
+
+// ── executor de mentira / stand-in executor ────────────────────────────────
+
+// Escreve cada arquivo (caminho relativo à raiz dada), criando as pastas.
+// Writes each file (path relative to the given root), creating the folders.
+export const writeFiles =
+  (...files) =>
+  (dir) => {
+    for (const file of files) {
+      mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
+      writeFileSync(path.join(dir, file), `export default '${file}';\n`);
+    }
+  };
+
+// Mensagem no formato que o prompt pede: começa pelo código da tarefa.
+// Message in the format the prompt asks for: starts with the task code.
+export const taskCommit = (id) => `${id} ${FEATURE}: trabalho da tarefa`;
+
+// Faz o papel do executor externo: altera o worktree da faixa e commita.
+// Plays the external executor: changes the lane worktree and commits.
+export function executorCommits(root, lane, change, message) {
+  const worktree = worktreeOf(root, lane);
+  change(worktree);
+  git(worktree, 'add', '-A');
+  git(worktree, 'commit', '-q', '--allow-empty', '-m', message);
+}
+
+// ── eventos / events ───────────────────────────────────────────────────────
+
 // Eventos sem o carimbo de hora. / Events without the timestamp.
 export function eventsOf(root) {
-  const file = path.join(root, 'fuzkrigo-worktrees', `repo-${FEATURE}-logs`, 'plano-eventos.log');
+  const file = path.join(logsDirOf(root), 'plano-eventos.log');
   return readFileSync(file, 'utf-8')
     .split('\n')
     .filter(Boolean)

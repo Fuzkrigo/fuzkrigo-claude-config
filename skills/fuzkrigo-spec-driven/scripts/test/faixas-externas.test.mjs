@@ -191,7 +191,7 @@ test('a secao de faixas manuais traz abertura, esforco, prompt e integracao', ()
     }
 
     const steps = [
-      /git diff [^\n]*--name-only HEAD\.\.\.spec\/demo-faixa-1/,
+      /conferir demo faixa-1/,
       /git merge --no-ff spec\/demo-faixa-1/,
       /git worktree remove \.\.\/fuzkrigo-worktrees\/repo-demo-faixa-1/,
       /git branch -d spec\/demo-faixa-1/,
@@ -219,4 +219,16 @@ test('o painel mostra "manual" no chip da faixa manual', () => {
   const events = parseEventos('2026-11-27T10:00:00Z|faixa|faixa-2|manual\n');
   assert.equal(events.faixas['faixa-2'], 'manual');
   assert.match(chipFor(events.faixas['faixa-2']), />manual</);
+});
+
+const WATCH_ONLY_TEXT =
+  'Modo acompanhamento — a execução roda fora deste painel (agentes nativos do Antigravity, ou o script rodado ' +
+  'pelo Arquiteto no <code>jarq</code>, na caixa); aqui você vê tasks.md, logs, provas e o gate ao vivo.';
+
+test('o painel sem botao cita o Arquiteto no jarq e marca a faixa reprovada', () => {
+  const html = renderPainelHtml({ feature: FEATURE, token: 't', podeExecutar: false }).replace(/\s+/g, ' ');
+  assert.ok(html.includes(WATCH_ONLY_TEXT), html);
+  assert.doesNotMatch(html, /o script no terminal/);
+  const events = parseEventos('2026-11-27T10:00:00Z|faixa|faixa-2|reprovada\n');
+  assert.match(chipFor(events.faixas['faixa-2']), /class="chip erro">reprovada</);
 });
