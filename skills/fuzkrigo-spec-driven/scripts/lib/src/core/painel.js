@@ -217,7 +217,7 @@ export function renderPainelHtml({ feature, token, podeExecutar }) {
   </div>
   ${podeExecutar ? `<button id="btn" onclick="executar()">▶ Executar todas as tarefas em janelas limpas e paralelas</button>
   <span id="btn-nota" class="sub"></span>` : `<p class="sub">Modo acompanhamento — a execução roda fora deste painel (agentes nativos do
-  Antigravity, ou o script no terminal); aqui você vê tasks.md, logs, provas e o gate ao vivo.</p>`}
+  Antigravity, ou o script rodado pelo Arquiteto no <code>jarq</code>, na caixa); aqui você vê tasks.md, logs, provas e o gate ao vivo.</p>`}
   <div id="banner" class="banner"></div>
   <div id="avisos"></div>
   <div id="conteudo"><p class="sub">carregando estado…</p></div>

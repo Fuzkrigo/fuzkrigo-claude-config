@@ -20,6 +20,7 @@
 
 import path from 'path';
 import { foldStatus } from '../util/text.js';
+import { avisosDeTeste } from './avisos-de-teste.js';
 import {
   executorDoModelo,
   faixasClaude,
@@ -121,6 +122,9 @@ export function montarPlano(project, featureName, opts = {}) {
   if (!pendentes.length) {
     return { erro: `todas as tarefas de "${featureName}" já estão [concluida] — nada a planejar` };
   }
+
+  // só o modo claude confere as faixas / only claude mode checks the lanes
+  if (agent === 'claude') avisos.push(...avisosDeTeste(pendentes, project.config, featureName));
 
   // agrupa por conflito de arquivos: componentes conexos viram faixas
   const comArquivos = pendentes.filter((t) => t.files.length);

@@ -1,12 +1,23 @@
 // Prompts do plano de execução: o texto que cada executor recebe.
 // Execution plan prompts: the text each executor receives.
 
-function linhasRegras(plan) {
+// A regra da lista só vale onde há conferência (modo claude) e `Arquivos:`.
+// The list rule only applies where there is a check (claude mode) and
+// `Arquivos:`.
+function regraDaLista(plan, tasks) {
+  if (plan.agent !== 'claude' || !tasks.some((t) => t.files.length)) return [];
+  return [
+    '- Toque SOMENTE nos arquivos permitidos, testes inclusos: a faixa é conferida contra a lista antes do merge e reprova com qualquer arquivo a mais.',
+  ];
+}
+
+function linhasRegras(plan, tasks) {
   const teste = plan.testCommand
     ? `Rode os testes localmente com \`${plan.testCommand}\` até passarem.`
     : 'Rode os testes do projeto localmente até passarem.';
   return [
     'Regras inegociáveis:',
+    ...regraDaLista(plan, tasks),
     '- Todo critério de aceite referenciado vira teste com @spec:AC-xxx no título.',
     '- NUNCA enfraqueça, pule (skip/todo) ou apague um teste para passar — teste pulado não é prova e o audit acusa.',
     `- ${teste}`,
@@ -22,7 +33,7 @@ function descreveTarefa(plan, t) {
   return [
     `${t.id} — "${t.title}"`,
     `  critérios/refs: ${refs}`,
-    `  arquivos permitidos (e seus testes): ${arquivos}`,
+    `  arquivos permitidos (testes inclusos): ${arquivos}`,
     `  mensagem de commit: "${t.id} ${plan.feature}: ${t.title}"`,
   ];
 }
@@ -36,7 +47,7 @@ export function promptTarefa(plan, t) {
     'Sua tarefa (somente ela):',
     ...descreveTarefa(plan, t),
     '',
-    ...linhasRegras(plan),
+    ...linhasRegras(plan, [t]),
   ].join('\n');
 }
 
@@ -66,7 +77,7 @@ export function promptFaixa(plan, fx, { worktree = true, manual = false } = {}) 
     `Execute NESTA ORDEM (1 tarefa = 1 commit):`,
     ...fx.tasks.flatMap((t) => descreveTarefa(plan, t)),
     '',
-    ...linhasRegras(plan),
+    ...linhasRegras(plan, fx.tasks),
     fim,
   ].join('\n');
 }
