@@ -124,7 +124,8 @@ const JUDGE_TITLE =
 
 // Troca o caminho do motor por MOTOR, com ou sem aspas.
 // Replaces the engine path with MOTOR, quoted or not.
-const withoutEnginePath = (block) => block.replace(/node (?:'[^']*'|\S+)/g, 'node MOTOR');
+const withoutEnginePath = (block) =>
+  block.replace(/node (?:'[^']*fuzkrigo-spec\.mjs'|\S*fuzkrigo-spec\.mjs)/g, 'node MOTOR');
 
 const laneDir = (lane) => `../fuzkrigo-worktrees/repo-demo-${lane}`;
 
