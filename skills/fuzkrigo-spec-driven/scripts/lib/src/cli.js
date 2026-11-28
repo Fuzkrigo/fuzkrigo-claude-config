@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { DEFAULT_CONFIG, loadConfig } from './config.js';
 import { auditProject } from './core/audit.js';
 import { conferirFaixa } from './core/conferir-faixa.js';
+import { runFluxo } from './core/fluxo.js';
 import {
   adicionarLicao,
   carregarLicoes,
@@ -99,6 +100,8 @@ comandos:
                       confere a faixa antes do merge: arquivos dentro da lista,
                       um commit por tarefa e worktree sem arquivo solto
                       (exit 0 pode mesclar · 1 reprovada · 2 uso errado)
+  fluxo <rótulo>      lê da entrada o stream-json do claude -p e escreve linhas
+                      legíveis (usado pelo executar-tarefas.sh)
   audit [--ci] [--json] [--md <arquivo>] [--feature <feature>]
                       audita especificação ↔ tarefas ↔ testes ↔ código ↔ constituição
                       exit 1 se houver erro (use no CI)
@@ -475,6 +478,14 @@ function cmdConferir(config, positional) {
   return conferirFaixa(config, featureName, laneId);
 }
 
+function cmdFluxo([label]) {
+  if (!label) {
+    console.error('uso: fuzkrigo-spec fluxo <rótulo>');
+    return 2;
+  }
+  return runFluxo(label);
+}
+
 function cmdTarefa(config, positional) {
   const [featureName, taskId, statusRaw] = positional;
   if (!featureName || !taskId || !statusRaw) {
@@ -737,6 +748,9 @@ export async function run(argv) {
 
   if (command === 'init') return cmdInit(rootDir, flags);
   if (command === 'new') return cmdNew(rootDir, positional[0], flags);
+  // fluxo roda dentro do worktree da faixa e não lê nada do projeto
+  // fluxo runs inside the lane worktree and reads nothing from the project
+  if (command === 'fluxo') return cmdFluxo(positional);
 
   const config = loadConfig(rootDir);
 

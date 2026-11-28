@@ -149,6 +149,12 @@ test('comando de varias linhas e textos longos sao cortados nos limites', () => 
   );
 });
 
+// O JSON não escapa U+2028: ele não pode partir o evento em duas linhas.
+// JSON does not escape U+2028: it must not split the event in two lines.
+test('evento com o separador U+2028 no texto continua sendo um evento so', () => {
+  assertLines([text('antes\u2028depois')], ['[T-003] antes\u2028depois']);
+});
+
 // ── terminal seguro / terminal safety ──────────────────────────────────────
 
 const ESC = '\u001b';

@@ -28,6 +28,23 @@ export function foldStatus(text) {
     .replace(/[̀-ͯ]/g, '');
 }
 
+// Sequências de escape do terminal, nas formas de 7 e de 8 bits: OSC, CSI e as
+// curtas. / Terminal escape sequences, 7-bit and 8-bit forms: OSC, CSI and the
+// short ones.
+const ESCAPE_SEQUENCES =
+  /(?:\u001b\]|\u009d)[^\u0007\u001b\u009c]*(?:\u0007|\u001b\\|\u009c)?|(?:\u001b\[|\u009b)[0-?]*[ -/]*[@-~]?|\u001b[ -/]*[0-~]/g;
+// Controles C0 e C1 e o DEL, menos a tabulação.
+// C0 and C1 controls and DEL, except tab.
+const CONTROL_CHARS = /[\u0000-\u0008\u000a-\u001f\u007f-\u009f]/g;
+
+// Texto vindo de fora (modelo, nome de arquivo) antes de ir para um terminal:
+// uma única linha, sem nada que o terminal interprete.
+// Outside text (model, file name) before it reaches a terminal: a single line,
+// with nothing the terminal would interpret.
+export function stripControl(text) {
+  return String(text).replace(ESCAPE_SEQUENCES, '').replace(CONTROL_CHARS, '');
+}
+
 // Linha de tabela markdown → células (sem as bordas vazias).
 export function tableCells(line) {
   const trimmed = line.trim();

@@ -220,6 +220,34 @@ test('Arquivos: com ./, barra invertida, acento e espaco casa com o que o git in
   });
 });
 
+// Controles que o Windows aceita em nome de arquivo: CSI de 8 bits e DEL.
+// Controls that Windows accepts in file names: 8-bit CSI and DEL.
+const HOSTILE = (word) => `src/\u009b31m${word}\u007f.js`;
+
+test('nome de arquivo com caractere de controle sai limpo nas mensagens', () => {
+  withTempDir('fspec-conferir-', (root) => {
+    const repo = preparedLane(root);
+    commit(root, writeFiles(HOSTILE('commitado')));
+    writeFiles(HOSTILE('solto'))(worktreeOf(root, LANE));
+    const proc = checkLane(repo);
+    assert.equal(proc.status, 1, proc.out);
+    assert.deepEqual(outsideLines(proc), ['fora da lista: src/commitado.js']);
+    assert.match(proc.out, /sem commit no worktree: src\/solto\.js/);
+    assert.doesNotMatch(proc.out, /[\u007f-\u009f]/);
+  });
+});
+
+// Uma quebra de linha no nome forjaria uma linha do veredito. O Windows não
+// aceita esse nome em arquivo, então a função é testada direto.
+// A line break in a name would forge a verdict line. Windows rejects such a file
+// name, so the function is tested directly.
+test('a limpeza tira quebra de linha, escape e controle, e mantem o texto', async () => {
+  const { stripControl } = await import('../lib/src/util/text.js');
+  assert.equal(stripControl('a\nfaixa-1: ok\r.js'), 'afaixa-1: ok.js');
+  assert.equal(stripControl('\u001b[31mcor\u001b[0m \u001b]0;título\u0007fim\u001bc\u0000'), 'cor fim');
+  assert.equal(stripControl('tab\tacento ção → ✘'), 'tab\tacento ção → ✘');
+});
+
 // ── worktree com arquivo sem commit / uncommitted files ────────────────────
 
 function assertDirty(proc, file) {

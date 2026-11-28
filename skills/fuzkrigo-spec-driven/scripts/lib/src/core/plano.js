@@ -396,8 +396,33 @@ function allowedTools(plan) {
   return base.join(',');
 }
 
-function chamadaClaude(plan, t) {
-  return `claude -p ${shq(promptTarefa(plan, t))} --model ${shq(t.model)} --effort ${t.esforcoCli} "\${CLAUDE_FLAGS[@]}"`;
+// `registro` é a faixa ou a tarefa sequencial: o .jsonl dela guarda o fluxo cru,
+// e o `fluxo` escreve o texto legível, que cai no .log. Com pipefail, a falha do
+// claude continua valendo.
+// `registro` is the lane or the sequential task: its .jsonl keeps the raw stream
+// and `fluxo` writes the readable text, which lands in the .log. With pipefail, a
+// claude failure still counts.
+function chamadaClaude(plan, t, registro) {
+  const claude = `claude -p ${shq(promptTarefa(plan, t))} --model ${shq(t.model)} --effort ${t.esforcoCli} --output-format stream-json --verbose "\${CLAUDE_FLAGS[@]}"`;
+  return `${claude} | tee -a "$LOG_DIR/${registro}.jsonl" | node "$ENGINE" fluxo ${t.id}`;
+}
+
+// O .jsonl recomeça a cada execução; as tarefas de uma faixa acrescentam nele.
+// The .jsonl restarts on every run; the tasks of a lane append to it.
+const zerarFluxo = (registro) => `: > "$LOG_DIR/${registro}.jsonl"`;
+
+// Dentro de um worktree, o caminho relativo do motor apontaria para a cópia dele,
+// que pode nem existir e que o executor pode alterar.
+// Inside a worktree the relative engine path would point at its copy, which may
+// not exist and which the executor can change.
+function linhasMotorAbsoluto() {
+  return [
+    '# motor sempre o da árvore principal, nunca a cópia de um worktree',
+    'case "$ENGINE" in',
+    '  /*|\\\\*|[A-Za-z]:*) ;;',
+    '  *) ENGINE="$TOPLEVEL/$ENGINE" ;;',
+    'esac',
+  ];
 }
 
 // Seção 2 do script: a branch de trabalho é a atual (a da issue); recusa a
@@ -463,6 +488,7 @@ export function renderPlanoSh(plan) {
   }
   L.push('TOPLEVEL=$(git rev-parse --show-toplevel 2>/dev/null) || falhar "fora de um repositório git"');
   L.push('cd "$TOPLEVEL" || exit 1');
+  L.push(...linhasMotorAbsoluto());
   L.push(...linhasBranchAtual());
   if (manual) L.push(...linhasRecusaSobras());
   L.push('# artefatos recém-gerados pelo `fuzkrigo-spec plano` são sujeira esperada:');
@@ -523,10 +549,11 @@ export function renderPlanoSh(plan) {
     for (const fx of onda) {
       L.push(...linhasWorktree(plan, fx));
       L.push(`evento "faixa|${fx.id}|executando"`);
+      L.push(zerarFluxo(fx.id));
       L.push('(');
       L.push(`  cd "$WT_${sufixoVar(fx)}" || exit 9`);
       fx.tasks.forEach((t, ti) => {
-        L.push(`  ${ti > 0 ? '&& ' : ''}${chamadaClaude(plan, t)} \\`);
+        L.push(`  ${ti > 0 ? '&& ' : ''}${chamadaClaude(plan, t, fx.id)} \\`);
       });
       // fecha o encadeamento (a última linha termina sem \)
       L[L.length - 1] = L[L.length - 1].replace(/ \\$/, '');
@@ -555,7 +582,10 @@ export function renderPlanoSh(plan) {
     for (const t of plan.sequenciais) {
       L.push(`info ${shq(`sequencial ${t.id} — ${t.title}`)} "(log: $LOG_DIR/${t.id}.log)"`);
       L.push(`evento "seq|${t.id}|executando"`);
-      L.push(`if ${chamadaClaude(plan, t)} > "$LOG_DIR/${t.id}.log" 2>&1; then`);
+      L.push(zerarFluxo(t.id));
+      // as chaves levam o stderr do claude para o log, e não só o do último comando
+      // the braces send claude's stderr to the log, not only the last command's
+      L.push(`if { ${chamadaClaude(plan, t, t.id)}; } > "$LOG_DIR/${t.id}.log" 2>&1; then`);
       L.push('  # commit de segurança se o agente esqueceu (rastreabilidade > perfeição)');
       L.push('  if [ -n "$(git status --porcelain)" ]; then');
       L.push(`    git add -A && git commit -q -m ${shq(`${t.id} ${plan.feature}: ${t.title} (auto-commit do plano)`)}`);

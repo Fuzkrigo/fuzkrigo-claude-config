@@ -8,6 +8,7 @@
 import { execFileSync } from 'child_process';
 import { existsSync, readFileSync } from 'fs';
 import path from 'path';
+import { stripControl } from '../util/text.js';
 import { normFile } from './plano.js';
 
 // Argumentos em lista, sem shell. As saídas pedidas com -z separam por NUL e não
@@ -108,12 +109,12 @@ function judgeLane(config, featureName, laneId) {
 }
 
 // O comando da CLI: imprime o veredito e devolve o código de saída. Erro de uso
-// vai para o stderr.
+// vai para o stderr. Cada linha é limpa: nomes de arquivo vêm do executor.
 // The CLI command: prints the verdict and returns the exit code. Usage errors go
-// to stderr.
+// to stderr. Every line is sanitized: file names come from the executor.
 export function conferirFaixa(config, featureName, laneId) {
   const { exitCode, lines } = judgeLane(config, featureName, laneId);
   const print = exitCode === 2 ? console.error : console.log;
-  for (const line of lines) print(line);
+  for (const line of lines) print(stripControl(line));
   return exitCode;
 }
