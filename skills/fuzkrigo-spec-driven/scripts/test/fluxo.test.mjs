@@ -170,7 +170,7 @@ test('sequencias de escape e caracteres de controle nao chegam ao terminal', () 
     text(colored('texto')),
     toolUse('Bash', { command: `echo comando\r${ESC}[2K` }),
     toolUse('Read', { file_path: colored('arquivo') }),
-    toolResult(`${ESC}]0;titulo${BEL}falha\u009b31m`, true),
+    toolResult(`${ESC}]0;titulo${BEL}falha\u009b31m\u0085`, true),
     success(`${colored('resposta')}\r\nfim`),
     `${colored('solta')}${BEL}`,
     { type: 'result', subtype: 'error_during_execution', duration_ms: 1000, errors: [colored('erro')] },

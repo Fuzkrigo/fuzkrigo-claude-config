@@ -220,9 +220,10 @@ test('Arquivos: com ./, barra invertida, acento e espaco casa com o que o git in
   });
 });
 
-// Controles que o Windows aceita em nome de arquivo: CSI de 8 bits e DEL.
-// Controls that Windows accepts in file names: 8-bit CSI and DEL.
-const HOSTILE = (word) => `src/\u009b31m${word}\u007f.js`;
+// Controles que o Windows aceita em nome de arquivo: CSI de 8 bits, um C1
+// isolado e DEL.
+// Controls that Windows accepts in file names: 8-bit CSI, a lone C1 and DEL.
+const HOSTILE = (word) => `src/\u009b31m${word}\u0090\u007f.js`;
 
 test('nome de arquivo com caractere de controle sai limpo nas mensagens', () => {
   withTempDir('fspec-conferir-', (root) => {
